@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "883883859677",
+    "firebase_url": "https://worldetor-672f8.firebaseio.com",
+    "project_id": "worldetor-672f8",
+    "storage_bucket": "worldetor-672f8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:883883859677:android:69693240c9f2fa48328534",
+        "android_client_info": {
+          "package_name": "com.iseeusolutions.worldetor"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "883883859677-ri33ok6fuh1idfi7qcb66l8q8ravb8go.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.iseeusolutions.worldetor",
+            "certificate_hash": "9d1a37b3b51ddc36a5166214869304baa340d2a8"
+          }
+        },
+        {
+          "client_id": "883883859677-nvjquc05mfr7jttj8j3s0cprnk0bdq00.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAad2kevF4AiSCQQdHuEuByEATnRXdiVls"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "883883859677-nvjquc05mfr7jttj8j3s0cprnk0bdq00.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
