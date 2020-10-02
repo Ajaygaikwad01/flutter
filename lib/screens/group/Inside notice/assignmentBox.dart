@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:ext_storage/ext_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:worldetor/screens/group/pdfviewer.dart';
@@ -18,8 +19,6 @@ class OurAssignmentBox extends StatefulWidget {
 
 class _OurAssignmentBoxState extends State<OurAssignmentBox> {
   void initState() {
-    // ignore: todo
-    // TODO: implement initState
     super.initState();
     getpermission();
     CurrentUser _currentuser = Provider.of<CurrentUser>(context, listen: false);
@@ -35,9 +34,14 @@ class _OurAssignmentBoxState extends State<OurAssignmentBox> {
 
   String downlodingMessage = " ";
   bool _isDownloading = false;
+  ProgressDialog progressdialog;
+  double _percentage = 0;
   @override
   Widget build(BuildContext context) {
-    // String assignmentId = ModalRoute.of(context).settings.arguments;
+    progressdialog = ProgressDialog(context, isDismissible: false);
+    // progressdialog.update(maxProgress: percentage,message: downlodingMessage);
+    // progressdialog.update(message: "Downloading...");
+
     return Consumer<CurrentGroup>(
       builder: (BuildContext context, value, Widget child) {
         return Scaffold(
@@ -77,72 +81,68 @@ class _OurAssignmentBoxState extends State<OurAssignmentBox> {
                           padding: const EdgeInsets.all(10.0),
                           child: Container(
                             child: ListTile(
-                              onTap: () async {
-                                String url = snapshot.data["fileUrl"][index];
-                                // const url = "https://www.google.com";
-                                // if (await canLaunch(url)) {
-                                //   // print("homepage");
-                                //   await launch(url, forceWebView: true);
-                                // } else {}
-
-                                Widget retval;
-                                retval = ChangeNotifierProvider(
-                                    create: (context) => CurrentGroup(),
-                                    child: Ourpdfviewer());
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                      builder: (context) => retval,
-                                      settings: RouteSettings(arguments: url)),
-                                );
-                              },
                               title: Row(
                                 children: [
                                   Expanded(
                                     child: Text(
                                         //snapshot.data["fileUrl"][index]
-                                        " pdf Document only" ?? "Loading..."),
+                                        snapshot.data["fileName"][index] ??
+                                            "Loading..."),
                                   ),
                                   Spacer(),
-                                  Column(
-                                    children: [
-                                      IconButton(
-                                          splashColor: Colors.grey,
-                                          icon: Icon(Icons.download_sharp),
-                                          onPressed: () async {
+                                  IconButton(
+                                      splashColor: Colors.grey,
+                                      icon: Icon(Icons.preview),
+                                      onPressed: () async {
+                                        String url =
+                                            snapshot.data["fileUrl"][index];
+
+                                        Widget retval;
+                                        retval = ChangeNotifierProvider(
+                                            create: (context) => CurrentGroup(),
+                                            child: Ourpdfviewer());
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                              builder: (context) => retval,
+                                              settings: RouteSettings(
+                                                  arguments: url)),
+                                        );
+                                      }),
+                                  IconButton(
+                                      splashColor: Colors.grey,
+                                      icon: Icon(Icons.download_sharp),
+                                      onPressed: () async {
+                                        setState(() {
+                                          _isDownloading = !_isDownloading;
+                                        });
+                                        progressdialog.show();
+                                        progressdialog.update(
+                                            message: "Downloading ....",
+                                            progress: _percentage);
+
+                                        var dir = await ExtStorage
+                                            .getExternalStoragePublicDirectory(
+                                                ExtStorage.DIRECTORY_DOWNLOADS);
+
+                                        Dio dio = Dio();
+                                        dio.download(
+                                          snapshot.data["fileUrl"][index],
+                                          "${dir}/${snapshot.data["fileName"][index]}",
+                                          onReceiveProgress: (count, total) {
+                                            var percentage =
+                                                count / total * 100;
+                                            _percentage = percentage;
                                             setState(() {
-                                              _isDownloading = !_isDownloading;
+                                              print(percentage);
+                                              downlodingMessage =
+                                                  percentage.floor().toString();
                                             });
-
-                                            var dir = await ExtStorage
-                                                .getExternalStoragePublicDirectory(
-                                                    ExtStorage
-                                                        .DIRECTORY_DOWNLOADS);
-
-                                            Dio dio = Dio();
-                                            dio.download(
-                                              snapshot.data["fileUrl"][index],
-                                              "${dir}/document.pdf",
-                                              onReceiveProgress:
-                                                  (count, total) {
-                                                var percentage =
-                                                    count / total * 100;
-                                                setState(() {
-                                                  print(percentage);
-                                                  downlodingMessage = percentage
-                                                      .floor()
-                                                      .toString();
-                                                });
-                                              },
-                                            );
-                                          }),
-                                      Text(
-                                        "${downlodingMessage}%",
-                                        style: TextStyle(
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ],
-                                  )
+                                            if (downlodingMessage == "100") {
+                                              progressdialog.hide();
+                                            }
+                                          },
+                                        );
+                                      })
                                 ],
                               ),
                             ),

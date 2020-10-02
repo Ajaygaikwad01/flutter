@@ -25,12 +25,18 @@ class CurrentGroup extends ChangeNotifier {
     }
   }
 
-  Future<String> finishedAssignment(
-      String uid, String userName, String review, List urlString) async {
+  Future<String> finishedAssignment(String uid, String userName, String review,
+      List urlString, List fileName) async {
     String retval = "Error";
     try {
-      await OurDatabase().sendAssignment(_currentgroup.id,
-          _currentgroup.currentNoticeid, uid, userName, review, urlString);
+      await OurDatabase().sendAssignment(
+          _currentgroup.id,
+          _currentgroup.currentNoticeid,
+          uid,
+          userName,
+          review,
+          urlString,
+          fileName);
       _doneWithCurrentAssignment = true;
       notifyListeners();
     } catch (e) {

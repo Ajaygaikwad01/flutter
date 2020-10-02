@@ -69,33 +69,22 @@ class _OurNoticeViewState extends State<OurNoticeView> {
   }
 
   List<String> fileurl = List();
+  List<String> _filename = List();
   TextEditingController _reviewController = TextEditingController();
   bool loading = false;
-// bool _isLoading = false;
-  // double _progress;
+
+  double _progress;
   ProgressDialog progressdialog;
   @override
   Widget build(BuildContext context) {
-    // ProgressDialog progressdialog = ProgressDialog(context,isDismissible: false);
     progressdialog = ProgressDialog(context, isDismissible: false);
 
     return Consumer<CurrentGroup>(
         builder: (BuildContext context, value, Widget child) {
       return Scaffold(
         appBar: AppBar(
-            // backgroundColor: Colors.white,
-            title: Text(value.getCurrentGroup.name ?? " loding...."),
-            actions: <Widget>[
-              // IconButton(
-              //   icon: Icon(Icons.home),
-              //   onPressed: () async {
-              //     Navigator.pushAndRemoveUntil(
-              //         context,
-              //         MaterialPageRoute(builder: (context) => HomeNavigator()),
-              //         (route) => false);
-              //   },
-              // ),
-            ]),
+          title: Text(value.getCurrentGroup.name ?? " loding...."),
+        ),
         body: StreamBuilder(
             stream: Firestore.instance
                 .collection("groups")
@@ -125,7 +114,6 @@ class _OurNoticeViewState extends State<OurNoticeView> {
                           child: Text(
                             snapshot.data['noticetype'] ?? "Loading...",
                             style: TextStyle(
-                              // color: Colors.amber,
                               fontSize: 20.0,
                               fontWeight: FontWeight.bold,
                             ),
@@ -149,7 +137,6 @@ class _OurNoticeViewState extends State<OurNoticeView> {
                                 child: Text(
                                   snapshot.data['name'] ?? "Loading...",
                                   style: TextStyle(
-                                    // color: Colors.amber,
                                     fontSize: 15.0,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -176,7 +163,6 @@ class _OurNoticeViewState extends State<OurNoticeView> {
                                 child: Text(
                                   snapshot.data['subject'] ?? "Loading...",
                                   style: TextStyle(
-                                    // color: Colors.amber,
                                     fontSize: 15.0,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -201,11 +187,6 @@ class _OurNoticeViewState extends State<OurNoticeView> {
                               ),
                               Text(
                                 "-    ",
-                                // style: TextStyle(
-                                //   // color: Colors.amber,
-                                //   fontSize: 15.0,
-                                //   fontWeight: FontWeight.bold,
-                                // ),
                               ),
                             ],
                           ),
@@ -217,7 +198,6 @@ class _OurNoticeViewState extends State<OurNoticeView> {
                                 child: Text(
                                   snapshot.data['description'] ?? "Loading...",
                                   style: TextStyle(
-                                    // color: Colors.amber,
                                     fontSize: 15.0,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -245,36 +225,45 @@ class _OurNoticeViewState extends State<OurNoticeView> {
 
   Future getImage() async {
     File file = await FilePicker.getFile(type: FileType.any);
+
     if (file != null) {
       progressdialog.show();
       progressdialog.update(message: "Uploding ....");
     }
-    setState(() {
-      loading = !loading;
-    });
-    _uploadImagetoFirebase(file);
+    String filename = file.path.split("/").last;
+
+    _uploadImagetoFirebase(file, filename);
   }
 
-  Future<void> _uploadImagetoFirebase(File image) async {
+  Future<void> _uploadImagetoFirebase(File image, String filename) async {
     try {
       CurrentGroup _currentgroup =
           Provider.of<CurrentGroup>(context, listen: false);
       CurrentUser _currentuser =
           Provider.of<CurrentUser>(context, listen: false);
 
-      int randomnumber = Random().nextInt(1000);
+      // int randomnumber = Random().nextInt(1000);
       String imageLocation =
-          '${_currentgroup.getCurrentGroup.name}/${_currentgroup.getCurrentGroup.currentNoticeid}/${_currentuser.getCurrentUser.uid}${randomnumber}';
+          '${_currentgroup.getCurrentGroup.name}/${_currentgroup.getCurrentGroup.currentNoticeid}/${_currentuser.getCurrentUser.uid}/${filename}';
 
       print(imageLocation);
       final StorageReference storageReference =
           FirebaseStorage().ref().child(imageLocation);
       final StorageUploadTask uploadTask = storageReference.putFile(image);
-      await uploadTask.onComplete;
 
-      _addPathtodatabase(imageLocation);
+      await uploadTask.onComplete;
+      // uploadTask.events.listen((event) {
+      //   setState(() {
+      //     _progress = event.snapshot.bytesTransferred.toDouble() /
+      //         event.snapshot.totalByteCount.toDouble();
+      //   });
+      // });
+      // print(_progress);
+      // progressdialog.update(
+      //     message: "Uploading..${(_progress).toStringAsFixed(2)}%");
+      _addPathtodatabase(imageLocation, filename);
       print("object");
-      // progressdialog.update(message: "Uploding Done");
+
       progressdialog.update(message: "Done.. Press Send Button !!");
     } catch (e) {
       print(e);
@@ -282,7 +271,7 @@ class _OurNoticeViewState extends State<OurNoticeView> {
   }
 
   String len;
-  void _addPathtodatabase(String location) async {
+  void _addPathtodatabase(String location, String filename) async {
     try {
       final ref = FirebaseStorage().ref().child(location);
       var imageString = await ref.getDownloadURL();
@@ -291,7 +280,7 @@ class _OurNoticeViewState extends State<OurNoticeView> {
         setState(() {
           fileurl.add(imageString);
           // loading = !loading;
-          len = fileurl.length.toString();
+          _filename.add(filename);
         });
 
         progressdialog.hide().then((isHidden) {
@@ -328,18 +317,27 @@ class _OurNoticeViewState extends State<OurNoticeView> {
                               size: 30,
                             ),
                             onPressed: () async {
+                              setState(() {
+                                len = fileurl.length.toString();
+                              });
                               getImage();
                             }),
-                        Text("${len} select File From storage",
+                        Text("$len select File From storage",
                             style: TextStyle(
                               color: Colors.blueAccent,
                               fontWeight: FontWeight.bold,
                               fontStyle: FontStyle.italic,
                             )),
+                        Flexible(
+                          child: Text("${_filename}",
+                              style: TextStyle(
+                                color: Colors.blueAccent,
+                                fontWeight: FontWeight.bold,
+                                fontStyle: FontStyle.italic,
+                              )),
+                        ),
                       ],
                     ),
-
-                    // Spacer(),
                     Padding(
                       padding: const EdgeInsets.all(10.0),
                       child: Column(
@@ -367,6 +365,9 @@ class _OurNoticeViewState extends State<OurNoticeView> {
                                 ),
                               ),
                               onPressed: () async {
+                                setState(() {
+                                  loading = !loading;
+                                });
                                 String uid = Provider.of<CurrentUser>(context,
                                         listen: false)
                                     .getCurrentUser
@@ -383,8 +384,12 @@ class _OurNoticeViewState extends State<OurNoticeView> {
 
                                 Provider.of<CurrentGroup>(context,
                                         listen: false)
-                                    .finishedAssignment(uid, userName,
-                                        _reviewController.text, fileurl);
+                                    .finishedAssignment(
+                                        uid,
+                                        userName,
+                                        _reviewController.text,
+                                        fileurl,
+                                        _filename);
 
                                 Navigator.of(context).pop();
                               }),

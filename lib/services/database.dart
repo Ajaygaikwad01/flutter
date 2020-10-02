@@ -246,7 +246,7 @@ class OurDatabase {
   }
 
   Future<String> sendAssignment(String groupId, String noticeId, String uid,
-      String userName, String review, List urlString) async {
+      String userName, String review, List urlString, List fileNmae) async {
     String retval = "Error";
     try {
       await _firestore
@@ -260,6 +260,7 @@ class OurDatabase {
         "review": review,
         "userName": userName,
         "fileUrl": FieldValue.arrayUnion(urlString),
+        "fileName": FieldValue.arrayUnion(fileNmae),
       });
     } catch (e) {
       print(e);
