@@ -2,18 +2,15 @@
 
 // import 'dart:html';
 // import 'dart:math';
-import 'dart:ffi';
+
 import 'dart:io';
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 import 'package:provider/provider.dart';
-// import 'package:share/share.dart';
-// import 'package:worldetor/screens/home/drawer.dart';
 import 'package:worldetor/state/currentgroup.dart';
 import 'package:worldetor/state/currentuser.dart';
 import 'package:worldetor/utils/ourcontener.dart';
@@ -24,12 +21,8 @@ class OurNoticeView extends StatefulWidget {
 }
 
 class _OurNoticeViewState extends State<OurNoticeView> {
-  String fileLocation;
-  TextEditingController _reviewController = TextEditingController();
-  // TextEditingController _ratingController = TextEditingController();
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
 
     CurrentUser _currentuser = Provider.of<CurrentUser>(context, listen: false);
@@ -75,11 +68,17 @@ class _OurNoticeViewState extends State<OurNoticeView> {
     );
   }
 
+  List<String> fileurl = List();
+  TextEditingController _reviewController = TextEditingController();
   bool loading = false;
 // bool _isLoading = false;
-  double _progress;
+  // double _progress;
+  ProgressDialog progressdialog;
   @override
   Widget build(BuildContext context) {
+    // ProgressDialog progressdialog = ProgressDialog(context,isDismissible: false);
+    progressdialog = ProgressDialog(context, isDismissible: false);
+
     return Consumer<CurrentGroup>(
         builder: (BuildContext context, value, Widget child) {
       return Scaffold(
@@ -246,7 +245,13 @@ class _OurNoticeViewState extends State<OurNoticeView> {
 
   Future getImage() async {
     File file = await FilePicker.getFile(type: FileType.any);
-    // var image = await ImagePicker.pickImage(source: ImageSource.gallery);
+    if (file != null) {
+      progressdialog.show();
+      progressdialog.update(message: "Uploding ....");
+    }
+    setState(() {
+      loading = !loading;
+    });
     _uploadImagetoFirebase(file);
   }
 
@@ -268,34 +273,31 @@ class _OurNoticeViewState extends State<OurNoticeView> {
       await uploadTask.onComplete;
 
       _addPathtodatabase(imageLocation);
-
       print("object");
+      // progressdialog.update(message: "Uploding Done");
+      progressdialog.update(message: "Done.. Press Send Button !!");
     } catch (e) {
       print(e);
     }
   }
 
+  String len;
   void _addPathtodatabase(String location) async {
     try {
       final ref = FirebaseStorage().ref().child(location);
       var imageString = await ref.getDownloadURL();
-      setState(() {
-        fileLocation = imageString;
-      });
 
-      // CurrentGroup _currentgroup =
-      //     Provider.of<CurrentGroup>(context, listen: false);
-      // CurrentUser _currentuser =
-      //     Provider.of<CurrentUser>(context, listen: false);
+      if (imageString != null) {
+        setState(() {
+          fileurl.add(imageString);
+          // loading = !loading;
+          len = fileurl.length.toString();
+        });
 
-      // await Firestore.instance
-      //     .collection("groups")
-      //     .document(_currentgroup.getCurrentGroup.id)
-      //     .collection("notice")
-      //     .document(_currentgroup.getCurrentGroup.currentNoticeid)
-      //     .collection("assignment")
-      //     .document(_currentuser.getCurrentUser.uid)
-      //     .updateData({"imglocation": imageString});
+        progressdialog.hide().then((isHidden) {
+          print(isHidden);
+        });
+      }
     } catch (e) {
       print(e);
     }
@@ -316,86 +318,85 @@ class _OurNoticeViewState extends State<OurNoticeView> {
                 padding: const EdgeInsets.all(8.0),
                 child: ListView(
                   children: <Widget>[
-                    IconButton(
-                        icon: Icon(
-                          Icons.add_a_photo,
-                          color: Colors.amber,
-                          size: 25,
-                        ),
-                        onPressed: () async {
-                          // var image = await ImagePicker.pickImage(
-                          //     source: ImageSource.gallery);
-                          // _uploadImagetoFirebase(image);
-                          File file =
-                              await FilePicker.getFile(type: FileType.any);
-                          // var image = await ImagePicker.pickImage(source: ImageSource.gallery);
-                          _uploadImagetoFirebase(file);
-                        }),
-                    Padding(
-                      padding: const EdgeInsets.all(5.0),
-                      child: Row(
-                          // children: [BackButton()],
-                          ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        IconButton(
+                            icon: Icon(
+                              Icons.storage,
+                              color: Colors.amber,
+                              size: 30,
+                            ),
+                            onPressed: () async {
+                              getImage();
+                            }),
+                        Text("${len} select File From storage",
+                            style: TextStyle(
+                              color: Colors.blueAccent,
+                              fontWeight: FontWeight.bold,
+                              fontStyle: FontStyle.italic,
+                            )),
+                      ],
                     ),
-                    Spacer(),
+
+                    // Spacer(),
                     Padding(
                       padding: const EdgeInsets.all(10.0),
-                      child: Ourcontener(
-                        child: Column(
-                          children: <Widget>[
-                            TextFormField(
-                              controller: _reviewController,
-                              decoration: InputDecoration(
-                                  prefixIcon: Icon(Icons.group),
-                                  hintText: "Review"),
-                              maxLength: 25,
-                            ),
-                            SizedBox(
-                              height: 20.0,
-                            ),
-                            // TextFormField(
-                            //   controller: _ratingController,
-                            //   decoration: InputDecoration(
-                            //       prefixIcon: Icon(Icons.description),
-                            //       hintText: "Rating"),
-                            //   maxLength: 50,
-                            // ),
-                            SizedBox(
-                              height: 20.0,
-                            ),
-
-                            RaisedButton(
-                                child: Padding(
-                                  padding: EdgeInsets.symmetric(
-                                      vertical: 10, horizontal: 30),
-                                  child: Text(
-                                    "Send",
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 20),
-                                  ),
+                      child: Column(
+                        children: <Widget>[
+                          TextFormField(
+                            controller: _reviewController,
+                            decoration: InputDecoration(
+                                prefixIcon: Icon(Icons.group),
+                                hintText: "Review/Id/Comment"),
+                            maxLength: 25,
+                          ),
+                          SizedBox(
+                            height: 5.0,
+                          ),
+                          RaisedButton(
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 10, horizontal: 30),
+                                child: Text(
+                                  "Send",
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20),
                                 ),
-                                onPressed: () async {
-                                  String uid = Provider.of<CurrentUser>(context,
-                                          listen: false)
-                                      .getCurrentUser
-                                      .uid;
+                              ),
+                              onPressed: () async {
+                                String uid = Provider.of<CurrentUser>(context,
+                                        listen: false)
+                                    .getCurrentUser
+                                    .uid;
 
-                                  String userName = Provider.of<CurrentUser>(
-                                          context,
-                                          listen: false)
-                                      .getCurrentUser
-                                      .fullName;
-                                  Provider.of<CurrentGroup>(context,
-                                          listen: false)
-                                      .finishedAssignment(uid, userName,
-                                          _reviewController.text, fileLocation);
+                                String userName = Provider.of<CurrentUser>(
+                                        context,
+                                        listen: false)
+                                    .getCurrentUser
+                                    .fullName;
 
-                                  Navigator.of(context).pop();
-                                })
-                          ],
-                        ),
+                                // List<String> selectedfile = List();
+                                // selectedfile.add(fileLocation);
+
+                                Provider.of<CurrentGroup>(context,
+                                        listen: false)
+                                    .finishedAssignment(uid, userName,
+                                        _reviewController.text, fileurl);
+
+                                Navigator.of(context).pop();
+                              }),
+                          Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: Text("Don't Forgot to press SEND button",
+                                style: TextStyle(
+                                  color: Colors.redAccent,
+                                  fontWeight: FontWeight.bold,
+                                )),
+                          ),
+                        ],
                       ),
                     )
                   ],

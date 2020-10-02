@@ -8,6 +8,7 @@ class OurGroup {
   List<String> members;
   Timestamp groupCreated;
   String currentNoticeid;
+  String currentAssignmentsenderid;
   Timestamp currentNoticeDue;
 
   OurGroup({
@@ -18,6 +19,7 @@ class OurGroup {
     this.members,
     this.groupCreated,
     this.currentNoticeid,
+    this.currentAssignmentsenderid,
     this.currentNoticeDue,
   });
 }

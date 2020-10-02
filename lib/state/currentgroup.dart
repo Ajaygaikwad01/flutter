@@ -26,11 +26,11 @@ class CurrentGroup extends ChangeNotifier {
   }
 
   Future<String> finishedAssignment(
-      String uid, String userName, String review, String imageString) async {
+      String uid, String userName, String review, List urlString) async {
     String retval = "Error";
     try {
       await OurDatabase().sendAssignment(_currentgroup.id,
-          _currentgroup.currentNoticeid, uid, userName, review, imageString);
+          _currentgroup.currentNoticeid, uid, userName, review, urlString);
       _doneWithCurrentAssignment = true;
       notifyListeners();
     } catch (e) {

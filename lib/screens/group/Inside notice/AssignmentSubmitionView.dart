@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:worldetor/screens/group/Inside%20notice/assignmentBox.dart';
 import 'package:worldetor/state/currentgroup.dart';
 import 'package:worldetor/state/currentuser.dart';
 
@@ -65,6 +66,30 @@ class _OurAssignmentSubmitionViewState
                           padding: const EdgeInsets.all(10.0),
                           child: Container(
                             child: ListTile(
+                              onTap: () async {
+                                await Firestore.instance
+                                    .collection("groups")
+                                    .document(value.getCurrentGroup.id)
+                                    .updateData({
+                                  "currentAssignmentSenderid": snapshot
+                                      .data.documents
+                                      .elementAt(index)
+                                      .documentID,
+                                });
+
+                                Widget retval;
+                                retval = ChangeNotifierProvider(
+                                  create: (context) => CurrentGroup(),
+                                  child: OurAssignmentBox(),
+                                );
+                                Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => retval,
+                                  // settings: RouteSettings(
+                                  //     arguments: snapshot.data.documents
+                                  //         .elementAt(index)
+                                  //         .documentID)),
+                                ));
+                              },
                               title: Row(
                                 children: [
                                   Text(snapshot.data.documents

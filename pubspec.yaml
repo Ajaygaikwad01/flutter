@@ -32,6 +32,13 @@ dependencies:
   image_picker: ^0.6.3+4
   file_picker: ^1.13.0+1
   flutter_plugin_pdf_viewer: ^1.0.7
+  progress_dialog: ^1.1.0+1
+  url_launcher: 
+  dio: 
+  path_provider: ^1.6.8
+  ext_storage:
+  permission_handler: ^4.4.0
+  flutter_downloader: ^1.4.4
 
   #for bottom weidget
   curved_navigation_bar: ^0.3.2

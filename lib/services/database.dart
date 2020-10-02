@@ -143,7 +143,8 @@ class OurDatabase {
       retval.description = _docSnapshot.data["Description"];
       retval.members = List<String>.from(_docSnapshot.data["members"]);
       retval.groupCreated = _docSnapshot.data["groupCreated"];
-
+      retval.currentAssignmentsenderid =
+          _docSnapshot.data["currentAssignmentSenderid"];
       retval.currentNoticeid = _docSnapshot.data["currentNoticeid"];
       retval.currentNoticeid = _docSnapshot.data["currentNoticeid"];
     } catch (e) {
@@ -235,6 +236,7 @@ class OurDatabase {
       retval.noticetype = _docSnapshot.data["noticetype"];
       retval.description = _docSnapshot.data["description"];
       retval.subject = _docSnapshot.data["subject"];
+
       retval.attendynames =
           List<String>.from(_docSnapshot.data["attendynames"]);
     } catch (e) {
@@ -244,19 +246,9 @@ class OurDatabase {
   }
 
   Future<String> sendAssignment(String groupId, String noticeId, String uid,
-      String userName, String review, String imageString) async {
+      String userName, String review, List urlString) async {
     String retval = "Error";
     try {
-      // int randomnumber = Random().nextInt(10000);
-      // String imageLocation = 'image/image${randomnumber}.jpg';
-
-      // final StorageReference storageReference =
-      //     FirebaseStorage().ref().child(imageLocation);
-      // final StorageUploadTask uploadTask = storageReference.putFile(document);
-      // await uploadTask.onComplete;
-      //add path in firestore database
-      // final ref = FirebaseStorage().ref().child(filelocation);
-      // var imageString = await ref.getDownloadURL();
       await _firestore
           .collection("groups")
           .document(groupId)
@@ -267,7 +259,7 @@ class OurDatabase {
           .setData({
         "review": review,
         "userName": userName,
-        "imglocation": imageString
+        "fileUrl": FieldValue.arrayUnion(urlString),
       });
     } catch (e) {
       print(e);
