@@ -307,7 +307,7 @@ class _OurNoticeViewState extends State<OurNoticeView> {
                 padding: const EdgeInsets.all(8.0),
                 child: ListView(
                   children: <Widget>[
-                    Row(
+                    Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         IconButton(
@@ -322,20 +322,19 @@ class _OurNoticeViewState extends State<OurNoticeView> {
                               });
                               getImage();
                             }),
-                        Text("$len select File From storage",
+                        Text("    $len select File From storage",
                             style: TextStyle(
                               color: Colors.blueAccent,
                               fontWeight: FontWeight.bold,
                               fontStyle: FontStyle.italic,
                             )),
-                        Flexible(
-                          child: Text("${_filename}",
-                              style: TextStyle(
-                                color: Colors.blueAccent,
-                                fontWeight: FontWeight.bold,
-                                fontStyle: FontStyle.italic,
-                              )),
-                        ),
+
+                        // child: Text("${_filename}",
+                        //     style: TextStyle(
+                        //       color: Colors.blueAccent,
+                        //       fontWeight: FontWeight.bold,
+                        //       fontStyle: FontStyle.italic,
+                        //     )),
                       ],
                     ),
                     Padding(

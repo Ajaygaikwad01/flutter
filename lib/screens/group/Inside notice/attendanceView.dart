@@ -58,30 +58,80 @@ class _OurAttendanceViewState extends State<OurAttendanceView> {
                       itemCount: snapshot.data["attendynames"].length,
                       itemBuilder: (BuildContext context, int index) {
                         String name = snapshot.data["attendynames"][index];
+                        String nameid = snapshot.data["attendyid"][index];
                         return Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: Container(
-                            child: ListTile(
-                              title: Row(
-                                children: [
-                                  Text(snapshot.data["attendynames"][index] ??
-                                      "Loading "),
-                                  Spacer(),
-                                  IconButton(
-                                      splashColor: Colors.grey,
-                                      icon: Icon(Icons.delete),
-                                      onPressed: () async {
-                                        await Firestore.instance
-                                            .collection("groups")
-                                            .document(value.getCurrentGroup.id)
-                                            .collection("notice")
-                                            .document(value.getCurrentNotice.id)
-                                            .updateData({
-                                          "attendynames":
-                                              FieldValue.arrayRemove([name])
-                                        });
-                                      })
-                                ],
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 1, horizontal: 10),
+                          child: Material(
+                            child: Ink(
+                              color: Colors.white,
+                              child: Container(
+                                child: ListTile(
+                                  title: Row(
+                                    children: [
+                                      Text(snapshot.data["attendynames"]
+                                              [index] ??
+                                          "Loading "),
+                                      Spacer(),
+                                      IconButton(
+                                          splashColor: Colors.grey,
+                                          icon: Icon(Icons.check_box_sharp,
+                                              color: Colors.blueAccent),
+                                          onPressed: () async {
+                                            int noticepoint = 1;
+                                            DocumentSnapshot docref =
+                                                await Firestore.instance
+                                                    .collection("groups")
+                                                    .document(value
+                                                        .getCurrentGroup.id)
+                                                    .collection("group_member")
+                                                    .document(snapshot
+                                                            .data["attendyid"]
+                                                        [index])
+                                                    .get();
+                                            var currntpoint =
+                                                docref.data["attend"];
+                                            int totalpoint =
+                                                currntpoint + noticepoint;
+                                            print(totalpoint);
+                                            await Firestore.instance
+                                                .collection("groups")
+                                                .document(
+                                                    value.getCurrentGroup.id)
+                                                .collection("group_member")
+                                                .document(snapshot
+                                                    .data["attendyid"][index])
+                                                .updateData(
+                                                    {"attend": totalpoint});
+
+                                            Scaffold.of(context).showSnackBar(
+                                                new SnackBar(
+                                                    content: new Text(
+                                                        "Attendance saved In database")));
+                                          }),
+                                      IconButton(
+                                          splashColor: Colors.grey,
+                                          icon: Icon(Icons.delete),
+                                          onPressed: () async {
+                                            await Firestore.instance
+                                                .collection("groups")
+                                                .document(
+                                                    value.getCurrentGroup.id)
+                                                .collection("notice")
+                                                .document(
+                                                    value.getCurrentNotice.id)
+                                                .updateData({
+                                              "attendynames":
+                                                  FieldValue.arrayRemove(
+                                                      [name]),
+                                              "attendyid":
+                                                  FieldValue.arrayRemove(
+                                                      [nameid]),
+                                            });
+                                          })
+                                    ],
+                                  ),
+                                ),
                               ),
                             ),
                           ),

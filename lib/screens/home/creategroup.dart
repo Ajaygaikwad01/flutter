@@ -2,9 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:worldetor/screens/root/opengrouproot.dart';
 import 'package:worldetor/screens/root/root.dart';
-
 import 'package:worldetor/services/database.dart';
 import 'package:worldetor/state/currentuser.dart';
 import 'package:worldetor/utils/ourcontener.dart';
@@ -18,8 +16,12 @@ class _OurCreateGroupState extends State<OurCreateGroup> {
   void _createGroup(
       BuildContext context, String groupName, String description) async {
     CurrentUser _currentuser = Provider.of<CurrentUser>(context, listen: false);
-    String _returnString = await OurDatabase()
-        .createGroup(groupName, description, _currentuser.getCurrentUser.uid);
+    String _returnString = await OurDatabase().createGroup(
+        groupName,
+        description,
+        _currentuser.getCurrentUser.uid,
+        _currentuser.getCurrentUser.fullName,
+        _currentuser.getCurrentUser.email);
 
     if (_returnString == "Success") {
       Navigator.pushAndRemoveUntil(

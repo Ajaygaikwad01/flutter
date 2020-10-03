@@ -28,7 +28,7 @@ class _OurChatPaageState extends State<OurChatPaage> {
       appBar: AppBar(
         title: Consumer<CurrentGroup>(
           builder: (BuildContext context, value, Widget child) {
-            return Text(value.getCurrentGroup.name ?? " loding....");
+            return Text(" Group Chat");
           },
         ),
       ),

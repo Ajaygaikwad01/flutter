@@ -4,6 +4,8 @@ class OurUser {
   String uid;
   String email;
   String fullName;
+  int point;
+  int attend;
   Timestamp accountCreated;
   String groupid;
   List<String> listGroup;
@@ -11,6 +13,8 @@ class OurUser {
     this.uid,
     this.email,
     this.fullName,
+    this.point,
+    this.attend,
     this.accountCreated,
     this.groupid,
     this.listGroup,

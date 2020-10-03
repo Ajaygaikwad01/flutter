@@ -53,7 +53,7 @@ class _OurAddAssignmentState extends State<OurAddAssignment> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Add Notice"),
+        title: Text("Add Assignment"),
       ),
       body: ListView(
         children: <Widget>[

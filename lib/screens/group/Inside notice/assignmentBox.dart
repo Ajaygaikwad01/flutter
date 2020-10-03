@@ -117,8 +117,9 @@ class _OurAssignmentBoxState extends State<OurAssignmentBox> {
                                         });
                                         progressdialog.show();
                                         progressdialog.update(
-                                            message: "Downloading ....",
-                                            progress: _percentage);
+                                            message:
+                                                "Downloading ....",
+                                            );
 
                                         var dir = await ExtStorage
                                             .getExternalStoragePublicDirectory(
@@ -133,12 +134,17 @@ class _OurAssignmentBoxState extends State<OurAssignmentBox> {
                                                 count / total * 100;
                                             _percentage = percentage;
                                             setState(() {
-                                              print(percentage);
+                                
+                                              // print(percentage);
                                               downlodingMessage =
                                                   percentage.floor().toString();
                                             });
                                             if (downlodingMessage == "100") {
                                               progressdialog.hide();
+                                              Scaffold.of(context).showSnackBar(
+                                                  new SnackBar(
+                                                      content: new Text(
+                                                          "File Downloaded")));
                                             }
                                           },
                                         );

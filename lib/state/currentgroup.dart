@@ -3,20 +3,25 @@
 import 'package:flutter/cupertino.dart';
 import 'package:worldetor/models/group.dart';
 import 'package:worldetor/models/notice.dart';
+import 'package:worldetor/models/user.dart';
 import 'package:worldetor/services/database.dart';
 
 class CurrentGroup extends ChangeNotifier {
   OurGroup _currentgroup = OurGroup();
   OurNotice _currentnotice = OurNotice();
+  // OurUser _groupmember = OurUser();
   bool _doneWithCurrentAssignment = false;
   OurGroup get getCurrentGroup => _currentgroup;
   OurNotice get getCurrentNotice => _currentnotice;
+  // OurUser get getgroupmember => _groupmember;
   bool get getDoneWithCurrentAssignment => _doneWithCurrentAssignment;
   void updateSteteFromDatabase(String groupId, String userId) async {
     try {
       _currentgroup = await OurDatabase().getGroupInfo(groupId);
       _currentnotice = await OurDatabase()
           .getCurrentNotice(groupId, _currentgroup.currentNoticeid);
+      // _groupmember = await OurDatabase().
+
       _doneWithCurrentAssignment = await OurDatabase()
           .isUserdoneAssignment(groupId, _currentgroup.currentNoticeid, userId);
       notifyListeners();

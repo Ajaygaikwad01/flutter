@@ -25,8 +25,10 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   void _openGroup(BuildContext context, String groupId) async {
     CurrentUser _currentuser = Provider.of<CurrentUser>(context, listen: false);
-    String _returnString =
-        await OurDatabase().openGroup(groupId, _currentuser.getCurrentUser.uid);
+    String _returnString = await OurDatabase().openGroup(
+      groupId,
+      _currentuser.getCurrentUser.uid,
+    );
 
     if (_returnString == "Success") {
       Navigator.of(context).push(

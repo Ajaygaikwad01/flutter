@@ -1,10 +1,4 @@
-// import 'dart:html';
-
-import 'dart:io';
-import 'dart:math';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:worldetor/models/group.dart';
 import 'package:worldetor/models/notice.dart';
 import 'package:worldetor/models/user.dart';
@@ -18,6 +12,7 @@ class OurDatabase {
       await _firestore.collection("users").document(user.uid).setData({
         'fullName': user.fullName,
         'email': user.email,
+        // 'point': 0,
         'accountCreated': Timestamp.now(),
       });
       retval = "Success";
@@ -27,8 +22,8 @@ class OurDatabase {
     return retval;
   }
 
-  Future<String> createGroup(
-      String groupName, String description, String userUid) async {
+  Future<String> createGroup(String groupName, String description,
+      String userUid, String fullName, String email) async {
     String retval = "Error";
     List<String> members = List();
 
@@ -54,7 +49,7 @@ class OurDatabase {
           .collection("users")
           .document(userUid)
           .updateData({'listgroup': FieldValue.arrayUnion(groupIdList)});
-
+      groupmemberinfo(_docref.documentID, userUid, fullName, email);
       retval = "Success";
     } catch (e) {
       print(e);
@@ -62,7 +57,8 @@ class OurDatabase {
     return retval;
   }
 
-  Future<String> joinGroup(String groupId, String userUid) async {
+  Future<String> joinGroup(
+      String groupId, String userUid, String fullName, String email) async {
     String retval = "Error";
     List<String> members = List();
 
@@ -85,7 +81,7 @@ class OurDatabase {
           .collection("users")
           .document(userUid)
           .updateData({'listgroup': FieldValue.arrayUnion(groupIdList)});
-
+      groupmemberinfo(groupId, userUid, fullName, email);
       retval = "Success";
     } catch (e) {
       print(e);
@@ -93,7 +89,10 @@ class OurDatabase {
     return retval;
   }
 
-  Future<String> openGroup(String groupId, String userUid) async {
+  Future<String> openGroup(
+    String groupId,
+    String userUid,
+  ) async {
     String retval = "Error";
     List<String> members = List();
 
@@ -107,7 +106,7 @@ class OurDatabase {
       await _firestore.collection("users").document(userUid).updateData({
         'groupId': groupId,
       });
-
+      // groupmemberinfo(groupId, userUid, fullName, email);
       retval = "Success";
     } catch (e) {
       print(e);
@@ -123,6 +122,7 @@ class OurDatabase {
       retval.uid = uid;
       retval.fullName = _docSnapshot.data["fullName"];
       retval.email = _docSnapshot.data["email"];
+      // retval.point = _docSnapshot.data["point"];
       retval.accountCreated = _docSnapshot.data["accountCreated"];
       retval.groupid = _docSnapshot.data["groupId"];
       retval.listGroup = List<String>.from(_docSnapshot.data["listgroup"]);
@@ -155,7 +155,6 @@ class OurDatabase {
 
   Future<String> removeNotice(String groupId, String noticeId) async {
     String retval = "Error";
-    // List<String> members = List();
 
     try {
       await _firestore
@@ -245,6 +244,30 @@ class OurDatabase {
     return retval;
   }
 
+  Future<String> groupmemberinfo(
+      String groupId, String userId, String fullName, String email) async {
+    String retval = "Error";
+    try {
+      await _firestore
+          .collection("groups")
+          .document(groupId)
+          .collection("group_member")
+          .document(userId)
+          .setData({
+        //  'id': _docref.documentID,
+        'name': fullName,
+        'point': 0,
+        'email': email,
+        'attend': 0,
+      });
+
+      retval = "Success";
+    } catch (e) {
+      print(e);
+    }
+    return retval;
+  }
+
   Future<String> sendAssignment(String groupId, String noticeId, String uid,
       String userName, String review, List urlString, List fileNmae) async {
     String retval = "Error";
@@ -293,18 +316,22 @@ class OurDatabase {
   }
 
   Future<String> getattandance(
-      String groupId, String noticeId, String sendername) async {
+      String groupId, String noticeId, String sendername, String userid) async {
     String retval = "Error";
     try {
       List<String> names = List();
+      List<String> uid = List();
       names.add(sendername);
-
+      uid.add(userid);
       await _firestore
           .collection("groups")
           .document(groupId)
           .collection("notice")
           .document(noticeId)
-          .updateData({'attendynames': FieldValue.arrayUnion(names)});
+          .updateData({
+        'attendynames': FieldValue.arrayUnion(names),
+        'attendyid': FieldValue.arrayUnion(uid),
+      });
       retval = "Success";
     } catch (e) {
       print(e);

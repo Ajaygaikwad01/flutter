@@ -17,8 +17,11 @@ class OurJoinGroup extends StatefulWidget {
 class _OurJoinGroupState extends State<OurJoinGroup> {
   void _joinGroup(BuildContext context, String groupId) async {
     CurrentUser _currentuser = Provider.of<CurrentUser>(context, listen: false);
-    String _returnString =
-        await OurDatabase().joinGroup(groupId, _currentuser.getCurrentUser.uid);
+    String _returnString = await OurDatabase().joinGroup(
+        groupId,
+        _currentuser.getCurrentUser.uid,
+        _currentuser.getCurrentUser.fullName,
+        _currentuser.getCurrentUser.email);
 
     if (_returnString == "Success") {
       Navigator.pushAndRemoveUntil(

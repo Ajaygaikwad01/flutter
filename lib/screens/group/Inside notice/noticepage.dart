@@ -34,7 +34,8 @@ class _OurNoticePageState extends State<OurNoticePage> {
     String _returnString = await OurDatabase().getattandance(
         _currentuser.getCurrentUser.groupid,
         noticeId,
-        _currentuser.getCurrentUser.fullName);
+        _currentuser.getCurrentUser.fullName,
+        _currentuser.getCurrentUser.uid);
     if (_returnString == "Success") {
       Scaffold.of(context)
           .showSnackBar(new SnackBar(content: new Text("Attenance Submited")));
@@ -128,7 +129,6 @@ class _OurNoticePageState extends State<OurNoticePage> {
       setState(() {
         time = DateTime.now();
       });
-
     });
   }
 
@@ -142,7 +142,6 @@ class _OurNoticePageState extends State<OurNoticePage> {
   TextEditingController _noticefeedbackController = TextEditingController();
   @override
   Widget build(BuildContext context) {
-
     return Consumer<CurrentGroup>(
         builder: (BuildContext context, value, Widget child) {
       return Scaffold(
@@ -179,7 +178,6 @@ class _OurNoticePageState extends State<OurNoticePage> {
                         var diff = date.difference(time).inMinutes;
                         return new Dismissible(
                             onDismissed: (direction) {
-                             
                               // _removeNotice(
                               //     context,
                               //     snapshot.data.documents
@@ -200,7 +198,7 @@ class _OurNoticePageState extends State<OurNoticePage> {
                               children: <Widget>[
                                 SizedBox(height: 4),
                                 Padding(
-                                  padding: const EdgeInsets.all(10.0),
+                                  padding: const EdgeInsets.all(8.0),
                                   child: Ourcontener(
                                     child: Column(
                                       children: [
@@ -524,12 +522,12 @@ class _OurNoticePageState extends State<OurNoticePage> {
                         var diff = date.difference(time).inMinutes;
                         return new Dismissible(
                           onDismissed: (direction) {
-                            _removeNotice(
-                                context,
-                                snapshot.data.documents
-                                    .elementAt(index)
-                                    .documentID
-                                    .toString());
+                            // _removeNotice(
+                            //     context,
+                            //     snapshot.data.documents
+                            //         .elementAt(index)
+                            //         .documentID
+                            //         .toString());
                           },
                           key: new Key(
                               snapshot.data.documents[index].toString()),
@@ -812,12 +810,12 @@ class _OurNoticePageState extends State<OurNoticePage> {
                         var diff = date.difference(time).inMinutes;
                         return new Dismissible(
                           onDismissed: (direction) {
-                            _removeNotice(
-                                context,
-                                snapshot.data.documents
-                                    .elementAt(index)
-                                    .documentID
-                                    .toString());
+                            // _removeNotice(
+                            //     context,
+                            //     snapshot.data.documents
+                            //         .elementAt(index)
+                            //         .documentID
+                            //         .toString());
                           },
                           key: new Key(
                               snapshot.data.documents[index].toString()),

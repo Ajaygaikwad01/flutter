@@ -8,8 +8,6 @@ import 'package:worldetor/screens/home/drawer.dart';
 import 'package:worldetor/state/currentgroup.dart';
 import 'package:worldetor/state/currentuser.dart';
 
-import 'package:worldetor/widgets/HomeNavigator.dart';
-
 class OurGroupMember extends StatefulWidget {
   @override
   _OurGroupMemberState createState() => _OurGroupMemberState();
@@ -45,75 +43,97 @@ class _OurGroupMemberState extends State<OurGroupMember> {
     return Consumer<CurrentGroup>(
         builder: (BuildContext context, value, Widget child) {
       return Scaffold(
-        appBar: AppBar(
-            title: Text(value.getCurrentGroup.name ?? " loding...."),
-            actions: <Widget>[
-              IconButton(
-                icon: Icon(Icons.home),
-                onPressed: () async {
-                  Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(builder: (context) => HomeNavigator()),
-                      (route) => false);
-                },
-              ),
-              IconButton(
-                  icon: Icon(Icons.share),
-                  tooltip: "invite",
-                  onPressed: () {
-                    _share(context);
-                  }),
-            ]),
+        appBar: AppBar(title: Text(" Members "), actions: <Widget>[
+          IconButton(
+              icon: Icon(Icons.share),
+              tooltip: "invite",
+              onPressed: () {
+                _share(context);
+              }),
+        ]),
         drawer: OurDrawer(),
-        body: Container(
-            child: // StreamBuilder(
-                //   stream: Firestore.instance
-                //       .collection("groups")
-                //       .document(value.getCurrentGroup.id)
-                //       .snapshots(),
-                //   builder: (BuildContext context, AsyncSnapshot snapshot) {
-                //     if (snapshot.data == null) {
-                //       return Container(
-                //         child: Center(
-                //           child: Text("empty"),
-                //         ),
-                //       );
-                //     } else {
-                //   return
-                ListView.builder(
-          itemCount: value.getCurrentGroup.members.length,
-          itemBuilder: (BuildContext context, int index) {
-            return StreamBuilder(
-                stream: Firestore.instance
-                    .collection("users")
-                    .document(value.getCurrentGroup.members[index])
-                    .snapshots(),
-                builder: (BuildContext context,
-                    AsyncSnapshot<DocumentSnapshot> snapshot) {
-                  if (snapshot.data == null) {
-                    return Container(
-                      child: Center(
-                        child: Text("Loading...."),
-                      ),
-                    );
-                  } else {
-                    return ListTile(
-                      leading: // CircleAvatar(
-                          //   backgroundImage: AssetImage(
-                          //       "lib/assets/google_logo.png"),
-                          // ),
-                          Icon(Icons.account_circle),
-                      title: Text(snapshot.data["fullName"]),
-                      subtitle: Text(snapshot.data["email"]),
-                    );
-                  }
-                });
-          },
-        )
-            // }
-            //   },
-            // ),
-            ),
+        body: StreamBuilder(
+            stream: Firestore.instance
+                .collection("groups")
+                .document(value.getCurrentGroup.id)
+                .collection("group_member")
+                .snapshots(),
+            builder:
+                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+              if (snapshot.data == null) {
+                return Container(
+                  child: Center(
+                    child: Text("Loading...."),
+                  ),
+                );
+              } else {
+                if (snapshot.data.documents == null) {
+                  return Container(
+                    child: Center(
+                      child: Text("Loading...."),
+                    ),
+                  );
+                } else {
+                  return ListView.builder(
+                      itemCount: snapshot.data.documents.length ?? 0,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 2, horizontal: 10),
+                          child: Material(
+                            child: Ink(
+                              color: Colors.white,
+                              child: Container(
+                                child: ListTile(
+                                  onTap: () {},
+                                  leading: // CircleAvatar(
+                                      //   backgroundImage: AssetImage(
+                                      //       "lib/assets/google_logo.png"),
+                                      // ),
+                                      Icon(Icons.account_circle),
+                                  title: Row(
+                                    children: [
+                                      Text(
+                                          snapshot.data.documents
+                                                  .elementAt(index)["name"] ??
+                                              "Loading...",
+                                          style: TextStyle(fontSize: 15)),
+                                      Spacer(),
+                                      Text(
+                                        "Attend: ${snapshot.data.documents.elementAt(index)["attend"]}" ??
+                                            "0",
+                                        style: TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.bold),
+                                      )
+                                    ],
+                                  ),
+                                  subtitle: Row(
+                                    children: [
+                                      Text(
+                                          snapshot.data.documents
+                                                  .elementAt(index)["email"] ??
+                                              "Loading...",
+                                          style: TextStyle(fontSize: 12)),
+                                      Spacer(),
+                                      Text(
+                                        "Points: ${snapshot.data.documents.elementAt(index)["point"]}" ??
+                                            "0",
+                                        style: TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.bold),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      });
+                }
+              }
+            }),
       );
     });
   }
