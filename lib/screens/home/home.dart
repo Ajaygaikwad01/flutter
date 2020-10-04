@@ -3,6 +3,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 import 'package:provider/provider.dart';
 
 import 'package:worldetor/screens/root/opengrouproot.dart';
@@ -31,6 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
     if (_returnString == "Success") {
+      progressdialog.hide();
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => OurGroupRoot(),
@@ -45,8 +47,13 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  ProgressDialog progressdialog;
   @override
   Widget build(BuildContext context) {
+    progressdialog = ProgressDialog(context, isDismissible: false);
+    progressdialog.update(
+      message: "Opening....",
+    );
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.greenAccent[100],
@@ -96,30 +103,33 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.all(8.0),
               child: Ourcontener(
                 child: ListTile(
-                  title: StreamBuilder(
-                    stream: Firestore.instance
-                        .collection("groups")
-                        .document(value.getCurrentUser.listGroup[index])
-                        .snapshots(),
-                    builder: (BuildContext context,
-                        AsyncSnapshot<DocumentSnapshot> snapshot) {
-                      if (snapshot.data == null) {
-                        return Text("Loading....");
-                      } else {
-                        return Column(
-                          children: [
-                            Text(snapshot.data["name"]),
-                            Text(snapshot.data["Description"] ?? "Description"),
-                          ],
-                        );
-                      }
-                    },
-                  ),
-                  // subtitle:
-                  //     Text(snapshot.data["Description"] ?? "Description"),
-                  onTap: () => _openGroup(
-                      context, value.getCurrentUser.listGroup[index]),
-                ),
+                    title: StreamBuilder(
+                      stream: Firestore.instance
+                          .collection("groups")
+                          .document(value.getCurrentUser.listGroup[index])
+                          .snapshots(),
+                      builder: (BuildContext context,
+                          AsyncSnapshot<DocumentSnapshot> snapshot) {
+                        if (snapshot.data == null) {
+                          return Text("Loading....");
+                        } else {
+                          return Column(
+                            children: [
+                              Text(snapshot.data["name"]),
+                              Text(snapshot.data["Description"] ??
+                                  "Description"),
+                            ],
+                          );
+                        }
+                      },
+                    ),
+                    // subtitle:
+                    //     Text(snapshot.data["Description"] ?? "Description"),
+                    onTap: () {
+                      progressdialog.show();
+                      _openGroup(
+                          context, value.getCurrentUser.listGroup[index]);
+                    }),
               ),
             );
           },

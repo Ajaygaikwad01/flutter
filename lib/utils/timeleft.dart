@@ -1,7 +1,3 @@
-import 'dart:async';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 class OurTimeLeft {
   List<String> timeleft(DateTime due) {
     List<String> retval = List(1);

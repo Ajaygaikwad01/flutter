@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:share/share.dart';
+
 import 'package:worldetor/screens/home/drawer.dart';
 
 import 'package:worldetor/state/currentgroup.dart';
@@ -19,7 +19,6 @@ class OurAlartPage extends StatefulWidget {
 class _OurAlartPageState extends State<OurAlartPage> {
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
 
     CurrentUser _currentuser = Provider.of<CurrentUser>(context, listen: false);

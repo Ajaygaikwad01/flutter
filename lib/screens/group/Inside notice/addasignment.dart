@@ -6,7 +6,6 @@ import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:worldetor/models/notice.dart';
-import 'package:worldetor/screens/root/root.dart';
 import 'package:worldetor/services/database.dart';
 import 'package:worldetor/state/currentuser.dart';
 import 'package:worldetor/utils/ourcontener.dart';

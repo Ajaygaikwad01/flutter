@@ -8,6 +8,6 @@ class OurNoticeBox extends StatefulWidget {
 class _OurNoticeBoxState extends State<OurNoticeBox> {
   @override
   Widget build(BuildContext context) {
-    // return
+    return null;
   }
 }

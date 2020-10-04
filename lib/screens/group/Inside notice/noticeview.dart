@@ -1,10 +1,5 @@
-// import 'dart:js';
-
-// import 'dart:html';
-// import 'dart:math';
-
 import 'dart:io';
-import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -73,7 +68,7 @@ class _OurNoticeViewState extends State<OurNoticeView> {
   TextEditingController _reviewController = TextEditingController();
   bool loading = false;
 
-  double _progress;
+  // double _progress;
   ProgressDialog progressdialog;
   @override
   Widget build(BuildContext context) {
@@ -244,7 +239,7 @@ class _OurNoticeViewState extends State<OurNoticeView> {
 
       // int randomnumber = Random().nextInt(1000);
       String imageLocation =
-          '${_currentgroup.getCurrentGroup.name}/${_currentgroup.getCurrentGroup.currentNoticeid}/${_currentuser.getCurrentUser.uid}/${filename}';
+          '${_currentgroup.getCurrentGroup.name}/${_currentgroup.getCurrentGroup.currentNoticeid}/${_currentuser.getCurrentUser.uid}/$filename';
 
       print(imageLocation);
       final StorageReference storageReference =

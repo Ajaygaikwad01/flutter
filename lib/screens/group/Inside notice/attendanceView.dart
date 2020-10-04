@@ -59,6 +59,7 @@ class _OurAttendanceViewState extends State<OurAttendanceView> {
                       itemBuilder: (BuildContext context, int index) {
                         String name = snapshot.data["attendynames"][index];
                         String nameid = snapshot.data["attendyid"][index];
+
                         return Padding(
                           padding: const EdgeInsets.symmetric(
                               vertical: 1, horizontal: 10),

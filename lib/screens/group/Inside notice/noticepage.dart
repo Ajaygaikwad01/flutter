@@ -1,16 +1,13 @@
 import 'dart:async';
-// import 'dart:ffi';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:worldetor/screens/group/Inside%20notice/AssignmentSubmitionView.dart';
-
 import 'package:worldetor/screens/group/Inside%20notice/attendanceView.dart';
 import 'package:worldetor/screens/group/Inside%20notice/floatingbutton.dart';
 import 'package:worldetor/screens/group/Inside%20notice/noticeview.dart';
-
 import 'package:worldetor/screens/home/drawer.dart';
 import 'package:worldetor/services/database.dart';
 import 'package:worldetor/state/currentgroup.dart';
@@ -139,7 +136,6 @@ class _OurNoticePageState extends State<OurNoticePage> {
     super.dispose();
   }
 
-  TextEditingController _noticefeedbackController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Consumer<CurrentGroup>(
@@ -176,24 +172,24 @@ class _OurNoticePageState extends State<OurNoticePage> {
                             .elementAt(index)["datecompleted"]
                             .toDate();
                         var diff = date.difference(time).inMinutes;
-                        return new Dismissible(
-                            onDismissed: (direction) {
-                              // _removeNotice(
-                              //     context,
-                              //     snapshot.data.documents
-                              //         .elementAt(index)
-                              //         .documentID
-                              //         .toString());
-                            },
-                            key: new Key(
-                                snapshot.data.documents[index].toString()),
-                            background: Expanded(
-                              child: Container(
-                                color: Colors.red,
-                                child: IconButton(
-                                    icon: Icon(Icons.delete), onPressed: null),
-                              ),
-                            ),
+                        return Slidable(
+                            actionPane: SlidableDrawerActionPane(),
+                            actionExtentRatio: 0.25,
+                            secondaryActions: <Widget>[
+                              IconSlideAction(
+                                caption: 'Delete',
+                                color: Colors.redAccent,
+                                icon: Icons.delete,
+                                onTap: () {
+                                  _removeNotice(
+                                      context,
+                                      snapshot.data.documents
+                                          .elementAt(index)
+                                          .documentID
+                                          .toString());
+                                },
+                              )
+                            ],
                             child: Column(
                               children: <Widget>[
                                 SizedBox(height: 4),
@@ -520,24 +516,24 @@ class _OurNoticePageState extends State<OurNoticePage> {
                             .elementAt(index)["datecompleted"]
                             .toDate();
                         var diff = date.difference(time).inMinutes;
-                        return new Dismissible(
-                          onDismissed: (direction) {
-                            // _removeNotice(
-                            //     context,
-                            //     snapshot.data.documents
-                            //         .elementAt(index)
-                            //         .documentID
-                            //         .toString());
-                          },
-                          key: new Key(
-                              snapshot.data.documents[index].toString()),
-                          background: Expanded(
-                            child: Container(
-                              color: Colors.red,
-                              child: IconButton(
-                                  icon: Icon(Icons.delete), onPressed: null),
-                            ),
-                          ),
+                        return Slidable(
+                          actionPane: SlidableDrawerActionPane(),
+                          actionExtentRatio: 0.25,
+                          secondaryActions: <Widget>[
+                            IconSlideAction(
+                              caption: 'Delete',
+                              color: Colors.redAccent,
+                              icon: Icons.delete,
+                              onTap: () {
+                                _removeNotice(
+                                    context,
+                                    snapshot.data.documents
+                                        .elementAt(index)
+                                        .documentID
+                                        .toString());
+                              },
+                            )
+                          ],
                           child: Column(
                             children: <Widget>[
                               SizedBox(height: 4),
@@ -808,24 +804,24 @@ class _OurNoticePageState extends State<OurNoticePage> {
                             .elementAt(index)["datecompleted"]
                             .toDate();
                         var diff = date.difference(time).inMinutes;
-                        return new Dismissible(
-                          onDismissed: (direction) {
-                            // _removeNotice(
-                            //     context,
-                            //     snapshot.data.documents
-                            //         .elementAt(index)
-                            //         .documentID
-                            //         .toString());
-                          },
-                          key: new Key(
-                              snapshot.data.documents[index].toString()),
-                          background: Expanded(
-                            child: Container(
-                              color: Colors.red,
-                              child: IconButton(
-                                  icon: Icon(Icons.delete), onPressed: null),
-                            ),
-                          ),
+                        return Slidable(
+                          actionPane: SlidableDrawerActionPane(),
+                          actionExtentRatio: 0.25,
+                          secondaryActions: <Widget>[
+                            IconSlideAction(
+                              caption: 'Delete',
+                              color: Colors.redAccent,
+                              icon: Icons.delete,
+                              onTap: () {
+                                _removeNotice(
+                                    context,
+                                    snapshot.data.documents
+                                        .elementAt(index)
+                                        .documentID
+                                        .toString());
+                              },
+                            )
+                          ],
                           child: Column(
                             children: <Widget>[
                               SizedBox(height: 4),
@@ -1068,10 +1064,7 @@ class _OurNoticePageState extends State<OurNoticePage> {
                                                         .elementAt(index)
                                                         .documentID
                                                         .toString());
-                                              } else {
-                                                null;
                                               }
-                                              // }
                                             }),
                                       ),
                                       Padding(

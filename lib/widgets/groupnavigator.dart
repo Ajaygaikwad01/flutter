@@ -1,6 +1,5 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:worldetor/screens/group/Inside%20notice/alartpage.dart';
 import 'package:worldetor/screens/group/Inside%20notice/noticepage.dart';
 import 'package:worldetor/screens/group/chatpage.dart';
 import 'package:worldetor/screens/group/memberllist.dart';

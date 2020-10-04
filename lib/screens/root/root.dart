@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:worldetor/screens/group/Inside%20notice/alartpage.dart';
-
 import 'package:worldetor/screens/login/login.dart';
 import 'package:worldetor/screens/splashScreen/splashscreen.dart';
-import 'package:worldetor/state/currentgroup.dart';
 import 'package:worldetor/state/currentuser.dart';
 import 'package:worldetor/widgets/HomeNavigator.dart';
-import 'package:worldetor/widgets/groupnavigator.dart';
 
 enum AuthStatus {
   unknown,
@@ -26,7 +22,6 @@ class _OurRootState extends State<OurRoot> {
   AuthStatus _authStatus = AuthStatus.unknown;
   @override
   void didChangeDependencies() async {
-    // TODO: implement didChangeDependencies
     super.didChangeDependencies();
     CurrentUser _currentUser = Provider.of<CurrentUser>(context, listen: false);
     String _returnscreen = await _currentUser.onStartUp();

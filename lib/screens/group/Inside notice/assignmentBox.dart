@@ -2,14 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
 import 'package:ext_storage/ext_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:worldetor/screens/group/pdfviewer.dart';
 import 'package:worldetor/state/currentgroup.dart';
 import 'package:worldetor/state/currentuser.dart';
-import 'package:worldetor/utils/ourcontener.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class OurAssignmentBox extends StatefulWidget {
@@ -35,12 +32,10 @@ class _OurAssignmentBoxState extends State<OurAssignmentBox> {
   String downlodingMessage = " ";
   bool _isDownloading = false;
   ProgressDialog progressdialog;
-  double _percentage = 0;
+  // double _percentage = 0;
   @override
   Widget build(BuildContext context) {
     progressdialog = ProgressDialog(context, isDismissible: false);
-    // progressdialog.update(maxProgress: percentage,message: downlodingMessage);
-    // progressdialog.update(message: "Downloading...");
 
     return Consumer<CurrentGroup>(
       builder: (BuildContext context, value, Widget child) {
@@ -117,9 +112,8 @@ class _OurAssignmentBoxState extends State<OurAssignmentBox> {
                                         });
                                         progressdialog.show();
                                         progressdialog.update(
-                                            message:
-                                                "Downloading ....",
-                                            );
+                                          message: "Downloading ....",
+                                        );
 
                                         var dir = await ExtStorage
                                             .getExternalStoragePublicDirectory(
@@ -128,13 +122,12 @@ class _OurAssignmentBoxState extends State<OurAssignmentBox> {
                                         Dio dio = Dio();
                                         dio.download(
                                           snapshot.data["fileUrl"][index],
-                                          "${dir}/${snapshot.data["fileName"][index]}",
+                                          "$dir/${snapshot.data["fileName"][index]}",
                                           onReceiveProgress: (count, total) {
                                             var percentage =
                                                 count / total * 100;
-                                            _percentage = percentage;
+                                            // _percentage = percentage;
                                             setState(() {
-                                
                                               // print(percentage);
                                               downlodingMessage =
                                                   percentage.floor().toString();

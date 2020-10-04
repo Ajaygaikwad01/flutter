@@ -1,9 +1,6 @@
-// import 'dart:html';
-
 import 'package:flutter/cupertino.dart';
 import 'package:worldetor/models/group.dart';
 import 'package:worldetor/models/notice.dart';
-import 'package:worldetor/models/user.dart';
 import 'package:worldetor/services/database.dart';
 
 class CurrentGroup extends ChangeNotifier {

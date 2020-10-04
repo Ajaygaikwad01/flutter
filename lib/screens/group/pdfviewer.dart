@@ -29,7 +29,7 @@ class _OurpdfviewerState extends State<Ourpdfviewer> {
       setState(() {});
     }
 
-    Widget Loading() {
+    Widget loading() {
       viewNow();
       if (doc == null) {
         return Text("loading....");
@@ -39,7 +39,7 @@ class _OurpdfviewerState extends State<Ourpdfviewer> {
     return Scaffold(
       appBar: AppBar(title: Text("pdf viewer")),
       body:
-          Container(child: doc == null ? Loading() : PDFViewer(document: doc)),
+          Container(child: doc == null ? loading() : PDFViewer(document: doc)),
     );
   }
 }
