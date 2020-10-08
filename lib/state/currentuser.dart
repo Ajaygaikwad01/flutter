@@ -40,7 +40,7 @@ class CurrentUser extends ChangeNotifier {
   }
 
   Future<String> signUpUser(
-      String email, String password, String fullName) async {
+      String email, String password, String fullName, String uniqueId) async {
     String retval = "Error";
 
     OurUser _user = OurUser();
@@ -51,6 +51,7 @@ class CurrentUser extends ChangeNotifier {
       _user.uid = _authResult.user.uid;
       _user.email = _authResult.user.email;
       _user.fullName = fullName;
+      _user.uniqueId = uniqueId;
 
       String _returnString = await OurDatabase().createUser(_user);
       if (_returnString == "Success") {

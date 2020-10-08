@@ -41,6 +41,7 @@ dependencies:
   flutter_downloader: ^1.4.4
   flutter_slidable:
   animations: ^1.1.2
+ 
 
   #for bottom weidget
   curved_navigation_bar: ^0.3.2

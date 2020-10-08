@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:provider/provider.dart';
 import 'package:share/share.dart';
 import 'package:worldetor/screens/home/drawer.dart';
@@ -36,6 +37,17 @@ class _OurGroupMemberState extends State<OurGroupMember> {
         Provider.of<CurrentGroup>(context, listen: false);
     _currentgroup.updateSteteFromDatabase(
         _currentuser.getCurrentUser.groupid, _currentuser.getCurrentUser.uid);
+  }
+
+  Future<void> _removemember(userId, groupId) async {
+    await Firestore.instance.collection("users").document(userId).updateData({
+      "listgroup": FieldValue.arrayRemove([groupId]),
+    });
+    await Firestore.instance.collection("groups").document(groupId).updateData({
+      "members": FieldValue.arrayRemove([userId]),
+    });
+    Scaffold.of(context)
+        .showSnackBar(new SnackBar(content: new Text("Group deleted")));
   }
 
   @override
@@ -80,50 +92,66 @@ class _OurGroupMemberState extends State<OurGroupMember> {
                         return Padding(
                           padding: const EdgeInsets.symmetric(
                               vertical: 2, horizontal: 10),
-                          child: Material(
-                            child: Ink(
-                              color: Colors.white,
-                              child: Container(
-                                child: ListTile(
-                                  onTap: () {},
-                                  leading: // CircleAvatar(
-                                      //   backgroundImage: AssetImage(
-                                      //       "lib/assets/google_logo.png"),
-                                      // ),
-                                      Icon(Icons.account_circle),
-                                  title: Row(
-                                    children: [
-                                      Text(
-                                          snapshot.data.documents
-                                                  .elementAt(index)["name"] ??
-                                              "Loading...",
-                                          style: TextStyle(fontSize: 15)),
-                                      Spacer(),
-                                      Text(
-                                        "Attend: ${snapshot.data.documents.elementAt(index)["attend"]}" ??
-                                            "0",
-                                        style: TextStyle(
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.bold),
-                                      )
-                                    ],
-                                  ),
-                                  subtitle: Row(
-                                    children: [
-                                      Text(
-                                          snapshot.data.documents
-                                                  .elementAt(index)["email"] ??
-                                              "Loading...",
-                                          style: TextStyle(fontSize: 12)),
-                                      Spacer(),
-                                      Text(
-                                        "Points: ${snapshot.data.documents.elementAt(index)["point"]}" ??
-                                            "0",
-                                        style: TextStyle(
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.bold),
-                                      )
-                                    ],
+                          child: Slidable(
+                            actionPane: SlidableDrawerActionPane(),
+                            actionExtentRatio: 0.30,
+                            secondaryActions: <Widget>[
+                              IconSlideAction(
+                                caption: 'Remove',
+                                color: Colors.redAccent,
+                                icon: Icons.remove_done,
+                                onTap: () {
+                                  // _removemember(snapshot.data.documents
+                                  //                   .elementAt(index)["name"],
+                                  //     value.getCurrentGroup.id);
+                                },
+                              )
+                            ],
+                            child: Material(
+                              child: Ink(
+                                color: Colors.white,
+                                child: Container(
+                                  child: ListTile(
+                                    onTap: () {},
+                                    leading: // CircleAvatar(
+                                        //   backgroundImage: AssetImage(
+                                        //       "lib/assets/google_logo.png"),
+                                        // ),
+                                        Icon(Icons.account_circle),
+                                    title: Row(
+                                      children: [
+                                        Text(
+                                            snapshot.data.documents
+                                                    .elementAt(index)["name"] ??
+                                                "Loading...",
+                                            style: TextStyle(fontSize: 15)),
+                                        Spacer(),
+                                        Text(
+                                          "Attend: ${snapshot.data.documents.elementAt(index)["attend"]}" ??
+                                              "0",
+                                          style: TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.bold),
+                                        )
+                                      ],
+                                    ),
+                                    subtitle: Row(
+                                      children: [
+                                        Text(
+                                            snapshot.data.documents.elementAt(
+                                                    index)["email"] ??
+                                                "Loading...",
+                                            style: TextStyle(fontSize: 12)),
+                                        Spacer(),
+                                        Text(
+                                          "Points: ${snapshot.data.documents.elementAt(index)["point"]}" ??
+                                              "0",
+                                          style: TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.bold),
+                                        )
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),

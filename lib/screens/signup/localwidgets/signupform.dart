@@ -11,17 +11,18 @@ class Oursignupform extends StatefulWidget {
 }
 
 class _OursignupformState extends State<Oursignupform> {
+  TextEditingController _uniqueIdController = TextEditingController();
   TextEditingController _fullNameController = TextEditingController();
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passswordController = TextEditingController();
   TextEditingController _conformpasswordController = TextEditingController();
 
   void _signUpUser(String email, String password, String fullName,
-      BuildContext context) async {
+      String uniqueId, BuildContext context) async {
     CurrentUser _currentuser = Provider.of<CurrentUser>(context, listen: false);
     try {
       String _returnString =
-          await _currentuser.signUpUser(email, password, fullName);
+          await _currentuser.signUpUser(email, password, fullName, uniqueId);
       if (_returnString == "Success") {
         Navigator.pop(context);
       } else {
@@ -52,6 +53,15 @@ class _OursignupformState extends State<Oursignupform> {
                 fontWeight: FontWeight.bold,
               ),
             ),
+          ),
+          TextFormField(
+            controller: _uniqueIdController,
+            decoration: InputDecoration(
+                prefixIcon: Icon(Icons.label_important),
+                hintText: "UniqueId/CollegeId/RollNo"),
+          ),
+          SizedBox(
+            height: 20.0,
           ),
           TextFormField(
             controller: _fullNameController,
@@ -103,8 +113,12 @@ class _OursignupformState extends State<Oursignupform> {
             onPressed: () {
               if (_passswordController.text ==
                   _conformpasswordController.text) {
-                _signUpUser(_emailController.text, _passswordController.text,
-                    _fullNameController.text, context);
+                _signUpUser(
+                    _emailController.text,
+                    _passswordController.text,
+                    _fullNameController.text,
+                    _uniqueIdController.text,
+                    context);
               } else {
                 Scaffold.of(context).showSnackBar(
                   SnackBar(

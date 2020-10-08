@@ -3,6 +3,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:provider/provider.dart';
 
@@ -47,12 +48,23 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _removegroup(userId, groupId) async {
+    await Firestore.instance.collection("users").document(userId).updateData({
+      "listgroup": FieldValue.arrayRemove([groupId]),
+    });
+    await Firestore.instance.collection("groups").document(groupId).updateData({
+      "members": FieldValue.arrayRemove([userId]),
+    });
+    Scaffold.of(context)
+        .showSnackBar(new SnackBar(content: new Text("Group deleted")));
+  }
+
   ProgressDialog progressdialog;
   @override
   Widget build(BuildContext context) {
     progressdialog = ProgressDialog(context, isDismissible: false);
     progressdialog.update(
-      message: "Opening....",
+      message: "Opening...",
     );
     return Scaffold(
       appBar: AppBar(
@@ -62,6 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: Icon(Icons.refresh_rounded),
             onPressed: () async {
+              setState(() {});
               print("Refreshing");
             },
           ),
@@ -96,44 +109,81 @@ class _HomeScreenState extends State<HomeScreen> {
       drawer: OurDrawer(),
       body: Consumer<CurrentUser>(
           builder: (BuildContext context, value, Widget child) {
-        return ListView.builder(
-          itemCount: value.getCurrentUser.listGroup.length,
-          itemBuilder: (BuildContext context, int index) {
-            return Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Ourcontener(
-                child: ListTile(
-                    title: StreamBuilder(
-                      stream: Firestore.instance
-                          .collection("groups")
-                          .document(value.getCurrentUser.listGroup[index])
-                          .snapshots(),
-                      builder: (BuildContext context,
-                          AsyncSnapshot<DocumentSnapshot> snapshot) {
-                        if (snapshot.data == null) {
-                          return Text("Loading....");
-                        } else {
-                          return Column(
-                            children: [
-                              Text(snapshot.data["name"]),
-                              Text(snapshot.data["Description"] ??
-                                  "Description"),
-                            ],
-                          );
-                        }
-                      },
+        if (value.getCurrentUser.listGroup == null) {
+          return Center(child: Text("Create OR join Group"));
+        } else {
+          return StreamBuilder(
+              stream: Firestore.instance
+                  .collection("users")
+                  .document(value.getCurrentUser.uid)
+                  .snapshots(),
+              builder: (BuildContext context,
+                  AsyncSnapshot<DocumentSnapshot> snapshot) {
+                if (snapshot.data == null) {
+                  return Container(
+                    child: Center(
+                      child: Text("Loading...."),
                     ),
-                    // subtitle:
-                    //     Text(snapshot.data["Description"] ?? "Description"),
-                    onTap: () {
-                      progressdialog.show();
-                      _openGroup(
-                          context, value.getCurrentUser.listGroup[index]);
-                    }),
-              ),
-            );
-          },
-        );
+                  );
+                } else {
+                  return ListView.builder(
+                    itemCount: snapshot.data["listgroup"].length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Slidable(
+                          actionPane: SlidableDrawerActionPane(),
+                          actionExtentRatio: 0.30,
+                          secondaryActions: <Widget>[
+                            IconSlideAction(
+                              caption: 'Delete',
+                              color: Colors.redAccent,
+                              icon: Icons.delete,
+                              onTap: () {
+                                _removegroup(value.getCurrentUser.uid,
+                                    snapshot.data["listgroup"][index]);
+                              },
+                            )
+                          ],
+                          child: Ourcontener(
+                            child: ListTile(
+                                title: StreamBuilder(
+                                  stream: Firestore.instance
+                                      .collection("groups")
+                                      .document(
+                                          snapshot.data["listgroup"][index])
+                                      .snapshots(),
+                                  builder: (BuildContext context,
+                                      AsyncSnapshot<DocumentSnapshot>
+                                          snapshot) {
+                                    if (snapshot.data == null) {
+                                      return Text("Loading....");
+                                    } else {
+                                      return Column(
+                                        children: [
+                                          Text(snapshot.data["name"]),
+                                          Text(snapshot.data["Description"] ??
+                                              "Description"),
+                                        ],
+                                      );
+                                    }
+                                  },
+                                ),
+                                // subtitle:
+                                //     Text(snapshot.data["Description"] ?? "Description"),
+                                onTap: () {
+                                  progressdialog.show();
+                                  _openGroup(context,
+                                      snapshot.data["listgroup"][index]);
+                                }),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                }
+              });
+        }
       }),
     );
   }

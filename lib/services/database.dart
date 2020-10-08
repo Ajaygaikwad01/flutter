@@ -12,7 +12,7 @@ class OurDatabase {
       await _firestore.collection("users").document(user.uid).setData({
         'fullName': user.fullName,
         'email': user.email,
-        // 'point': 0,
+        'uniqueId': user.uniqueId,
         'accountCreated': Timestamp.now(),
       });
       retval = "Success";
@@ -114,15 +114,15 @@ class OurDatabase {
     return retval;
   }
 
-  Future<OurUser> getUserInfo(String uid) async {
+  Future<OurUser> getUserInfo(String userId) async {
     OurUser retval = OurUser();
     try {
       DocumentSnapshot _docSnapshot =
-          await _firestore.collection("users").document(uid).get();
-      retval.uid = uid;
+          await _firestore.collection("users").document(userId).get();
+      retval.uid = userId;
       retval.fullName = _docSnapshot.data["fullName"];
       retval.email = _docSnapshot.data["email"];
-      // retval.point = _docSnapshot.data["point"];
+      retval.uniqueId = _docSnapshot.data["uniqueId"];
       retval.accountCreated = _docSnapshot.data["accountCreated"];
       retval.groupid = _docSnapshot.data["groupId"];
       retval.listGroup = List<String>.from(_docSnapshot.data["listgroup"]);
@@ -256,6 +256,7 @@ class OurDatabase {
           .setData({
         //  'id': _docref.documentID,
         'name': fullName,
+
         'point': 0,
         'email': email,
         'attend': 0,
@@ -332,6 +333,27 @@ class OurDatabase {
         'attendynames': FieldValue.arrayUnion(names),
         'attendyid': FieldValue.arrayUnion(uid),
       });
+      retval = "Success";
+    } catch (e) {
+      print(e);
+    }
+    return retval;
+  }
+
+  Future<String> groupTotalAttendance(
+      String groupId, String uniqueID, String date) async {
+    String retval = "Error";
+    try {
+      await _firestore
+          .collection("groups")
+          .document(groupId)
+          .collection("groupTotalAttendance")
+          .document(uniqueID)
+          .updateData({
+        //  'id': _docref.documentID,
+        date: "present",
+      });
+
       retval = "Success";
     } catch (e) {
       print(e);

@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 import 'package:provider/provider.dart';
 import 'package:worldetor/screens/group/Inside%20notice/AssignmentSubmitionView.dart';
 import 'package:worldetor/screens/group/Inside%20notice/attendanceView.dart';
@@ -61,6 +62,7 @@ class _OurNoticePageState extends State<OurNoticePage> {
         .openNotice(_currentuser.getCurrentUser.groupid, noticeId);
 
     if (_returnString == "Success") {
+      progressdialog.hide();
       Widget retval;
       retval = ChangeNotifierProvider(
         create: (context) => CurrentGroup(),
@@ -81,6 +83,7 @@ class _OurNoticePageState extends State<OurNoticePage> {
         .openNotice(_currentuser.getCurrentUser.groupid, noticeId);
 
     if (_returnString == "Success") {
+      progressdialog.hide();
       Widget retval;
       retval = ChangeNotifierProvider(
         create: (context) => CurrentGroup(),
@@ -101,6 +104,7 @@ class _OurNoticePageState extends State<OurNoticePage> {
         .openNotice(_currentuser.getCurrentUser.groupid, noticeId);
 
     if (_returnString == "Success") {
+      progressdialog.hide();
       Widget retval;
       retval = ChangeNotifierProvider(
         create: (context) => CurrentGroup(),
@@ -136,8 +140,13 @@ class _OurNoticePageState extends State<OurNoticePage> {
     super.dispose();
   }
 
+  ProgressDialog progressdialog;
   @override
   Widget build(BuildContext context) {
+    progressdialog = ProgressDialog(context, isDismissible: false);
+    progressdialog.update(
+      message: "Opening....",
+    );
     return Consumer<CurrentGroup>(
         builder: (BuildContext context, value, Widget child) {
       return Scaffold(
@@ -165,8 +174,11 @@ class _OurNoticePageState extends State<OurNoticePage> {
                     itemCount: snapshot.data.documents.length,
                     itemBuilder: (BuildContext context, int index) {
                       if (snapshot.data.documents
-                              .elementAt(index)['noticetype'] ==
-                          "Assignment") {
+                                  .elementAt(index)['noticetype'] ==
+                              "Assignment" ||
+                          snapshot.data.documents
+                                  .elementAt(index)['noticetype'] ==
+                              "notice") {
                         // var now = DateTime.now();
                         var date = snapshot.data.documents
                             .elementAt(index)["datecompleted"]
@@ -318,31 +330,40 @@ class _OurNoticePageState extends State<OurNoticePage> {
                                                       )
                                                     ],
                                                   ),
-                                                  Row(
-                                                    children: [
-                                                      Text(
-                                                        "Points: ",
-                                                        style: TextStyle(
-                                                          color: Colors.amber,
-                                                          fontSize: 15.0,
-                                                          fontWeight:
-                                                              FontWeight.bold,
+                                                  Visibility(
+                                                    visible: (snapshot
+                                                                .data.documents
+                                                                .elementAt(
+                                                                    index)[
+                                                            'noticetype'] ==
+                                                        "Assignment"),
+                                                    child: Row(
+                                                      children: [
+                                                        Text(
+                                                          "Points: ",
+                                                          style: TextStyle(
+                                                            color: Colors.amber,
+                                                            fontSize: 15.0,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                          ),
                                                         ),
-                                                      ),
-                                                      Text(
-                                                        snapshot.data.documents
-                                                                .elementAt(index)[
-                                                                    'point']
-                                                                .toString() ??
-                                                            "loading.....",
-                                                        style: TextStyle(
-                                                          color: Colors.black,
-                                                          fontSize: 13.0,
-                                                          // fontWeight:
-                                                          // FontWeight.bold,
+                                                        Text(
+                                                          snapshot.data
+                                                                  .documents
+                                                                  .elementAt(index)[
+                                                                      'point']
+                                                                  .toString() ??
+                                                              "loading.....",
+                                                          style: TextStyle(
+                                                            color: Colors.black,
+                                                            fontSize: 13.0,
+                                                            // fontWeight:
+                                                            // FontWeight.bold,
+                                                          ),
                                                         ),
-                                                      ),
-                                                    ],
+                                                      ],
+                                                    ),
                                                   ),
                                                   Row(
                                                     children: [
@@ -385,36 +406,50 @@ class _OurNoticePageState extends State<OurNoticePage> {
                                                       ),
                                                     ],
                                                   ),
-                                                  RaisedButton(
-                                                    child: Padding(
-                                                      padding:
-                                                          EdgeInsets.symmetric(
-                                                              vertical: 5,
-                                                              horizontal: 10),
-                                                      child: Text(
-                                                        (diff == 0 || diff < 0)
-                                                            ? " !!! EXPIRED !!!"
-                                                            : "Tap for More Info...",
-                                                        style: TextStyle(
-                                                          // fontSize: 20.0,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    onPressed: () => (diff <= 0)
-                                                        ? Scaffold.of(context)
-                                                            .showSnackBar(new SnackBar(
-                                                                content: new Text(
-                                                                    "Notification is Expired")))
-                                                        : _openNotice(
-                                                            context,
-                                                            snapshot
+                                                  Visibility(
+                                                    visible: (snapshot
                                                                 .data.documents
                                                                 .elementAt(
-                                                                    index)
-                                                                .documentID
-                                                                .toString()),
+                                                                    index)[
+                                                            'noticetype'] !=
+                                                        "attendance"),
+                                                    child: RaisedButton(
+                                                        child: Padding(
+                                                          padding: EdgeInsets
+                                                              .symmetric(
+                                                                  vertical: 5,
+                                                                  horizontal:
+                                                                      10),
+                                                          child: Text(
+                                                            (diff == 0 ||
+                                                                    diff < 0)
+                                                                ? " !!! EXPIRED !!!"
+                                                                : "Tap for More Info...",
+                                                            style: TextStyle(
+                                                              // fontSize: 20.0,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        onPressed: () {
+                                                          (diff <= 0)
+                                                              ? Scaffold.of(
+                                                                      context)
+                                                                  .showSnackBar(
+                                                                      new SnackBar(
+                                                                          content: new Text(
+                                                                              "Notification is Expired")))
+                                                              : _openNotice(
+                                                                  context,
+                                                                  snapshot.data
+                                                                      .documents
+                                                                      .elementAt(
+                                                                          index)
+                                                                      .documentID
+                                                                      .toString());
+                                                        }),
                                                   )
                                                 ],
                                               ),
@@ -427,25 +462,41 @@ class _OurNoticePageState extends State<OurNoticePage> {
                                                         .leader ==
                                                     _currentuser
                                                         .getCurrentUser.uid) {
-                                                  _openAssignmentAdminView(
-                                                      context,
-                                                      snapshot.data.documents
-                                                          .elementAt(index)
-                                                          .documentID
-                                                          .toString());
+                                                  progressdialog.show();
+                                                  if (snapshot.data.documents
+                                                              .elementAt(index)[
+                                                          'noticetype'] ==
+                                                      "Assignment") {
+                                                    _openAssignmentAdminView(
+                                                        context,
+                                                        snapshot.data.documents
+                                                            .elementAt(index)
+                                                            .documentID
+                                                            .toString());
+                                                  } else {
+                                                    progressdialog.hide();
+                                                    _openNotice(
+                                                        context,
+                                                        snapshot.data.documents
+                                                            .elementAt(index)
+                                                            .documentID
+                                                            .toString());
+                                                  }
                                                 } else {
-                                                  (diff <= 0)
-                                                      ? Scaffold.of(context)
-                                                          .showSnackBar(new SnackBar(
-                                                              content: new Text(
-                                                                  "Notification is Expired only Admin can Access")))
-                                                      : _openNotice(
-                                                          context,
-                                                          snapshot
-                                                              .data.documents
-                                                              .elementAt(index)
-                                                              .documentID
-                                                              .toString());
+                                                  if (diff <= 0) {
+                                                    Scaffold.of(context)
+                                                        .showSnackBar(new SnackBar(
+                                                            content: new Text(
+                                                                "Notification is Expired only Admin can Access")));
+                                                  } else {
+                                                    progressdialog.show();
+                                                    _openNotice(
+                                                        context,
+                                                        snapshot.data.documents
+                                                            .elementAt(index)
+                                                            .documentID
+                                                            .toString());
+                                                  }
                                                 }
                                               }),
                                         ),
@@ -508,295 +559,6 @@ class _OurNoticePageState extends State<OurNoticePage> {
                                 ),
                               ],
                             ));
-                      } else if (snapshot.data.documents
-                              .elementAt(index)['noticetype'] ==
-                          "notice") {
-                        // var now = DateTime.now();
-                        var date = snapshot.data.documents
-                            .elementAt(index)["datecompleted"]
-                            .toDate();
-                        var diff = date.difference(time).inMinutes;
-                        return Slidable(
-                          actionPane: SlidableDrawerActionPane(),
-                          actionExtentRatio: 0.25,
-                          secondaryActions: <Widget>[
-                            IconSlideAction(
-                              caption: 'Delete',
-                              color: Colors.redAccent,
-                              icon: Icons.delete,
-                              onTap: () {
-                                _removeNotice(
-                                    context,
-                                    snapshot.data.documents
-                                        .elementAt(index)
-                                        .documentID
-                                        .toString());
-                              },
-                            )
-                          ],
-                          child: Column(
-                            children: <Widget>[
-                              SizedBox(height: 4),
-                              Padding(
-                                padding: const EdgeInsets.all(10.0),
-                                child: Ourcontener(
-                                  child: Column(
-                                    children: [
-                                      Container(
-                                        child: ListTile(
-                                          title: Column(
-                                            children: [
-                                              (diff <= 0)
-                                                  ? Container(
-                                                      alignment:
-                                                          Alignment.topLeft,
-                                                      decoration: BoxDecoration(
-                                                        color:
-                                                            Colors.amber[900],
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(20.0),
-                                                      ),
-                                                      // color: Colors.amber,
-
-                                                      child: Row(
-                                                        children: [
-                                                          Icon(Icons
-                                                              .access_alarms),
-                                                          Text(
-                                                            " " +
-                                                                    snapshot
-                                                                        .data
-                                                                        .documents
-                                                                        .elementAt(
-                                                                            index)['noticetype'] +
-                                                                    "  Expired" +
-                                                                    "  !!!" ??
-                                                                "loading.....",
-                                                            style: TextStyle(
-                                                              // color: Colors.white,
-                                                              fontSize: 20.0,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    )
-                                                  : Container(
-                                                      color: Colors.amber,
-                                                      alignment:
-                                                          AlignmentDirectional
-                                                              .topStart,
-                                                      child: Text(
-                                                        " " +
-                                                                snapshot.data
-                                                                        .documents
-                                                                        .elementAt(
-                                                                            index)[
-                                                                    'noticetype'] +
-                                                                ":" ??
-                                                            "loading.....",
-                                                        style: TextStyle(
-                                                          // color: Colors.white,
-                                                          fontSize: 20.0,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
-                                                      ),
-                                                    ),
-                                              Text(
-                                                snapshot.data.documents
-                                                        .elementAt(
-                                                            index)['name'] ??
-                                                    "loading.....",
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                  fontSize: 18.0,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          subtitle: Column(
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  Text(
-                                                    "Subject: ",
-                                                    style: TextStyle(
-                                                      color: Colors.amber,
-                                                      fontSize: 15.0,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                    ),
-                                                  ),
-                                                  Expanded(
-                                                    child: Text(
-                                                      snapshot.data.documents
-                                                                  .elementAt(
-                                                                      index)[
-                                                              'subject'] ??
-                                                          "loading.....",
-                                                      style: TextStyle(
-                                                        color: Colors.black,
-                                                        fontSize: 13.0,
-                                                        // fontWeight:
-                                                        //     FontWeight.bold,
-                                                      ),
-                                                    ),
-                                                  )
-                                                ],
-                                              ),
-                                              Row(
-                                                children: [
-                                                  Text(
-                                                    "Due On: ",
-                                                    style: TextStyle(
-                                                      color: Colors.amber,
-                                                      fontSize: 15.0,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                    ),
-                                                  ),
-                                                  Text(
-                                                    (snapshot.data.documents
-                                                                    .elementAt(index)[
-                                                                "datecompleted"] !=
-                                                            null)
-                                                        ? DateFormat.yMMMEd("en_US")
-                                                                .format(snapshot
-                                                                    .data
-                                                                    .documents
-                                                                    .elementAt(index)[
-                                                                        "datecompleted"]
-                                                                    .toDate()) +
-                                                            " at- " +
-                                                            DateFormat("H:mm")
-                                                                .format(snapshot
-                                                                    .data
-                                                                    .documents
-                                                                    .elementAt(
-                                                                        index)["datecompleted"]
-                                                                    .toDate())
-                                                        : "loading.....",
-                                                    style: TextStyle(
-                                                      color: Colors.black,
-                                                      fontSize: 13.0,
-                                                      // fontWeight:
-                                                      //     FontWeight.bold,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              RaisedButton(
-                                                  child: Padding(
-                                                    padding:
-                                                        EdgeInsets.symmetric(
-                                                            vertical: 5,
-                                                            horizontal: 10),
-                                                    child: Text(
-                                                      (diff == 0 || diff < 0)
-                                                          ? " !!! EXPIRED !!!"
-                                                          : "Tap for More Info...",
-                                                      style: TextStyle(
-                                                        // fontSize: 20.0,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  onPressed: () => (diff <= 0)
-                                                      ? Scaffold.of(context)
-                                                          .showSnackBar(new SnackBar(
-                                                              content: new Text(
-                                                                  "Notification is Expired")))
-                                                      : _openNotice(
-                                                          context,
-                                                          snapshot
-                                                              .data.documents
-                                                              .elementAt(index)
-                                                              .documentID
-                                                              .toString()))
-                                            ],
-                                          ),
-                                          onTap: () => (diff <= 0)
-                                              ? Scaffold.of(context)
-                                                  .showSnackBar(new SnackBar(
-                                                      content: new Text(
-                                                          "Notification is Expired")))
-                                              : _openNotice(
-                                                  context,
-                                                  snapshot.data.documents
-                                                      .elementAt(index)
-                                                      .documentID
-                                                      .toString()),
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 10),
-                                        child: Container(
-                                          // alignment: Alignment.center,
-                                          color: Colors.black12,
-                                          child: Row(
-                                            children: [
-                                              Text(
-                                                (snapshot.data.documents
-                                                                .elementAt(
-                                                                    index)[
-                                                            "datesend"] !=
-                                                        null)
-                                                    ? " " +
-                                                        DateFormat.yMMMMEEEEd(
-                                                                "en_US")
-                                                            .format(snapshot
-                                                                .data.documents
-                                                                .elementAt(index)[
-                                                                    "datesend"]
-                                                                .toDate())
-                                                    : "loading...",
-                                                style: TextStyle(
-                                                  // color: Colors.black12,
-                                                  fontSize: 13.0,
-                                                  // fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                              Spacer(),
-                                              Text(
-                                                (DateFormat("H:mm").format(
-                                                            snapshot
-                                                                .data.documents
-                                                                .elementAt(index)[
-                                                                    "datesend"]
-                                                                .toDate()) !=
-                                                        null)
-                                                    ? DateFormat("H:mm").format(
-                                                            snapshot
-                                                                .data.documents
-                                                                .elementAt(index)[
-                                                                    "datesend"]
-                                                                .toDate()) +
-                                                        " "
-                                                    : "loading...",
-                                                style: TextStyle(
-                                                  // color: Colors.black26,
-                                                  fontSize: 13.0,
-                                                  // fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
                       } else if (snapshot.data.documents
                               .elementAt(index)['noticetype'] ==
                           "attendance") {
@@ -973,8 +735,6 @@ class _OurNoticePageState extends State<OurNoticePage> {
                                                       style: TextStyle(
                                                         color: Colors.black,
                                                         fontSize: 13.0,
-                                                        // fontWeight:
-                                                        //     FontWeight.bold,
                                                       ),
                                                     ),
                                                   ],
@@ -994,15 +754,33 @@ class _OurNoticePageState extends State<OurNoticePage> {
                                                                 size: 35,
                                                               ),
                                                               onPressed: () {
-                                                                _attendance(
-                                                                    context,
-                                                                    snapshot
-                                                                        .data
-                                                                        .documents
-                                                                        .elementAt(
-                                                                            index)
-                                                                        .documentID
-                                                                        .toString());
+                                                                CurrentUser
+                                                                    _currentuser =
+                                                                    Provider.of<
+                                                                            CurrentUser>(
+                                                                        context,
+                                                                        listen:
+                                                                            false);
+                                                                if (_currentuser
+                                                                        .getCurrentUser
+                                                                        .uniqueId ==
+                                                                    null) {
+                                                                  Scaffold.of(
+                                                                          context)
+                                                                      .showSnackBar(new SnackBar(
+                                                                          content:
+                                                                              new Text("Failed Please Add uniqueId in profile")));
+                                                                } else {
+                                                                  _attendance(
+                                                                      context,
+                                                                      snapshot
+                                                                          .data
+                                                                          .documents
+                                                                          .elementAt(
+                                                                              index)
+                                                                          .documentID
+                                                                          .toString());
+                                                                }
                                                               }),
                                                           SizedBox(
                                                             width: 30,
@@ -1043,21 +821,17 @@ class _OurNoticePageState extends State<OurNoticePage> {
                                               ],
                                             ),
                                             onTap: () async {
+                                              // progressdialog.show();
                                               CurrentUser _currentuser =
                                                   Provider.of<CurrentUser>(
                                                       context,
                                                       listen: false);
 
-                                              // if (diff <= 0) {
-                                              //   Scaffold.of(context)
-                                              //       .showSnackBar(new SnackBar(
-                                              //           content: new Text(
-                                              //               "Notification is Expired")));
-                                              // } else {
                                               if (value
                                                       .getCurrentGroup.leader ==
                                                   _currentuser
                                                       .getCurrentUser.uid) {
+                                                progressdialog.show();
                                                 _openAttendanceAdminView(
                                                     context,
                                                     snapshot.data.documents
@@ -1071,7 +845,6 @@ class _OurNoticePageState extends State<OurNoticePage> {
                                         padding: EdgeInsets.symmetric(
                                             horizontal: 10),
                                         child: Container(
-                                          // alignment: Alignment.center,
                                           color: Colors.black12,
                                           child: Row(
                                             children: [
@@ -1091,9 +864,7 @@ class _OurNoticePageState extends State<OurNoticePage> {
                                                                 .toDate())
                                                     : "loading...",
                                                 style: TextStyle(
-                                                  // color: Colors.black12,
                                                   fontSize: 13.0,
-                                                  // fontWeight: FontWeight.bold,
                                                 ),
                                               ),
                                               Spacer(),
@@ -1114,9 +885,7 @@ class _OurNoticePageState extends State<OurNoticePage> {
                                                         " "
                                                     : "loading...",
                                                 style: TextStyle(
-                                                  // color: Colors.black26,
                                                   fontSize: 13.0,
-                                                  // fontWeight: FontWeight.bold,
                                                 ),
                                               ),
                                             ],

@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+
 import 'package:worldetor/state/currentgroup.dart';
 import 'package:worldetor/state/currentuser.dart';
 
@@ -20,6 +22,41 @@ class _OurAttendanceViewState extends State<OurAttendanceView> {
         Provider.of<CurrentGroup>(context, listen: false);
     _currentgroup.updateSteteFromDatabase(
         _currentuser.getCurrentUser.groupid, _currentuser.getCurrentUser.uid);
+  }
+
+  attendbutton(groupid, indexval) async {
+    DateTime time = DateTime.now();
+    String currentTime = DateFormat.yMMMMd("en_US").format(time);
+
+    CurrentUser _currentuser = Provider.of<CurrentUser>(context, listen: false);
+    int noticepoint = 1;
+    DocumentSnapshot docref = await Firestore.instance
+        .collection("groups")
+        .document(groupid)
+        .collection("group_member")
+        .document(indexval)
+        .get();
+    var currntpoint = docref.data["attend"];
+    int totalpoint = currntpoint + noticepoint;
+
+    print(totalpoint);
+    await Firestore.instance
+        .collection("groups")
+        .document(groupid)
+        .collection("group_member")
+        .document(indexval)
+        .updateData({"attend": totalpoint});
+    // await OurDatabase().groupTotalAttendance(
+    //     groupid, _currentuser.getCurrentUser.uniqueId, currentTime);
+    await Firestore.instance
+        .collection("groups")
+        .document(groupid)
+        .collection("groupTotalAttendance")
+        .document(_currentuser.getCurrentUser.uniqueId)
+        .setData({
+      //  'id': _docref.documentID,
+      currentTime: "present",
+    });
   }
 
   @override
@@ -79,36 +116,10 @@ class _OurAttendanceViewState extends State<OurAttendanceView> {
                                           icon: Icon(Icons.check_box_sharp,
                                               color: Colors.blueAccent),
                                           onPressed: () async {
-                                            int noticepoint = 1;
-                                            DocumentSnapshot docref =
-                                                await Firestore.instance
-                                                    .collection("groups")
-                                                    .document(value
-                                                        .getCurrentGroup.id)
-                                                    .collection("group_member")
-                                                    .document(snapshot
-                                                            .data["attendyid"]
-                                                        [index])
-                                                    .get();
-                                            var currntpoint =
-                                                docref.data["attend"];
-                                            int totalpoint =
-                                                currntpoint + noticepoint;
-                                            print(totalpoint);
-                                            await Firestore.instance
-                                                .collection("groups")
-                                                .document(
-                                                    value.getCurrentGroup.id)
-                                                .collection("group_member")
-                                                .document(snapshot
-                                                    .data["attendyid"][index])
-                                                .updateData(
-                                                    {"attend": totalpoint});
-
-                                            Scaffold.of(context).showSnackBar(
-                                                new SnackBar(
-                                                    content: new Text(
-                                                        "Attendance saved In database")));
+                                            attendbutton(
+                                                value.getCurrentGroup.id,
+                                                snapshot.data["attendyid"]
+                                                    [index]);
                                           }),
                                       IconButton(
                                           splashColor: Colors.grey,

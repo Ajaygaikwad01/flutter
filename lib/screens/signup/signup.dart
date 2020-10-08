@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:worldetor/screens/signup/signupform.dart';
+import 'package:worldetor/screens/signup/localwidgets/signupform.dart';
 
 class Oursignup extends StatelessWidget {
   @override

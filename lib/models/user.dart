@@ -4,6 +4,7 @@ class OurUser {
   String uid;
   String email;
   String fullName;
+  String uniqueId;
   int point;
   int attend;
   Timestamp accountCreated;
@@ -13,6 +14,7 @@ class OurUser {
     this.uid,
     this.email,
     this.fullName,
+    this.uniqueId,
     this.point,
     this.attend,
     this.accountCreated,
