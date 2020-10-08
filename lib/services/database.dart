@@ -23,7 +23,7 @@ class OurDatabase {
   }
 
   Future<String> createGroup(String groupName, String description,
-      String userUid, String fullName, String email) async {
+      String userUid, String fullName, String email, String uniqueId) async {
     String retval = "Error";
     List<String> members = List();
 
@@ -49,7 +49,7 @@ class OurDatabase {
           .collection("users")
           .document(userUid)
           .updateData({'listgroup': FieldValue.arrayUnion(groupIdList)});
-      groupmemberinfo(_docref.documentID, userUid, fullName, email);
+      groupmemberinfo(_docref.documentID, userUid, fullName, email, uniqueId);
       retval = "Success";
     } catch (e) {
       print(e);
@@ -57,8 +57,8 @@ class OurDatabase {
     return retval;
   }
 
-  Future<String> joinGroup(
-      String groupId, String userUid, String fullName, String email) async {
+  Future<String> joinGroup(String groupId, String userUid, String fullName,
+      String email, String uniqueId) async {
     String retval = "Error";
     List<String> members = List();
 
@@ -81,7 +81,7 @@ class OurDatabase {
           .collection("users")
           .document(userUid)
           .updateData({'listgroup': FieldValue.arrayUnion(groupIdList)});
-      groupmemberinfo(groupId, userUid, fullName, email);
+      groupmemberinfo(groupId, userUid, fullName, email, uniqueId);
       retval = "Success";
     } catch (e) {
       print(e);
@@ -244,10 +244,20 @@ class OurDatabase {
     return retval;
   }
 
-  Future<String> groupmemberinfo(
-      String groupId, String userId, String fullName, String email) async {
+  Future<String> groupmemberinfo(String groupId, String userId, String fullName,
+      String email, String uniqueId) async {
     String retval = "Error";
     try {
+      await _firestore
+          .collection("groups")
+          .document(groupId)
+          .collection("groupTotalAttendance")
+          .document(uniqueId)
+          .setData({
+        //  'id': _docref.documentID,
+        "Name": fullName,
+      });
+
       await _firestore
           .collection("groups")
           .document(groupId)
@@ -256,7 +266,7 @@ class OurDatabase {
           .setData({
         //  'id': _docref.documentID,
         'name': fullName,
-
+        'uniqueId': uniqueId,
         'point': 0,
         'email': email,
         'attend': 0,

@@ -51,7 +51,7 @@ class _OurNoticeViewState extends State<OurNoticeView> {
             Padding(
               padding: const EdgeInsets.only(left: 10),
               child: Text(
-                'Add Assignment',
+                'Attach Document',
                 style: TextStyle(
                   fontSize: 20,
                   color: Colors.grey,
@@ -226,43 +226,51 @@ class _OurNoticeViewState extends State<OurNoticeView> {
                             height: 15,
                           ),
                           (_filename.length != null)
-                              ? Expanded(
-                                  child: Padding(
-                                    padding: EdgeInsets.symmetric(
-                                        vertical: 5, horizontal: 30),
-                                    child: ListView.builder(
-                                      shrinkWrap: true,
-                                      // scrollDirection: Axis.horizontal,
-                                      itemCount: _filename.length,
-                                      itemBuilder:
-                                          (BuildContext context, int index) =>
-                                              Card(
-                                        color: Colors.white30,
-                                        child: Center(
-                                            child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Expanded(
-                                                child: Text(
-                                                    "    " + _filename[index])),
-                                            IconButton(
-                                                icon: Icon(
-                                                  Icons.cancel,
-                                                ),
-                                                onPressed: () async {
-                                                  _filename.removeAt(index);
-                                                  fileurl.removeAt(index);
-                                                  await FirebaseStorage.instance
-                                                      .ref()
-                                                      .child(
-                                                          _filelocation[index])
-                                                      .delete();
-                                                  _filelocation.removeAt(index);
-                                                  // print();
-                                                })
-                                          ],
-                                        )),
+                              ? Visibility(
+                                  visible:
+                                      (value.getDoneWithCurrentAssignment !=
+                                          true),
+                                  child: Expanded(
+                                    child: Padding(
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: 5, horizontal: 30),
+                                      child: ListView.builder(
+                                        shrinkWrap: true,
+                                        // scrollDirection: Axis.horizontal,
+                                        itemCount: _filename.length,
+                                        itemBuilder:
+                                            (BuildContext context, int index) =>
+                                                Card(
+                                          color: Colors.white30,
+                                          child: Center(
+                                              child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Expanded(
+                                                  child: Text("    " +
+                                                      _filename[index])),
+                                              IconButton(
+                                                  icon: Icon(
+                                                    Icons.cancel,
+                                                  ),
+                                                  onPressed: () async {
+                                                    setState(() {
+                                                      loading = !loading;
+                                                    });
+                                                    _filename.removeAt(index);
+                                                    fileurl.removeAt(index);
+                                                    // await FirebaseStorage.instance
+                                                    //     .ref()
+                                                    //     .child(
+                                                    //         _filelocation[index])
+                                                    //     .delete();
+                                                    // _filelocation.removeAt(index);
+                                                    // print();
+                                                  })
+                                            ],
+                                          )),
+                                        ),
                                       ),
                                     ),
                                   ),

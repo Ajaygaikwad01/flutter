@@ -21,7 +21,8 @@ class _OurCreateGroupState extends State<OurCreateGroup> {
         description,
         _currentuser.getCurrentUser.uid,
         _currentuser.getCurrentUser.fullName,
-        _currentuser.getCurrentUser.email);
+        _currentuser.getCurrentUser.email,
+        _currentuser.getCurrentUser.uniqueId);
 
     if (_returnString == "Success") {
       Navigator.pushAndRemoveUntil(
@@ -75,22 +76,29 @@ class _OurCreateGroupState extends State<OurCreateGroup> {
                     height: 20.0,
                   ),
                   RaisedButton(
-                    child: Padding(
-                      padding:
-                          EdgeInsets.symmetric(vertical: 10, horizontal: 80),
-                      child: Text(
-                        "Create",
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20),
+                      child: Padding(
+                        padding:
+                            EdgeInsets.symmetric(vertical: 10, horizontal: 80),
+                        child: Text(
+                          "Create",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20),
+                        ),
                       ),
-                    ),
-                    onPressed: () => _createGroup(
-                        context,
-                        _groupNameController.text,
-                        _groupdescriptionController.text),
-                  )
+                      onPressed: () {
+                        CurrentUser _currentuser =
+                            Provider.of<CurrentUser>(context, listen: false);
+                        if (_currentuser.getCurrentUser.uniqueId != null) {
+                          _createGroup(context, _groupNameController.text,
+                              _groupdescriptionController.text);
+                        } else {
+                          print("uniqueid not avilable");
+                          // Scaffold.of(context).showSnackBar(new SnackBar(
+                          //     content: new Text("Please add Unique ID")));
+                        }
+                      })
                 ],
               ),
             ),

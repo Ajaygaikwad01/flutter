@@ -39,7 +39,7 @@ class _OurGroupMemberState extends State<OurGroupMember> {
         _currentuser.getCurrentUser.groupid, _currentuser.getCurrentUser.uid);
   }
 
-  Future<void> _removemember(userId, groupId) async {
+  Future<void> _removemember(context, userId, groupId) async {
     await Firestore.instance.collection("users").document(userId).updateData({
       "listgroup": FieldValue.arrayRemove([groupId]),
     });
@@ -108,6 +108,7 @@ class _OurGroupMemberState extends State<OurGroupMember> {
                                 icon: Icons.remove_done,
                                 onTap: () {
                                   _removemember(
+                                      context,
                                       snapshot.data.documents
                                           .elementAt(index)
                                           .documentID,

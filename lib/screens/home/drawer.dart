@@ -91,8 +91,7 @@ class _OurDrawerState extends State<OurDrawer> {
                                         fontSize: 18, color: Colors.black),
                                   ),
                                   Text(
-                                    snapshot.data["uniqueId"] ??
-                                        "Add Unique Id ->",
+                                    snapshot.data["uniqueId"] ?? "Add UniqueId",
                                     style: TextStyle(
                                         fontSize: 17, color: Colors.black),
                                   ),

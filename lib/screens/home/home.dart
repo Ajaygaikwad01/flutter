@@ -48,7 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<void> _removegroup(userId, groupId) async {
+  Future<void> _removegroup(context, userId, groupId) async {
     await Firestore.instance.collection("users").document(userId).updateData({
       "listgroup": FieldValue.arrayRemove([groupId]),
     });
@@ -59,6 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
         .showSnackBar(new SnackBar(content: new Text("Group deleted")));
   }
 
+  bool loading = false;
   ProgressDialog progressdialog;
   @override
   Widget build(BuildContext context) {
@@ -140,7 +141,10 @@ class _HomeScreenState extends State<HomeScreen> {
                               color: Colors.redAccent,
                               icon: Icons.delete,
                               onTap: () {
-                                _removegroup(value.getCurrentUser.uid,
+                                setState(() {
+                                  loading = !loading;
+                                });
+                                _removegroup(context, value.getCurrentUser.uid,
                                     snapshot.data["listgroup"][index]);
                               },
                             )

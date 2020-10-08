@@ -53,7 +53,7 @@ class _OurAttendanceViewState extends State<OurAttendanceView> {
         .document(groupid)
         .collection("groupTotalAttendance")
         .document(_currentuser.getCurrentUser.uniqueId)
-        .setData({
+        .updateData({
       //  'id': _docref.documentID,
       currentTime: "present",
     });
@@ -91,65 +91,86 @@ class _OurAttendanceViewState extends State<OurAttendanceView> {
                       ),
                     );
                   } else {
-                    return ListView.builder(
-                      itemCount: snapshot.data["attendynames"].length,
-                      itemBuilder: (BuildContext context, int index) {
-                        String name = snapshot.data["attendynames"][index];
-                        String nameid = snapshot.data["attendyid"][index];
+                    if (snapshot.data["attendynames"].length != null) {
+                      return ListView.builder(
+                        itemCount: snapshot.data["attendynames"].length,
+                        itemBuilder: (BuildContext context, int index) {
+                          String name = snapshot.data["attendynames"][index];
+                          String nameid = snapshot.data["attendyid"][index];
 
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 1, horizontal: 10),
-                          child: Material(
-                            child: Ink(
-                              color: Colors.white,
-                              child: Container(
-                                child: ListTile(
-                                  title: Row(
-                                    children: [
-                                      Text(snapshot.data["attendynames"]
-                                              [index] ??
-                                          "Loading "),
-                                      Spacer(),
-                                      IconButton(
-                                          splashColor: Colors.grey,
-                                          icon: Icon(Icons.check_box_sharp,
-                                              color: Colors.blueAccent),
-                                          onPressed: () async {
-                                            attendbutton(
-                                                value.getCurrentGroup.id,
-                                                snapshot.data["attendyid"]
-                                                    [index]);
-                                          }),
-                                      IconButton(
-                                          splashColor: Colors.grey,
-                                          icon: Icon(Icons.delete),
-                                          onPressed: () async {
-                                            await Firestore.instance
-                                                .collection("groups")
-                                                .document(
-                                                    value.getCurrentGroup.id)
-                                                .collection("notice")
-                                                .document(
-                                                    value.getCurrentNotice.id)
-                                                .updateData({
-                                              "attendynames":
-                                                  FieldValue.arrayRemove(
-                                                      [name]),
-                                              "attendyid":
-                                                  FieldValue.arrayRemove(
-                                                      [nameid]),
-                                            });
-                                          })
-                                    ],
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 1, horizontal: 10),
+                            child: Material(
+                              child: Ink(
+                                color: Colors.white,
+                                child: Container(
+                                  child: ListTile(
+                                    title: Row(
+                                      children: [
+                                        Text(snapshot.data["attendynames"]
+                                                [index] ??
+                                            "Loading "),
+                                        Spacer(),
+                                        IconButton(
+                                            splashColor: Colors.grey,
+                                            icon: Icon(Icons.check_box_sharp,
+                                                color: Colors.blueAccent),
+                                            onPressed: () async {
+                                              attendbutton(
+                                                  value.getCurrentGroup.id,
+                                                  snapshot.data["attendyid"]
+                                                      [index]);
+                                              await Firestore.instance
+                                                  .collection("groups")
+                                                  .document(
+                                                      value.getCurrentGroup.id)
+                                                  .collection("notice")
+                                                  .document(
+                                                      value.getCurrentNotice.id)
+                                                  .updateData({
+                                                "attendynames":
+                                                    FieldValue.arrayRemove(
+                                                        [name]),
+                                                "attendyid":
+                                                    FieldValue.arrayRemove(
+                                                        [nameid]),
+                                              });
+                                              Scaffold.of(context).showSnackBar(
+                                                  new SnackBar(
+                                                      content: new Text(
+                                                          "Attendance marked")));
+                                            }),
+                                        IconButton(
+                                            splashColor: Colors.grey,
+                                            icon: Icon(Icons.delete),
+                                            onPressed: () async {
+                                              await Firestore.instance
+                                                  .collection("groups")
+                                                  .document(
+                                                      value.getCurrentGroup.id)
+                                                  .collection("notice")
+                                                  .document(
+                                                      value.getCurrentNotice.id)
+                                                  .updateData({
+                                                "attendynames":
+                                                    FieldValue.arrayRemove(
+                                                        [name]),
+                                                "attendyid":
+                                                    FieldValue.arrayRemove(
+                                                        [nameid]),
+                                              });
+                                            })
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                        );
-                      },
-                    );
+                          );
+                        },
+                      );
+                    }
                   }
                 }
               },
