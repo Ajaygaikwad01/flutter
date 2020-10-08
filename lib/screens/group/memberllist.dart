@@ -46,8 +46,14 @@ class _OurGroupMemberState extends State<OurGroupMember> {
     await Firestore.instance.collection("groups").document(groupId).updateData({
       "members": FieldValue.arrayRemove([userId]),
     });
+    await Firestore.instance
+        .collection("groups")
+        .document(groupId)
+        .collection("group_member")
+        .document(userId)
+        .delete();
     Scaffold.of(context)
-        .showSnackBar(new SnackBar(content: new Text("Group deleted")));
+        .showSnackBar(new SnackBar(content: new Text("member Removed")));
   }
 
   @override
@@ -101,9 +107,11 @@ class _OurGroupMemberState extends State<OurGroupMember> {
                                 color: Colors.redAccent,
                                 icon: Icons.remove_done,
                                 onTap: () {
-                                  // _removemember(snapshot.data.documents
-                                  //                   .elementAt(index)["name"],
-                                  //     value.getCurrentGroup.id);
+                                  _removemember(
+                                      snapshot.data.documents
+                                          .elementAt(index)
+                                          .documentID,
+                                      value.getCurrentGroup.id);
                                 },
                               )
                             ],
