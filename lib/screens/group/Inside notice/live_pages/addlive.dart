@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
@@ -11,13 +9,13 @@ import 'package:worldetor/services/database.dart';
 import 'package:worldetor/state/currentuser.dart';
 import 'package:worldetor/utils/ourcontener.dart';
 
-class OurAddAssignment extends StatefulWidget {
+class OurLiveNotice extends StatefulWidget {
   @override
-  _OurAddAssignmentState createState() => _OurAddAssignmentState();
+  _OurLiveNoticeState createState() => _OurLiveNoticeState();
 }
 
-class _OurAddAssignmentState extends State<OurAddAssignment> {
-  void _addAssignment(BuildContext context, OurNotice notice) async {
+class _OurLiveNoticeState extends State<OurLiveNotice> {
+  void _addnotice(BuildContext context, OurNotice notice) async {
     CurrentUser _currentuser = Provider.of<CurrentUser>(context, listen: false);
     String _returnString = await OurDatabase()
         .addnotice(_currentuser.getCurrentUser.groupid, notice);
@@ -35,11 +33,11 @@ class _OurAddAssignmentState extends State<OurAddAssignment> {
   }
 
   TextEditingController _noticeTitleController = TextEditingController();
-  TextEditingController _noticeSubjectController = TextEditingController();
-  TextEditingController _noticepointController = TextEditingController();
+
   TextEditingController _noticeDescriptionController = TextEditingController();
-  // DateTime _selecedSendDate = DateTime.now();
+  TextEditingController _noticeSubjectController = TextEditingController();
   DateTime _selecedtDate = DateTime.now();
+  // DateTime _selecedSendDate = DateTime.now();
   Future<void> _selectDate(BuildContext context) async {
     final DateTime picked =
         await DatePicker.showDateTimePicker(context, showTitleActions: true);
@@ -60,7 +58,7 @@ class _OurAddAssignmentState extends State<OurAddAssignment> {
     );
     return Scaffold(
       appBar: AppBar(
-        title: Text("Add Assignment"),
+        title: Text("Fill Information"),
       ),
       body: ListView(
         children: <Widget>[
@@ -94,32 +92,22 @@ class _OurAddAssignmentState extends State<OurAddAssignment> {
                   SizedBox(
                     height: 20.0,
                   ),
-                  TextFormField(
-                      controller: _noticeDescriptionController,
-                      decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.description),
-                          hintText: "Description"),
-                      minLines: 1,
-                      maxLines: 5,
-                      maxLengthEnforced: true),
-                  SizedBox(
-                    height: 20.0,
-                  ),
-                  TextFormField(
-                    controller: _noticepointController,
-                    decoration: InputDecoration(
-                        prefixIcon: Icon(Icons.point_of_sale),
-                        hintText: "point"),
-                    keyboardType: TextInputType.number,
-                  ),
-                  SizedBox(
-                    height: 20.0,
-                  ),
+                  // TextFormField(
+                  //     controller: _noticeDescriptionController,
+                  //     decoration: InputDecoration(
+                  //         prefixIcon: Icon(Icons.description),
+                  //         hintText: "Description"),
+                  //     minLines: 1,
+                  //     maxLines: 5,
+                  //     maxLengthEnforced: true),
+                  // SizedBox(
+                  //   height: 20.0,
+                  // ),
                   Text(DateFormat.yMMMMd("en_US").format(_selecedtDate)),
                   Text(DateFormat("H:mm").format(_selecedtDate)),
                   FlatButton(
                       onPressed: () => _selectDate(context),
-                      child: Text("Selcet Due Date")),
+                      child: Text("Selcet Schedule Date")),
                   RaisedButton(
                       child: Padding(
                         padding:
@@ -135,15 +123,15 @@ class _OurAddAssignmentState extends State<OurAddAssignment> {
                       onPressed: () async {
                         await progressdialog.show();
                         OurNotice notice = OurNotice();
-                        notice.noticetype = "Assignment";
+                        notice.noticetype = "Live";
+
                         notice.name = _noticeTitleController.text;
                         notice.subject = _noticeSubjectController.text;
                         notice.description = _noticeDescriptionController.text;
-                        notice.point = int.parse(_noticepointController.text);
                         // notice.datesend = Timestamp.fromDate(_selecedSendDate);
                         notice.datecompleted =
                             Timestamp.fromDate(_selecedtDate);
-                        _addAssignment(context, notice);
+                        _addnotice(context, notice);
                       })
                 ],
               ),

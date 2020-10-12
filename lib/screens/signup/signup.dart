@@ -12,9 +12,9 @@ class Oursignup extends StatelessWidget {
             child: ListView(
               padding: EdgeInsets.all(20.0),
               children: <Widget>[
-                SizedBox(
-                  height: 20.0,
-                ),
+                // SizedBox(
+                //   height: 20.0,
+                // ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -22,7 +22,7 @@ class Oursignup extends StatelessWidget {
                   ],
                 ),
                 SizedBox(
-                  height: 40,
+                  height: 20,
                 ),
                 Oursignupform()
               ],

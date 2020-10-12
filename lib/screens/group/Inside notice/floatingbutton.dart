@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:worldetor/screens/group/Inside%20notice/addAttendance.dart';
 import 'package:worldetor/screens/group/Inside%20notice/addasignment.dart';
+import 'package:worldetor/screens/group/Inside%20notice/live_pages/addlive.dart';
 import 'package:worldetor/screens/group/Inside%20notice/addnotice.dart';
 
 class OurFloatButton extends StatefulWidget {
@@ -38,7 +39,7 @@ class _OurFloatButtonState extends State<OurFloatButton> {
           },
         ),
         SpeedDialChild(
-          child: Icon(Icons.add_alert),
+          child: Icon(Icons.check_circle),
           backgroundColor: Colors.white70,
           foregroundColor: Colors.black,
           label: "Attendance",
@@ -71,7 +72,13 @@ class _OurFloatButtonState extends State<OurFloatButton> {
           foregroundColor: Colors.black,
           label: "Live",
           labelStyle: TextStyle(fontSize: 16),
-          onTap: () {},
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => OurLiveNotice(),
+              ),
+            );
+          },
         )
       ],
     );

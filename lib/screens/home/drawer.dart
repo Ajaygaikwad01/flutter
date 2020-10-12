@@ -68,7 +68,8 @@ class _OurDrawerState extends State<OurDrawer> {
                       builder: (BuildContext context,
                           AsyncSnapshot<DocumentSnapshot> snapshot) {
                         if (snapshot.data == null) {
-                          print("null value");
+                          return Text("Loading..");
+                          // print("null value");
                         } else {
                           return Column(
                             children: <Widget>[

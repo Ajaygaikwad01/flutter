@@ -33,6 +33,8 @@ class _OurpdfviewerState extends State<Ourpdfviewer> {
       viewNow();
       if (doc == null) {
         return Text("loading....");
+      } else {
+        return Text("");
       }
     }
 

@@ -1,11 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:provider/provider.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:share/share.dart';
 import 'package:worldetor/screens/home/drawer.dart';
-
 import 'package:worldetor/state/currentgroup.dart';
 import 'package:worldetor/state/currentuser.dart';
 
@@ -39,7 +38,40 @@ class _OurGroupMemberState extends State<OurGroupMember> {
         _currentuser.getCurrentUser.groupid, _currentuser.getCurrentUser.uid);
   }
 
-  Future<void> _removemember(context, userId, groupId) async {
+  void _deletedialog(userId, groupId) {
+    Alert(
+      context: context,
+      type: AlertType.info,
+      title: "Remove",
+      desc: "Are you sure? ",
+      buttons: [
+        DialogButton(
+          child: Text(
+            "Cancel",
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+          onPressed: () => Navigator.pop(context),
+          color: Color.fromRGBO(0, 179, 134, 1.0),
+        ),
+        DialogButton(
+          child: Text(
+            "Remove",
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+          onPressed: () {
+            _removemember(userId, groupId);
+            Navigator.pop(context);
+          },
+          gradient: LinearGradient(colors: [
+            Color.fromRGBO(116, 116, 191, 1.0),
+            Color.fromRGBO(52, 138, 199, 1.0)
+          ]),
+        )
+      ],
+    ).show();
+  }
+
+  void _removemember(userId, groupId) async {
     await Firestore.instance.collection("users").document(userId).updateData({
       "listgroup": FieldValue.arrayRemove([groupId]),
     });
@@ -52,8 +84,8 @@ class _OurGroupMemberState extends State<OurGroupMember> {
         .collection("group_member")
         .document(userId)
         .delete();
-    Scaffold.of(context)
-        .showSnackBar(new SnackBar(content: new Text("member Removed")));
+    Scaffold.of(context).showSnackBar(new SnackBar(
+        content: new Text("member Removed"), duration: Duration(seconds: 1)));
   }
 
   @override
@@ -107,8 +139,7 @@ class _OurGroupMemberState extends State<OurGroupMember> {
                                 color: Colors.redAccent,
                                 icon: Icons.remove_done,
                                 onTap: () {
-                                  _removemember(
-                                      context,
+                                  _deletedialog(
                                       snapshot.data.documents
                                           .elementAt(index)
                                           .documentID,

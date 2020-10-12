@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 import 'package:provider/provider.dart';
 import 'package:worldetor/state/currentuser.dart';
 import 'package:worldetor/utils/ourcontener.dart';
@@ -25,7 +26,9 @@ class _OursignupformState extends State<Oursignupform> {
           await _currentuser.signUpUser(email, password, fullName, uniqueId);
       if (_returnString == "Success") {
         Navigator.pop(context);
+        await progressdialog.hide();
       } else {
+        await progressdialog.hide();
         Scaffold.of(context).showSnackBar(
           SnackBar(
             content: Text(_returnString),
@@ -38,8 +41,15 @@ class _OursignupformState extends State<Oursignupform> {
     }
   }
 
+  ProgressDialog progressdialog;
   @override
   Widget build(BuildContext context) {
+    progressdialog = ProgressDialog(context,
+        type: ProgressDialogType.Normal, isDismissible: true);
+
+    progressdialog.style(
+      message: "Loading....",
+    );
     return Ourcontener(
       child: Column(
         children: <Widget>[
@@ -102,7 +112,7 @@ class _OursignupformState extends State<Oursignupform> {
             child: Padding(
               padding: EdgeInsets.symmetric(vertical: 10, horizontal: 80),
               child: Text(
-                "signUp",
+                "Sign Up",
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 20.0,
@@ -110,9 +120,10 @@ class _OursignupformState extends State<Oursignupform> {
                 ),
               ),
             ),
-            onPressed: () {
+            onPressed: () async {
               if (_passswordController.text ==
                   _conformpasswordController.text) {
+                await progressdialog.show();
                 _signUpUser(
                     _emailController.text,
                     _passswordController.text,
@@ -128,6 +139,9 @@ class _OursignupformState extends State<Oursignupform> {
                 );
               }
             },
+          ),
+          SizedBox(
+            height: 20.0,
           ),
         ],
       ),

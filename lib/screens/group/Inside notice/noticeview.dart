@@ -6,7 +6,6 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:provider/provider.dart';
-
 import 'package:worldetor/state/currentgroup.dart';
 import 'package:worldetor/state/currentuser.dart';
 import 'package:worldetor/utils/ourcontener.dart';
@@ -278,8 +277,9 @@ class _OurNoticeViewState extends State<OurNoticeView> {
                               : Text(""),
 
                           Visibility(
-                            visible:
-                                (value.getDoneWithCurrentAssignment != true),
+                            visible: (value.getDoneWithCurrentAssignment !=
+                                    true &&
+                                snapshot.data['noticetype'] == "Assignment"),
                             child: Expanded(
                               child: TextFormField(
                                 controller: _reviewController,
@@ -290,8 +290,9 @@ class _OurNoticeViewState extends State<OurNoticeView> {
                             ),
                           ),
                           Visibility(
-                            visible:
-                                (value.getDoneWithCurrentAssignment != true),
+                            visible: (value.getDoneWithCurrentAssignment !=
+                                    true &&
+                                snapshot.data['noticetype'] == "Assignment"),
                             child: Expanded(
                               child: RaisedButton(
                                   child: Padding(
@@ -335,8 +336,9 @@ class _OurNoticeViewState extends State<OurNoticeView> {
                             ),
                           ),
                           Visibility(
-                            visible:
-                                (value.getDoneWithCurrentAssignment != true),
+                            visible: (value.getDoneWithCurrentAssignment !=
+                                    true &&
+                                snapshot.data['noticetype'] == "Assignment"),
                             child: Expanded(
                               child: Padding(
                                 padding: const EdgeInsets.all(10.0),

@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 import 'package:provider/provider.dart';
 
 import 'package:worldetor/screens/signup/signup.dart';
@@ -40,6 +41,7 @@ class _OurLoginFormState extends State<OurLoginForm> {
       }
 
       if (_returnString == "Success") {
+        await progressdialog.hide();
         Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (context) => HomeNavigator()),
@@ -50,10 +52,11 @@ class _OurLoginFormState extends State<OurLoginForm> {
         //   ),
         // );
       } else {
+        await progressdialog.hide();
         Scaffold.of(context).showSnackBar(
           SnackBar(
             content: Text(_returnString),
-            duration: Duration(seconds: 2),
+            duration: Duration(seconds: 1),
           ),
         );
       }
@@ -65,45 +68,53 @@ class _OurLoginFormState extends State<OurLoginForm> {
   Widget _googleButton() {
     return OutlineButton(
       splashColor: Colors.grey,
-      onPressed: () {
+      onPressed: () async {
+        //  await progressdialog.show();
         _loginUser(type: LoginType.google, context: context);
       },
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(60)),
       highlightElevation: 0,
       borderSide: BorderSide(color: Colors.grey),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+        padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Image(
                 image: AssetImage("lib/assets/google_logo.png"), height: 35.0),
-            Padding(
-              padding: const EdgeInsets.only(left: 10),
-              child: Text(
-                'Sign in with Google',
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.grey,
-                ),
-              ),
-            )
+            // Padding(
+            //   padding: const EdgeInsets.only(left: 10),
+            //   child: Text(
+            //     'Sign in with Google',
+            //     style: TextStyle(
+            //       fontSize: 20,
+            //       color: Colors.grey,
+            //     ),
+            //   ),
+            // )
           ],
         ),
       ),
     );
   }
 
+  ProgressDialog progressdialog;
   @override
   Widget build(BuildContext context) {
+    progressdialog = ProgressDialog(context,
+        type: ProgressDialogType.Normal, isDismissible: true);
+
+    progressdialog.style(
+      message: "Loading....",
+    );
     return Ourcontener(
       child: Column(
         children: <Widget>[
           Padding(
-            padding: EdgeInsets.symmetric(vertical: 2.0, horizontal: 8.0),
+            padding: EdgeInsets.symmetric(vertical: 1.0, horizontal: 4.0),
             child: Text(
-              "Log In",
+              "Sign In",
               style: TextStyle(
                 color: Theme.of(context).secondaryHeaderColor,
                 fontSize: 25.0,
@@ -111,13 +122,16 @@ class _OurLoginFormState extends State<OurLoginForm> {
               ),
             ),
           ),
+          SizedBox(
+            height: 30.0,
+          ),
           TextFormField(
             controller: _emailController,
             decoration: InputDecoration(
                 prefixIcon: Icon(Icons.alternate_email), hintText: "Email"),
           ),
           SizedBox(
-            height: 20.0,
+            height: 10.0,
           ),
           TextFormField(
             controller: _passswordController,
@@ -125,14 +139,26 @@ class _OurLoginFormState extends State<OurLoginForm> {
                 prefixIcon: Icon(Icons.lock_outline), hintText: "Password"),
             obscureText: true,
           ),
+          Container(
+            alignment: AlignmentDirectional.bottomEnd,
+            child: FlatButton(
+              onPressed: () {
+                Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (context) => Oursignup()));
+              },
+              child: Text("Forgot password ?",
+                  style: TextStyle(fontStyle: FontStyle.italic)),
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+          ),
           SizedBox(
-            height: 20.0,
+            height: 15.0,
           ),
           RaisedButton(
             child: Padding(
               padding: EdgeInsets.symmetric(vertical: 10, horizontal: 80),
               child: Text(
-                "LogIn",
+                "Sign In",
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 20.0,
@@ -140,7 +166,8 @@ class _OurLoginFormState extends State<OurLoginForm> {
                 ),
               ),
             ),
-            onPressed: () {
+            onPressed: () async {
+              await progressdialog.show();
               _loginUser(
                   type: LoginType.email,
                   email: _emailController.text,
@@ -149,22 +176,27 @@ class _OurLoginFormState extends State<OurLoginForm> {
             },
           ),
           SizedBox(
-            height: 10.0,
+            height: 5.0,
+          ),
+          Text("---or signIn with---"),
+          SizedBox(
+            height: 3.0,
+          ),
+          _googleButton(),
+          SizedBox(
+            height: 20.0,
           ),
           FlatButton(
             onPressed: () {
               Navigator.of(context)
                   .push(MaterialPageRoute(builder: (context) => Oursignup()));
             },
-            child: Text("Sign Up Here"),
+            child: Text("Dont have account? Sign Up Here",
+                style: TextStyle(fontStyle: FontStyle.italic)),
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
           SizedBox(
-            height: 10.0,
-          ),
-          _googleButton(),
-          SizedBox(
-            height: 20.0,
+            height: 3.0,
           ),
         ],
       ),

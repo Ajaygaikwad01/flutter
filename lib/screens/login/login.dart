@@ -11,15 +11,15 @@ class Ourlogin extends StatelessWidget {
         children: <Widget>[
           Expanded(
             child: ListView(
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              padding: EdgeInsets.symmetric(horizontal: 3, vertical: 5),
               children: <Widget>[
                 Padding(
-                  padding: EdgeInsets.all(10.0),
+                  padding: EdgeInsets.all(0.0),
                   child: Image.asset("lib/assets/logo.PNG"),
                 ),
-                SizedBox(
-                  height: 5.0,
-                ),
+                // SizedBox(
+                //   height: 5.0,
+                // ),
                 OurLoginForm()
               ],
             ),

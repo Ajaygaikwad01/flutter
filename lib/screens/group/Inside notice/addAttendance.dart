@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 
 import 'package:provider/provider.dart';
 import 'package:worldetor/models/notice.dart';
@@ -24,6 +25,7 @@ class _OurAddAttendanceState extends State<OurAddAttendance> {
         .addnotice(_currentuser.getCurrentUser.groupid, notice);
 
     if (_returnString == "Success") {
+      await progressdialog.hide();
       Navigator.pop(context);
       // Navigator.pushAndRemoveUntil(
       //     context,
@@ -50,8 +52,14 @@ class _OurAddAttendanceState extends State<OurAddAttendance> {
     }
   }
 
+  ProgressDialog progressdialog;
   @override
   Widget build(BuildContext context) {
+    progressdialog = ProgressDialog(context,
+        type: ProgressDialogType.Normal, isDismissible: true);
+    progressdialog.style(
+      message: "Loading....",
+    );
     return Scaffold(
       appBar: AppBar(
         title: Text("Attendance"),
@@ -116,7 +124,8 @@ class _OurAddAttendanceState extends State<OurAddAttendance> {
                               fontSize: 20),
                         ),
                       ),
-                      onPressed: () {
+                      onPressed: () async {
+                        await progressdialog.show();
                         OurNotice notice = OurNotice();
                         notice.noticetype = "attendance";
 
