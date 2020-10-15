@@ -1,6 +1,7 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:worldetor/screens/group/Inside%20notice/noticepage.dart';
+import 'package:worldetor/screens/group/Inside%20notice/alartpage.dart';
+// import 'package:worldetor/screens/group/Inside%20notice/noticepage.dart';
 import 'package:worldetor/screens/group/chatpage.dart';
 import 'package:worldetor/screens/group/memberllist.dart';
 
@@ -12,8 +13,8 @@ class GroupNavigator extends StatefulWidget {
 class _GroupNavigatorState extends State<GroupNavigator> {
   int _page = 0;
   final pages = [
-    // OurAlartPage(),
-    OurNoticePage(),
+    OurAlertPage(),
+    // OurNoticePage(),
     OurChatPaage(),
     OurGroupMember(),
   ];
@@ -25,7 +26,7 @@ class _GroupNavigatorState extends State<GroupNavigator> {
         animationCurve: Curves.bounceInOut,
         animationDuration: Duration(microseconds: 150),
         height: 50,
-        backgroundColor: Color.fromARGB(255, 213, 235, 220),
+        backgroundColor: Colors.white70,
         items: <Widget>[
           // Icon(Icons.info, size: 30),
           Icon(Icons.notification_important, size: 30),

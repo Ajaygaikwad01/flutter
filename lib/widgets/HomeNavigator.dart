@@ -19,7 +19,7 @@ class _HomeNavigatorState extends State<HomeNavigator> {
         animationCurve: Curves.bounceInOut,
         animationDuration: Duration(microseconds: 150),
         height: 50,
-        backgroundColor: Color.fromARGB(255, 213, 235, 220),
+        backgroundColor: Colors.white70,
         items: <Widget>[
           Icon(Icons.home, size: 30),
           Icon(Icons.video_call, size: 30),

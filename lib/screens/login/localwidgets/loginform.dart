@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:provider/provider.dart';
+import 'package:worldetor/screens/login/resetpassword.dart';
 
 import 'package:worldetor/screens/signup/signup.dart';
 import 'package:worldetor/state/currentuser.dart';
@@ -83,16 +84,16 @@ class _OurLoginFormState extends State<OurLoginForm> {
           children: <Widget>[
             Image(
                 image: AssetImage("lib/assets/google_logo.png"), height: 35.0),
-            // Padding(
-            //   padding: const EdgeInsets.only(left: 10),
-            //   child: Text(
-            //     'Sign in with Google',
-            //     style: TextStyle(
-            //       fontSize: 20,
-            //       color: Colors.grey,
-            //     ),
-            //   ),
-            // )
+            Padding(
+              padding: const EdgeInsets.only(left: 10),
+              child: Text(
+                ' Google',
+                style: TextStyle(
+                  fontSize: 20,
+                  color: Colors.grey,
+                ),
+              ),
+            )
           ],
         ),
       ),
@@ -143,8 +144,8 @@ class _OurLoginFormState extends State<OurLoginForm> {
             alignment: AlignmentDirectional.bottomEnd,
             child: FlatButton(
               onPressed: () {
-                Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (context) => Oursignup()));
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => OurResetpasssword()));
               },
               child: Text("Forgot password ?",
                   style: TextStyle(fontStyle: FontStyle.italic)),

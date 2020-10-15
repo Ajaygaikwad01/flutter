@@ -176,60 +176,89 @@ class _CallPageState extends State<CallPage> {
   /// Toolbar layout
   Widget _toolbar() {
     if (widget.role == ClientRole.Audience) return Container();
+    final views = _getRenderViews();
     return Container(
-      alignment: Alignment.bottomCenter,
-      padding: const EdgeInsets.symmetric(vertical: 48),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          RawMaterialButton(
-            onPressed: _onToggleMute,
-            child: Icon(
-              muted ? Icons.mic_off : Icons.mic,
-              color: muted ? Colors.white : Colors.blueAccent,
-              size: 20.0,
-            ),
-            shape: CircleBorder(),
-            elevation: 2.0,
-            fillColor: muted ? Colors.blueAccent : Colors.white,
-            padding: const EdgeInsets.all(12.0),
+      alignment: Alignment.bottomRight,
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Icon(Icons.remove_red_eye),
+              Text("viewers [${views.length.toString()}]",
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+            ],
           ),
-          RawMaterialButton(
-            onPressed: _onDesableCamera,
-            child: Icon(
-              hidecam ? Icons.videocam_off : Icons.videocam,
-              color: hidecam ? Colors.white : Colors.blueAccent,
-              size: 20.0,
+          // Container(
+          //   child: RawMaterialButton(
+          //     onPressed: _onToggleMute,
+          //     child: Icon(
+          //       muted ? Icons.mic_off : Icons.mic,
+          //       color: muted ? Colors.white : Colors.blueAccent,
+          //       size: 20.0,
+          //     ),
+          //     shape: CircleBorder(),
+          //     elevation: 2.0,
+          //     fillColor: muted ? Colors.blueAccent : Colors.white,
+          //     padding: const EdgeInsets.all(12.0),
+          //   ),
+          // ),
+          Spacer(),
+          Container(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                RawMaterialButton(
+                  onPressed: _onToggleMute,
+                  child: Icon(
+                    muted ? Icons.mic_off : Icons.mic,
+                    color: muted ? Colors.white : Colors.blueAccent,
+                    size: 20.0,
+                  ),
+                  shape: CircleBorder(),
+                  elevation: 2.0,
+                  fillColor: muted ? Colors.blueAccent : Colors.white,
+                  padding: const EdgeInsets.all(12.0),
+                ),
+                RawMaterialButton(
+                  onPressed: _onDesableCamera,
+                  child: Icon(
+                    hidecam ? Icons.videocam_off : Icons.videocam,
+                    color: hidecam ? Colors.white : Colors.blueAccent,
+                    size: 20.0,
+                  ),
+                  shape: CircleBorder(),
+                  elevation: 2.0,
+                  fillColor: hidecam ? Colors.blueAccent : Colors.white,
+                  padding: const EdgeInsets.all(12.0),
+                ),
+                RawMaterialButton(
+                  onPressed: () => _onCallEnd(context),
+                  child: Icon(
+                    Icons.call_end,
+                    color: Colors.white,
+                    size: 35.0,
+                  ),
+                  shape: CircleBorder(),
+                  elevation: 2.0,
+                  fillColor: Colors.redAccent,
+                  padding: const EdgeInsets.all(15.0),
+                ),
+                RawMaterialButton(
+                  onPressed: _onSwitchCamera,
+                  child: Icon(
+                    Icons.switch_camera,
+                    color: Colors.blueAccent,
+                    size: 20.0,
+                  ),
+                  shape: CircleBorder(),
+                  elevation: 2.0,
+                  fillColor: Colors.white,
+                  padding: const EdgeInsets.all(12.0),
+                )
+              ],
             ),
-            shape: CircleBorder(),
-            elevation: 2.0,
-            fillColor: hidecam ? Colors.blueAccent : Colors.white,
-            padding: const EdgeInsets.all(12.0),
           ),
-          RawMaterialButton(
-            onPressed: () => _onCallEnd(context),
-            child: Icon(
-              Icons.call_end,
-              color: Colors.white,
-              size: 35.0,
-            ),
-            shape: CircleBorder(),
-            elevation: 2.0,
-            fillColor: Colors.redAccent,
-            padding: const EdgeInsets.all(15.0),
-          ),
-          RawMaterialButton(
-            onPressed: _onSwitchCamera,
-            child: Icon(
-              Icons.switch_camera,
-              color: Colors.blueAccent,
-              size: 20.0,
-            ),
-            shape: CircleBorder(),
-            elevation: 2.0,
-            fillColor: Colors.white,
-            padding: const EdgeInsets.all(12.0),
-          )
         ],
       ),
     );
@@ -238,7 +267,7 @@ class _CallPageState extends State<CallPage> {
   /// Info panel to show logs
   Widget _panel() {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 48),
+      padding: const EdgeInsets.symmetric(vertical: 50),
       alignment: Alignment.bottomCenter,
       child: FractionallySizedBox(
         heightFactor: 0.5,
@@ -311,7 +340,7 @@ class _CallPageState extends State<CallPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Agora Flutter QuickStart'),
+        title: Text('Live Stream'),
       ),
       backgroundColor: Colors.black,
       body: Center(

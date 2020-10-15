@@ -58,7 +58,9 @@ class _OurLiveNoticeState extends State<OurLiveNotice> {
     );
     return Scaffold(
       appBar: AppBar(
-        title: Text("Fill Information"),
+        iconTheme: IconThemeData(color: Colors.white),
+        title: Text("Fill Live Information",
+            style: TextStyle(color: Colors.white)),
       ),
       body: ListView(
         children: <Widget>[

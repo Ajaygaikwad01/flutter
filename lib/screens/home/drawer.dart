@@ -15,6 +15,7 @@ class _OurDrawerState extends State<OurDrawer> {
   TextEditingController _uniqueIdController = TextEditingController();
   _dialogbox(BuildContext context, userId) {
     return showDialog(
+        // barrierColor: Colors.white,
         context: context,
         builder: (context) {
           return AlertDialog(

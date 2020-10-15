@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bounce/flutter_bounce.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:provider/provider.dart';
@@ -11,7 +12,7 @@ import 'package:worldetor/screens/home/drawer.dart';
 import 'package:worldetor/screens/home/joingroup.dart';
 import 'package:worldetor/services/database.dart';
 import 'package:worldetor/state/currentuser.dart';
-import 'package:worldetor/utils/ourcontener.dart';
+import 'package:worldetor/utils/ourNewContainer.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -19,6 +20,12 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    setState(() {});
+  }
+
   void _deletedialog(userId, groupId) {
     Alert(
       context: context,
@@ -97,22 +104,31 @@ class _HomeScreenState extends State<HomeScreen> {
     progressdialog = ProgressDialog(context,
         type: ProgressDialogType.Normal, isDismissible: false);
     progressdialog.style(
-      message: "Opening....",
+      message: "Loading....",
     );
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.greenAccent[100],
-        title: Text("home"),
+        // backgroundColor: Colors.greenAccent[100],
+        title: Text(
+          "Home",
+          style: TextStyle(color: Colors.white),
+        ),
+        iconTheme: IconThemeData(color: Colors.white),
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.refresh_rounded),
+            tooltip: "Refresh",
+            icon: Icon(
+              Icons.cached_outlined,
+            ),
             onPressed: () async {
               setState(() {});
               print("Refreshing");
             },
           ),
           PopupMenuButton<String>(
-            icon: Icon(Icons.add),
+            icon: Icon(
+              Icons.add,
+            ),
             onSelected: (String choice) {
               if (choice == Constant.CreateGroup) {
                 Navigator.of(context).push(
@@ -192,23 +208,68 @@ class _HomeScreenState extends State<HomeScreen> {
                                       },
                                     )
                                   ],
-                                  child: Ourcontener(
-                                    child: ListTile(
-                                        title: Column(
-                                          children: [
-                                            Text(snapshot2.data["name"]),
-                                            Text(
-                                                snapshot2.data["Description"] ??
-                                                    "Description"),
-                                          ],
+                                  child: Bounce(
+                                    duration: Duration(milliseconds: 110),
+                                    onPressed: () async {
+                                      setState(() {});
+                                      await progressdialog.show();
+                                      _openGroup(
+                                          context, snapshot2.data.documentID);
+                                    },
+                                    child: OurNewcontener(
+                                      child: Material(
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(15)),
+                                        color: Colors.white,
+                                        // color: Colors.cyanAccent[100],
+                                        // child: InkWell(
+                                        //   splashColor: Colors.grey,
+                                        //   onTap: () {},
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(10.0),
+                                          child: Container(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                    snapshot2.data["name"] ??
+                                                        "Loading..",
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 16)),
+                                                Text(
+                                                    snapshot2.data[
+                                                            "Description"] ??
+                                                        "Description",
+                                                    style: TextStyle(
+                                                        fontSize: 13,
+                                                        color: Colors.black45)),
+                                                SizedBox(
+                                                  height: 25,
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    Text("Created By: ",
+                                                        style: TextStyle(
+                                                            fontSize: 15)),
+                                                    Text(
+                                                        snapshot2.data[
+                                                                "leaderName"] ??
+                                                            "Admin",
+                                                        style: TextStyle(
+                                                            fontSize: 14)),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
                                         ),
-                                        // subtitle:
-                                        //     Text(snapshot.data["Description"] ?? "Description"),
-                                        onTap: () async {
-                                          await progressdialog.show();
-                                          _openGroup(context,
-                                              snapshot2.data.documentID);
-                                        }),
+                                        // ),
+                                      ),
+                                    ),
                                   ),
                                 ),
                               );

@@ -93,14 +93,26 @@ class _OurGroupMemberState extends State<OurGroupMember> {
     return Consumer<CurrentGroup>(
         builder: (BuildContext context, value, Widget child) {
       return Scaffold(
-        appBar: AppBar(title: Text(" Members "), actions: <Widget>[
-          IconButton(
-              icon: Icon(Icons.share),
-              tooltip: "invite",
-              onPressed: () {
-                _share(context);
-              }),
-        ]),
+        appBar: AppBar(
+            title: Text(" Members ", style: TextStyle(color: Colors.white)),
+            iconTheme: IconThemeData(color: Colors.white),
+            actions: <Widget>[
+              Row(
+                children: [
+                  IconButton(
+                      icon: Icon(Icons.share),
+                      tooltip: "invite",
+                      onPressed: () {
+                        _share(context);
+                      }),
+                  Text("Invite  ",
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: Colors.white)),
+                ],
+              ),
+            ]),
         drawer: OurDrawer(),
         body: StreamBuilder(
             stream: Firestore.instance

@@ -26,9 +26,11 @@ class _OurChatPaageState extends State<OurChatPaage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        iconTheme: IconThemeData(color: Colors.white),
         title: Consumer<CurrentGroup>(
           builder: (BuildContext context, value, Widget child) {
-            return Text(" Group Chat");
+            return Text(" Group Chat", style: TextStyle(color: Colors.white));
+            ;
           },
         ),
       ),

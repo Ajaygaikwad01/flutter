@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:worldetor/screens/root/root.dart';
-import 'package:worldetor/screens/splashScreen/splashscreen.dart';
+
 import 'package:worldetor/state/currentuser.dart';
 import 'package:worldetor/utils/theme.dart';
 

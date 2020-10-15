@@ -12,6 +12,9 @@ class OurSplashScreen extends StatelessWidget {
           child: Center(
             child: Column(
               children: [
+                SizedBox(
+                  height: 20,
+                ),
                 AvatarGlow(
                   glowColor: Colors.blue,
                   endRadius: 90.0,

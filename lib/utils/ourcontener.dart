@@ -14,10 +14,10 @@ class Ourcontener extends StatelessWidget {
           boxShadow: [
             BoxShadow(
                 color: Colors.grey,
-                blurRadius: 11.0,
-                spreadRadius: 8.0,
+                blurRadius: 9.0,
+                spreadRadius: 5.0,
                 offset: Offset(
-                  3.5,
+                  6.0,
                   3.5,
                 )),
           ]),

@@ -44,6 +44,7 @@ class _OurAssignmentBoxState extends State<OurAssignmentBox> {
             title: Text("Document List"),
           ),
           body: Container(
+            color: Colors.white70,
             child: StreamBuilder(
               stream: Firestore.instance
                   .collection("groups")

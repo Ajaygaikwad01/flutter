@@ -60,7 +60,9 @@ class _OurAddAssignmentState extends State<OurAddAssignment> {
     );
     return Scaffold(
       appBar: AppBar(
-        title: Text("Add Assignment"),
+        iconTheme: IconThemeData(color: Colors.white),
+        title: Text("Fill Assignment Information",
+            style: TextStyle(color: Colors.white)),
       ),
       body: ListView(
         children: <Widget>[

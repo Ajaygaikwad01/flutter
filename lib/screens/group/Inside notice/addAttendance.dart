@@ -62,7 +62,9 @@ class _OurAddAttendanceState extends State<OurAddAttendance> {
     );
     return Scaffold(
       appBar: AppBar(
-        title: Text("Attendance"),
+        iconTheme: IconThemeData(color: Colors.white),
+        title: Text("Fill Attendance Informtion",
+            style: TextStyle(color: Colors.white)),
       ),
       body: ListView(
         children: <Widget>[
@@ -127,7 +129,7 @@ class _OurAddAttendanceState extends State<OurAddAttendance> {
                       onPressed: () async {
                         await progressdialog.show();
                         OurNotice notice = OurNotice();
-                        notice.noticetype = "attendance";
+                        notice.noticetype = "Attendance";
 
                         notice.name = _noticeTitleController.text;
                         notice.subject = _noticeSubjectController.text;

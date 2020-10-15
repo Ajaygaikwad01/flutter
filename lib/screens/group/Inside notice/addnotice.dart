@@ -27,12 +27,6 @@ class _OurAddNoticeState extends State<OurAddNotice> {
     if (_returnString == "Success") {
       await progressdialog.hide();
       Navigator.pop(context);
-      // Navigator.pushAndRemoveUntil(
-      //     context,
-      //     MaterialPageRoute(
-      //       builder: (context) => OurRoot(),
-      //     ),
-      //     (route) => false);
     }
   }
 
@@ -40,17 +34,16 @@ class _OurAddNoticeState extends State<OurAddNotice> {
 
   TextEditingController _noticeDescriptionController = TextEditingController();
   TextEditingController _noticeSubjectController = TextEditingController();
-  DateTime _selecedtDate = DateTime.now();
-  // DateTime _selecedSendDate = DateTime.now();
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime picked =
-        await DatePicker.showDateTimePicker(context, showTitleActions: true);
-    if (picked != null && picked != _selecedtDate) {
-      setState(() {
-        _selecedtDate = picked;
-      });
-    }
-  }
+  // DateTime _selecedtDate = DateTime.now();
+  // Future<void> _selectDate(BuildContext context) async {
+  //   final DateTime picked =
+  //       await DatePicker.showDateTimePicker(context, showTitleActions: true);
+  //   if (picked != null && picked != _selecedtDate) {
+  //     setState(() {
+  //       _selecedtDate = picked;
+  //     });
+  //   }
+  // }
 
   ProgressDialog progressdialog;
   @override
@@ -62,7 +55,9 @@ class _OurAddNoticeState extends State<OurAddNotice> {
     );
     return Scaffold(
       appBar: AppBar(
-        title: Text("Fill Information"),
+        iconTheme: IconThemeData(color: Colors.white),
+        title: Text("Fill Notice Information",
+            style: TextStyle(color: Colors.white)),
       ),
       body: ListView(
         children: <Widget>[
@@ -107,11 +102,11 @@ class _OurAddNoticeState extends State<OurAddNotice> {
                   SizedBox(
                     height: 20.0,
                   ),
-                  Text(DateFormat.yMMMMd("en_US").format(_selecedtDate)),
-                  Text(DateFormat("H:mm").format(_selecedtDate)),
-                  FlatButton(
-                      onPressed: () => _selectDate(context),
-                      child: Text("Selcet Due Date")),
+                  // Text(DateFormat.yMMMMd("en_US").format(_selecedtDate)),
+                  // Text(DateFormat("H:mm").format(_selecedtDate)),
+                  // FlatButton(
+                  //     onPressed: () => _selectDate(context),
+                  //     child: Text("Selcet Due Date")),
                   RaisedButton(
                       child: Padding(
                         padding:
@@ -133,8 +128,8 @@ class _OurAddNoticeState extends State<OurAddNotice> {
                         notice.subject = _noticeSubjectController.text;
                         notice.description = _noticeDescriptionController.text;
                         // notice.datesend = Timestamp.fromDate(_selecedSendDate);
-                        notice.datecompleted =
-                            Timestamp.fromDate(_selecedtDate);
+                        // notice.datecompleted =
+                        //     Timestamp.fromDate(_selecedtDate);
                         _addnotice(context, notice);
                       })
                 ],

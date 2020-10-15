@@ -34,6 +34,7 @@ class OurDatabase {
       DocumentReference _docref = await _firestore.collection("groups").add({
         'name': groupName,
         'leader': userUid,
+        'leaderName': fullName,
         'members': members,
         'Description': description,
         'groupcreated': Timestamp.now(),

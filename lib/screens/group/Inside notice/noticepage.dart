@@ -1,21 +1,12 @@
-import 'dart:async';
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:intl/intl.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:provider/provider.dart';
-import 'package:rflutter_alert/rflutter_alert.dart';
-import 'package:worldetor/screens/group/Inside%20notice/AssignmentSubmitionView.dart';
-import 'package:worldetor/screens/group/Inside%20notice/attendanceView.dart';
-import 'package:worldetor/screens/group/Inside%20notice/floatingbutton.dart';
-import 'package:worldetor/screens/group/Inside%20notice/live_pages/index.dart';
-import 'package:worldetor/screens/group/Inside%20notice/noticeview.dart';
-import 'package:worldetor/screens/home/drawer.dart';
-import 'package:worldetor/services/database.dart';
 import 'package:worldetor/state/currentgroup.dart';
 import 'package:worldetor/state/currentuser.dart';
-import 'package:worldetor/utils/ourcontener.dart';
 
 class OurNoticePage extends StatefulWidget {
   @override
@@ -23,154 +14,6 @@ class OurNoticePage extends StatefulWidget {
 }
 
 class _OurNoticePageState extends State<OurNoticePage> {
-  void _attendancedialog() {
-    Alert(
-      context: context,
-      type: AlertType.success,
-      title: "Success",
-      desc: "Your Attendance is Submited",
-      buttons: [
-        // DialogButton(
-        //   child: Text(
-        //     "Close",
-        //     style: TextStyle(color: Colors.white, fontSize: 20),
-        //   ),
-        //   onPressed: () => Navigator.pop(context),
-        //   color: Color.fromRGBO(0, 179, 134, 1.0),
-        // ),
-        DialogButton(
-          child: Text(
-            "Close",
-            style: TextStyle(color: Colors.white, fontSize: 20),
-          ),
-          onPressed: () => Navigator.pop(context),
-          gradient: LinearGradient(colors: [
-            Color.fromRGBO(116, 116, 191, 1.0),
-            Color.fromRGBO(52, 138, 199, 1.0)
-          ]),
-        )
-      ],
-    ).show();
-  }
-
-  void _attendance(
-    BuildContext context,
-    String noticeId,
-  ) async {
-    CurrentUser _currentuser = Provider.of<CurrentUser>(context, listen: false);
-
-    String _returnString = await OurDatabase().getattandance(
-        _currentuser.getCurrentUser.groupid,
-        noticeId,
-        _currentuser.getCurrentUser.fullName,
-        _currentuser.getCurrentUser.uid);
-    if (_returnString == "Success") {
-      _attendancedialog();
-      Scaffold.of(context).showSnackBar(new SnackBar(
-          content: new Text("Attenance Submited"),
-          duration: Duration(seconds: 1)));
-    }
-  }
-
-  void _removeNotice(
-    BuildContext context,
-    String noticeId,
-  ) async {
-    CurrentUser _currentuser = Provider.of<CurrentUser>(context, listen: false);
-    String _returnString = await OurDatabase()
-        .removeNotice(_currentuser.getCurrentUser.groupid, noticeId);
-    if (_returnString == "Success") {
-      Scaffold.of(context).showSnackBar(
-          new SnackBar(content: new Text("Notification Dismissed")));
-    }
-  }
-
-  void _openAttendanceAdminView(
-    BuildContext context,
-    String noticeId,
-  ) async {
-    CurrentUser _currentuser = Provider.of<CurrentUser>(context, listen: false);
-    String _returnString = await OurDatabase()
-        .openNotice(_currentuser.getCurrentUser.groupid, noticeId);
-
-    if (_returnString == "Success") {
-      progressdialog.hide();
-      Widget retval;
-      retval = ChangeNotifierProvider(
-        create: (context) => CurrentGroup(),
-        child: OurAttendanceView(),
-      );
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (context) => retval),
-      );
-    }
-  }
-
-  void _openAssignmentAdminView(
-    BuildContext context,
-    String noticeId,
-  ) async {
-    CurrentUser _currentuser = Provider.of<CurrentUser>(context, listen: false);
-    String _returnString = await OurDatabase()
-        .openNotice(_currentuser.getCurrentUser.groupid, noticeId);
-
-    if (_returnString == "Success") {
-      progressdialog.hide();
-      Widget retval;
-      retval = ChangeNotifierProvider(
-        create: (context) => CurrentGroup(),
-        child: OurAssignmentSubmitionView(),
-      );
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (context) => retval),
-      );
-    }
-  }
-
-  void _openNotice(
-    BuildContext context,
-    String noticeId,
-  ) async {
-    CurrentUser _currentuser = Provider.of<CurrentUser>(context, listen: false);
-    String _returnString = await OurDatabase()
-        .openNotice(_currentuser.getCurrentUser.groupid, noticeId);
-
-    if (_returnString == "Success") {
-      progressdialog.hide();
-      Widget retval;
-      retval = ChangeNotifierProvider(
-        create: (context) => CurrentGroup(),
-        child: OurNoticeView(),
-      );
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (context) => retval),
-      );
-    }
-  }
-
-  void _openLive(
-    BuildContext context,
-    String noticeId,
-  ) async {
-    CurrentUser _currentuser = Provider.of<CurrentUser>(context, listen: false);
-    String _returnString = await OurDatabase()
-        .openNotice(_currentuser.getCurrentUser.groupid, noticeId);
-
-    if (_returnString == "Success") {
-      progressdialog.hide();
-      Widget retval;
-      retval = ChangeNotifierProvider(
-        create: (context) => CurrentGroup(),
-        child: IndexPage(),
-      );
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (context) => retval),
-      );
-    }
-  }
-
-  Timer _timer;
-  var time = DateTime.now();
   @override
   void initState() {
     super.initState();
@@ -180,1144 +23,437 @@ class _OurNoticePageState extends State<OurNoticePage> {
         Provider.of<CurrentGroup>(context, listen: false);
     _currentgroup.updateSteteFromDatabase(
         _currentuser.getCurrentUser.groupid, _currentuser.getCurrentUser.uid);
-    // _startTimer();
-    _timer = Timer.periodic(Duration(minutes: 1), (timer) {
-      setState(() {
-        time = DateTime.now();
-      });
-    });
   }
 
-  @override
-  void dispose() {
-    _timer.cancel();
-    super.dispose();
+  Widget _assignmentButton(context, bool value) {
+    return OutlineButton(
+      splashColor: Colors.grey,
+      onPressed: () {
+        value
+            ? Scaffold.of(context).showSnackBar(
+                new SnackBar(content: new Text("Assignment Allready Submited")))
+            : getImage();
+      },
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
+      highlightElevation: 0,
+      borderSide: BorderSide(color: Colors.grey),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            value ? Icon(Icons.assignment_turned_in) : Icon(Icons.assignment),
+            // Icon(Icons.assignment),
+            Padding(
+              padding: const EdgeInsets.only(left: 10),
+              child: Text(
+                'Attach Document',
+                style: TextStyle(
+                  fontSize: 20,
+                  color: Colors.grey,
+                ),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
   }
 
+  List<String> fileurl = List();
+  List<String> _filelocation = List();
+  List<String> _filename = List();
+  TextEditingController _reviewController = TextEditingController();
+  bool loading = false;
+
+  // double _progress;
   ProgressDialog progressdialog;
   @override
   Widget build(BuildContext context) {
-    progressdialog = ProgressDialog(context,
-        type: ProgressDialogType.Normal, isDismissible: true);
-    progressdialog.style(
-      message: "Loading....",
-    );
+    progressdialog = ProgressDialog(context, isDismissible: false);
     return Consumer<CurrentGroup>(
         builder: (BuildContext context, value, Widget child) {
       return Scaffold(
-        appBar: AppBar(
-          title: Text(value.getCurrentGroup.name ?? " loding...."),
-        ),
-        drawer: OurDrawer(),
-        body: Container(
-          child: StreamBuilder(
+        backgroundColor: Color(0xFF21BFBD),
+        body: StreamBuilder(
             stream: Firestore.instance
                 .collection("groups")
                 .document(value.getCurrentGroup.id)
                 .collection("notice")
-                .orderBy("datesend", descending: true)
+                .document(value.getCurrentGroup.currentNoticeid)
                 .snapshots(),
-            builder:
-                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            builder: (BuildContext context,
+                AsyncSnapshot<DocumentSnapshot> snapshot) {
               if (snapshot.data == null) {
                 return Center(
-                  child: Text("empty"),
+                  child: CircularProgressIndicator(),
                 );
               } else {
-                return ListView.builder(
-                    // reverse: true,
-                    itemCount: snapshot.data.documents.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      if (snapshot.data.documents
-                                  .elementAt(index)['noticetype'] ==
-                              "Assignment" ||
-                          snapshot.data.documents
-                                  .elementAt(index)['noticetype'] ==
-                              "notice") {
-                        // var now = DateTime.now();
-                        var date = snapshot.data.documents
-                            .elementAt(index)["datecompleted"]
-                            .toDate();
-                        var diff = date.difference(time).inMinutes;
-                        return Slidable(
-                            actionPane: SlidableDrawerActionPane(),
-                            actionExtentRatio: 0.25,
-                            secondaryActions: <Widget>[
-                              IconSlideAction(
-                                caption: 'Delete',
-                                color: Colors.redAccent,
-                                icon: Icons.delete,
-                                onTap: () {
-                                  _removeNotice(
-                                      context,
-                                      snapshot.data.documents
-                                          .elementAt(index)
-                                          .documentID
-                                          .toString());
-                                },
-                              )
-                            ],
-                            child: Column(
-                              children: <Widget>[
-                                SizedBox(height: 4),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Ourcontener(
-                                    child: Column(
-                                      children: [
-                                        Container(
-                                          child: ListTile(
-                                              title: Column(
-                                                children: [
-                                                  (diff <= 0)
-                                                      ? Container(
-                                                          alignment:
-                                                              Alignment.topLeft,
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            color: Colors
-                                                                .amber[900],
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        20.0),
-                                                          ),
-                                                          child: Row(
-                                                            children: [
-                                                              Icon(Icons
-                                                                  .access_alarms),
-                                                              Text(
-                                                                " " +
-                                                                        snapshot
-                                                                            .data
-                                                                            .documents
-                                                                            .elementAt(index)['noticetype'] +
-                                                                        "  Expired" +
-                                                                        "  !!!" ??
-                                                                    "loading.....",
-                                                                style:
-                                                                    TextStyle(
-                                                                  // color: Colors.white,
-                                                                  fontSize:
-                                                                      20.0,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
-                                                                ),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        )
-                                                      : Container(
-                                                          alignment:
-                                                              Alignment.topLeft,
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            color: Colors.amber,
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        20.0),
-                                                          ),
-                                                          // color: Colors.amber,
-
-                                                          child: Text(
-                                                            "  " +
-                                                                    snapshot
-                                                                        .data
-                                                                        .documents
-                                                                        .elementAt(
-                                                                            index)['noticetype'] +
-                                                                    ":" ??
-                                                                "loading...",
-                                                            style: TextStyle(
-                                                              // color: Colors.white,
-                                                              fontSize: 20.0,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                  Text(
-                                                    snapshot.data.documents
-                                                                .elementAt(
-                                                                    index)[
-                                                            'name'] ??
-                                                        "loading.....",
-                                                    textAlign: TextAlign.center,
-                                                    style: TextStyle(
-                                                      fontSize: 18.0,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              subtitle: Column(
-                                                children: [
-                                                  Row(
-                                                    children: [
-                                                      Text(
-                                                        "Subject: ",
-                                                        style: TextStyle(
-                                                          color: Colors.amber,
-                                                          fontSize: 15.0,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
-                                                      ),
-                                                      Expanded(
-                                                        child: Text(
-                                                          snapshot.data
-                                                                      .documents
-                                                                      .elementAt(
-                                                                          index)[
-                                                                  'subject'] ??
-                                                              "loading.....",
-                                                          style: TextStyle(
-                                                            color: Colors.black,
-                                                            fontSize: 13.0,
-                                                            // fontWeight:
-                                                            //     FontWeight.bold,
-                                                          ),
-                                                        ),
-                                                      )
-                                                    ],
-                                                  ),
-                                                  Visibility(
-                                                    visible: (snapshot
-                                                                .data.documents
-                                                                .elementAt(
-                                                                    index)[
-                                                            'noticetype'] ==
-                                                        "Assignment"),
-                                                    child: Row(
-                                                      children: [
-                                                        Text(
-                                                          "Points: ",
-                                                          style: TextStyle(
-                                                            color: Colors.amber,
-                                                            fontSize: 15.0,
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                          ),
-                                                        ),
-                                                        Text(
-                                                          snapshot.data
-                                                                  .documents
-                                                                  .elementAt(index)[
-                                                                      'point']
-                                                                  .toString() ??
-                                                              "loading.....",
-                                                          style: TextStyle(
-                                                            color: Colors.black,
-                                                            fontSize: 13.0,
-                                                            // fontWeight:
-                                                            // FontWeight.bold,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  Row(
-                                                    children: [
-                                                      Text(
-                                                        "Due On: ",
-                                                        style: TextStyle(
-                                                          color: Colors.amber,
-                                                          fontSize: 15.0,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
-                                                      ),
-                                                      Text(
-                                                        (snapshot.data.documents
-                                                                        .elementAt(
-                                                                            index)[
-                                                                    "datecompleted"] !=
-                                                                null)
-                                                            ? DateFormat.yMMMEd("en_US").format(snapshot
-                                                                    .data
-                                                                    .documents
-                                                                    .elementAt(index)[
-                                                                        "datecompleted"]
-                                                                    .toDate()) +
-                                                                " at- " +
-                                                                DateFormat("H:mm")
-                                                                    .format(snapshot
-                                                                        .data
-                                                                        .documents
-                                                                        .elementAt(
-                                                                            index)["datecompleted"]
-                                                                        .toDate())
-                                                            : "loading.....",
-                                                        style: TextStyle(
-                                                          color: Colors.black,
-                                                          fontSize: 13.0,
-                                                          // fontWeight:
-                                                          //      FontWeight.bold,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  RaisedButton(
-                                                      child: Padding(
-                                                        padding: EdgeInsets
-                                                            .symmetric(
-                                                                vertical: 5,
-                                                                horizontal: 10),
-                                                        child: Text(
-                                                          (diff == 0 ||
-                                                                  diff < 0)
-                                                              ? " !!! EXPIRED !!!"
-                                                              : "Tap for More Info...",
-                                                          style: TextStyle(
-                                                            // fontSize: 20.0,
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      onPressed: () {
-                                                        if (diff <= 0) {
-                                                          Scaffold.of(context)
-                                                              .showSnackBar(
-                                                                  new SnackBar(
-                                                                      content:
-                                                                          new Text(
-                                                                              "Notification is Expired")));
-                                                        } else {
-                                                          progressdialog.show();
-                                                          _openNotice(
-                                                              context,
-                                                              snapshot.data
-                                                                  .documents
-                                                                  .elementAt(
-                                                                      index)
-                                                                  .documentID
-                                                                  .toString());
-                                                        }
-                                                      }),
-                                                ],
-                                              ),
-                                              onTap: () {
-                                                CurrentUser _currentuser =
-                                                    Provider.of<CurrentUser>(
-                                                        context,
-                                                        listen: false);
-                                                if (value.getCurrentGroup
-                                                        .leader ==
-                                                    _currentuser
-                                                        .getCurrentUser.uid) {
-                                                  progressdialog.show();
-                                                  if (snapshot.data.documents
-                                                              .elementAt(index)[
-                                                          'noticetype'] ==
-                                                      "Assignment") {
-                                                    _openAssignmentAdminView(
-                                                        context,
-                                                        snapshot.data.documents
-                                                            .elementAt(index)
-                                                            .documentID
-                                                            .toString());
-                                                  } else {
-                                                    _openNotice(
-                                                        context,
-                                                        snapshot.data.documents
-                                                            .elementAt(index)
-                                                            .documentID
-                                                            .toString());
-                                                  }
-                                                } else {
-                                                  if (diff <= 0) {
-                                                    Scaffold.of(context)
-                                                        .showSnackBar(new SnackBar(
-                                                            content: new Text(
-                                                                "Notification is Expired only Admin can Access")));
-                                                  } else {
-                                                    progressdialog.show();
-                                                    _openNotice(
-                                                        context,
-                                                        snapshot.data.documents
-                                                            .elementAt(index)
-                                                            .documentID
-                                                            .toString());
-                                                  }
-                                                }
-                                              }),
-                                        ),
-                                        Padding(
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal: 10),
-                                          child: Container(
-                                            // alignment: Alignment.center,
-                                            color: Colors.black12,
-                                            child: Row(
-                                              children: [
-                                                Text(
-                                                  (snapshot.data.documents
-                                                                  .elementAt(
-                                                                      index)[
-                                                              "datesend"] !=
-                                                          null)
-                                                      ? DateFormat.yMMMMEEEEd(
-                                                              "en_US")
-                                                          .format(snapshot
-                                                              .data.documents
-                                                              .elementAt(index)[
-                                                                  "datesend"]
-                                                              .toDate())
-                                                      : "loading...",
-                                                  style: TextStyle(
-                                                    // color: Colors.black12,
-                                                    fontSize: 13.0,
-                                                    // fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                                Spacer(),
-                                                Text(
-                                                  (DateFormat("H:mm").format(snapshot
-                                                              .data.documents
-                                                              .elementAt(index)[
-                                                                  "datesend"]
-                                                              .toDate()) !=
-                                                          null)
-                                                      ? DateFormat("H:mm")
-                                                          .format(snapshot
-                                                              .data.documents
-                                                              .elementAt(index)[
-                                                                  "datesend"]
-                                                              .toDate())
-                                                      : "loading...",
-                                                  style: TextStyle(
-                                                    // color: Colors.black26,
-                                                    fontSize: 13.0,
-                                                    // fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ],
+                if (snapshot.data.data == null) {
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                } else {
+                  return ListView(
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.only(top: 15.0, left: 10.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            IconButton(
+                              icon: Icon(Icons.arrow_back_ios),
+                              color: Colors.white,
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                            Container(
+                                width: 125.0,
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: <Widget>[
+                                    IconButton(
+                                      icon: Icon(Icons.cached),
+                                      color: Colors.white,
+                                      onPressed: () {
+                                        setState(() {});
+                                      },
                                     ),
-                                  ),
-                                ),
-                              ],
-                            ));
-                      } else if (snapshot.data.documents
-                              .elementAt(index)['noticetype'] ==
-                          "attendance") {
-                        var date = snapshot.data.documents
-                            .elementAt(index)["datecompleted"]
-                            .toDate();
-                        var diff = date.difference(time).inMinutes;
-                        return Slidable(
-                          actionPane: SlidableDrawerActionPane(),
-                          actionExtentRatio: 0.25,
-                          secondaryActions: <Widget>[
-                            IconSlideAction(
-                              caption: 'Delete',
-                              color: Colors.redAccent,
-                              icon: Icons.delete,
-                              onTap: () {
-                                _removeNotice(
-                                    context,
-                                    snapshot.data.documents
-                                        .elementAt(index)
-                                        .documentID
-                                        .toString());
-                              },
+                                    IconButton(
+                                      icon: Icon(Icons.menu),
+                                      color: Colors.white,
+                                      onPressed: () {},
+                                    )
+                                  ],
+                                ))
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 25.0),
+                      Padding(
+                        padding: EdgeInsets.only(left: 40.0),
+                        child: Row(
+                          children: <Widget>[
+                            Text(
+                                snapshot.data['noticetype'] + ':' ??
+                                    "Loading...",
+                                style: TextStyle(
+                                    // fontFamily: 'Montserrat',
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 25.0)),
+                            SizedBox(width: 10.0),
+                            Expanded(
+                              child: Text(snapshot.data['name'] ?? "Loading...",
+                                  style: TextStyle(
+                                      // fontFamily: 'Montserrat',
+                                      color: Colors.white,
+                                      fontSize: 24.0)),
                             )
                           ],
-                          child: Column(
-                            children: <Widget>[
-                              SizedBox(height: 4),
-                              Padding(
-                                padding: const EdgeInsets.all(10.0),
-                                child: Ourcontener(
-                                  child: Column(
-                                    children: [
-                                      Container(
-                                        child: ListTile(
-                                            title: Column(
-                                              children: [
-                                                (diff <= 0)
-                                                    ? Container(
-                                                        alignment:
-                                                            Alignment.topLeft,
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          color:
-                                                              Colors.amber[900],
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      20.0),
-                                                        ),
-                                                        // color: Colors.amber,
-
-                                                        child: Row(
-                                                          children: [
-                                                            Icon(Icons
-                                                                .access_alarms),
-                                                            Text(
-                                                              " " +
-                                                                      snapshot
-                                                                          .data
-                                                                          .documents
-                                                                          .elementAt(
-                                                                              index)['noticetype'] +
-                                                                      "  Expired" +
-                                                                      "  !!!" ??
-                                                                  "loading.....",
-                                                              style: TextStyle(
-                                                                // color: Colors.white,
-                                                                fontSize: 20.0,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold,
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      )
-                                                    : Container(
-                                                        color: Colors.amber,
-                                                        alignment:
-                                                            AlignmentDirectional
-                                                                .topStart,
-                                                        child: Text(
-                                                          " " +
-                                                                  snapshot.data
-                                                                      .documents
-                                                                      .elementAt(
-                                                                          index)['noticetype'] +
-                                                                  ":" ??
-                                                              "loading.....",
-                                                          style: TextStyle(
-                                                            // color: Colors.white,
-                                                            fontSize: 20.0,
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                Text(
-                                                  snapshot.data.documents
-                                                          .elementAt(
-                                                              index)['name'] ??
-                                                      "loading.....",
-                                                  textAlign: TextAlign.center,
-                                                  style: TextStyle(
-                                                    fontSize: 18.0,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            subtitle: Column(
-                                              children: [
-                                                Row(
-                                                  children: [
-                                                    Text(
-                                                      "Subject: ",
-                                                      style: TextStyle(
-                                                        color: Colors.amber,
-                                                        fontSize: 15.0,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                      ),
-                                                    ),
-                                                    Expanded(
-                                                      child: Text(
-                                                        snapshot.data.documents
-                                                                    .elementAt(
-                                                                        index)[
-                                                                'subject'] ??
-                                                            "loading.....",
-                                                        style: TextStyle(
-                                                          color: Colors.black,
-                                                          fontSize: 13.0,
-                                                          // fontWeight:
-                                                          //     FontWeight.bold,
-                                                        ),
-                                                      ),
-                                                    )
-                                                  ],
-                                                ),
-                                                Row(
-                                                  children: [
-                                                    Text(
-                                                      "Due On: ",
-                                                      style: TextStyle(
-                                                        color: Colors.amber,
-                                                        fontSize: 15.0,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                      ),
-                                                    ),
-                                                    Text(
-                                                      (snapshot.data.documents
-                                                                      .elementAt(index)[
-                                                                  "datecompleted"] !=
-                                                              null)
-                                                          ? DateFormat.yMMMEd("en_US")
-                                                                  .format(snapshot
-                                                                      .data
-                                                                      .documents
-                                                                      .elementAt(index)[
-                                                                          "datecompleted"]
-                                                                      .toDate()) +
-                                                              " at- " +
-                                                              DateFormat("H:mm")
-                                                                  .format(snapshot
-                                                                      .data
-                                                                      .documents
-                                                                      .elementAt(
-                                                                          index)["datecompleted"]
-                                                                      .toDate())
-                                                          : "loading.....",
-                                                      style: TextStyle(
-                                                        color: Colors.black,
-                                                        fontSize: 13.0,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                (diff > 0)
-                                                    ? Row(
-                                                        children: [
-                                                          Spacer(),
-                                                          IconButton(
-                                                              splashColor:
-                                                                  Colors.grey,
-                                                              icon: Icon(
-                                                                Icons
-                                                                    .check_circle,
-                                                                color: Colors
-                                                                    .blue[300],
-                                                                size: 35,
-                                                              ),
-                                                              onPressed: () {
-                                                                CurrentUser
-                                                                    _currentuser =
-                                                                    Provider.of<
-                                                                            CurrentUser>(
-                                                                        context,
-                                                                        listen:
-                                                                            false);
-                                                                if (_currentuser
-                                                                        .getCurrentUser
-                                                                        .uniqueId ==
-                                                                    null) {
-                                                                  Scaffold.of(
-                                                                          context)
-                                                                      .showSnackBar(new SnackBar(
-                                                                          content:
-                                                                              new Text("Failed Please Add uniqueId in profile")));
-                                                                } else {
-                                                                  _attendance(
-                                                                      context,
-                                                                      snapshot
-                                                                          .data
-                                                                          .documents
-                                                                          .elementAt(
-                                                                              index)
-                                                                          .documentID
-                                                                          .toString());
-                                                                }
-                                                              }),
-                                                          SizedBox(
-                                                            width: 30,
-                                                          ),
-                                                          IconButton(
-                                                              splashColor:
-                                                                  Colors.grey,
-                                                              icon: Icon(
-                                                                Icons.clear,
-                                                                color: Colors
-                                                                    .red[300],
-                                                                size: 35,
-                                                              ),
-                                                              onPressed: null),
-                                                          Spacer(),
-                                                        ],
-                                                      )
-                                                    : Text(""),
-                                                Row(
-                                                  children: [
-                                                    Spacer(),
-                                                    Text(
-                                                      "present",
-                                                      style: TextStyle(
-                                                          color:
-                                                              Colors.blue[300]),
-                                                    ),
-                                                    SizedBox(
-                                                      width: 30,
-                                                    ),
-                                                    Text("Absent",
-                                                        style: TextStyle(
-                                                            color: Colors
-                                                                .red[300])),
-                                                    Spacer(),
-                                                  ],
-                                                )
-                                              ],
-                                            ),
-                                            onTap: () async {
-                                              // progressdialog.show();
-                                              CurrentUser _currentuser =
-                                                  Provider.of<CurrentUser>(
-                                                      context,
-                                                      listen: false);
-
-                                              if (value
-                                                      .getCurrentGroup.leader ==
-                                                  _currentuser
-                                                      .getCurrentUser.uid) {
-                                                progressdialog.show();
-                                                _openAttendanceAdminView(
-                                                    context,
-                                                    snapshot.data.documents
-                                                        .elementAt(index)
-                                                        .documentID
-                                                        .toString());
-                                              }
-                                            }),
+                        ),
+                      ),
+                      SizedBox(height: 40.0),
+                      Container(
+                        height: MediaQuery.of(context).size.height - 185.0,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius:
+                              BorderRadius.only(topLeft: Radius.circular(75.0)),
+                        ),
+                        child: ListView(
+                          // primary: false,
+                          padding:
+                              EdgeInsets.only(left: 25.0, right: 20.0, top: 15),
+                          children: <Widget>[
+                            Expanded(
+                              child: Container(
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      "Subject: ",
+                                      style: TextStyle(
+                                        color: Colors.redAccent,
+                                        fontSize: 17.0,
+                                        fontWeight: FontWeight.bold,
                                       ),
-                                      Padding(
+                                    ),
+                                    Expanded(
+                                      child: Text(
+                                        snapshot.data['subject'] ??
+                                            "Loading...",
+                                        style: TextStyle(
+                                          fontSize: 15.0,
+                                          // fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 5,
+                            ),
+                            Expanded(
+                              child: Container(
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      "Description:",
+                                      style: TextStyle(
+                                        color: Colors.redAccent,
+                                        fontSize: 17.0,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Text(
+                                      "-    ",
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Container(
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        snapshot.data['description'] ??
+                                            "Loading...",
+                                        style: TextStyle(
+                                          fontSize: 15.0,
+                                          // fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 15,
+                            ),
+                            (snapshot.data['noticetype'] == "Assignment")
+                                ? _assignmentButton(
+                                    context, value.getDoneWithCurrentAssignment)
+                                : Text(" "),
+                            SizedBox(
+                              height: 15,
+                            ),
+                            (_filename.length != null)
+                                ? Visibility(
+                                    visible:
+                                        (value.getDoneWithCurrentAssignment !=
+                                            true),
+                                    child: Expanded(
+                                      child: Padding(
                                         padding: EdgeInsets.symmetric(
-                                            horizontal: 10),
-                                        child: Container(
-                                          color: Colors.black12,
-                                          child: Row(
-                                            children: [
-                                              Text(
-                                                (snapshot.data.documents
-                                                                .elementAt(
-                                                                    index)[
-                                                            "datesend"] !=
-                                                        null)
-                                                    ? " " +
-                                                        DateFormat.yMMMMEEEEd(
-                                                                "en_US")
-                                                            .format(snapshot
-                                                                .data.documents
-                                                                .elementAt(index)[
-                                                                    "datesend"]
-                                                                .toDate())
-                                                    : "loading...",
-                                                style: TextStyle(
-                                                  fontSize: 13.0,
-                                                ),
-                                              ),
-                                              Spacer(),
-                                              Text(
-                                                (DateFormat("H:mm").format(
-                                                            snapshot
-                                                                .data.documents
-                                                                .elementAt(index)[
-                                                                    "datesend"]
-                                                                .toDate()) !=
-                                                        null)
-                                                    ? DateFormat("H:mm").format(
-                                                            snapshot
-                                                                .data.documents
-                                                                .elementAt(index)[
-                                                                    "datesend"]
-                                                                .toDate()) +
-                                                        " "
-                                                    : "loading...",
-                                                style: TextStyle(
-                                                  fontSize: 13.0,
-                                                ),
-                                              ),
-                                            ],
+                                            vertical: 5, horizontal: 30),
+                                        child: ListView.builder(
+                                          shrinkWrap: true,
+                                          // scrollDirection: Axis.horizontal,
+                                          itemCount: _filename.length,
+                                          itemBuilder: (BuildContext context,
+                                                  int index) =>
+                                              Card(
+                                            color: Colors.white30,
+                                            child: Center(
+                                                child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Expanded(
+                                                    child: Text("    " +
+                                                        _filename[index])),
+                                                IconButton(
+                                                    icon: Icon(
+                                                      Icons.cancel,
+                                                    ),
+                                                    onPressed: () async {
+                                                      setState(() {
+                                                        loading = !loading;
+                                                      });
+                                                      _filename.removeAt(index);
+                                                      fileurl.removeAt(index);
+                                                      // await FirebaseStorage.instance
+                                                      //     .ref()
+                                                      //     .child(
+                                                      //         _filelocation[index])
+                                                      //     .delete();
+                                                      // _filelocation.removeAt(index);
+                                                      // print();
+                                                    })
+                                              ],
+                                            )),
                                           ),
                                         ),
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  )
+                                : Text(""),
+                            Visibility(
+                              visible: (value.getDoneWithCurrentAssignment !=
+                                      true &&
+                                  snapshot.data['noticetype'] == "Assignment"),
+                              child: Expanded(
+                                child: TextFormField(
+                                  controller: _reviewController,
+                                  decoration: InputDecoration(
+                                      hintText: "Review/Id/Comment"),
+                                  maxLength: 30,
                                 ),
                               ),
-                            ],
-                          ),
-                        );
-                      } else if (snapshot.data.documents
-                              .elementAt(index)['noticetype'] ==
-                          "Live") {
-                        var date = snapshot.data.documents
-                            .elementAt(index)["datecompleted"]
-                            .toDate();
-                        var diff = date.difference(time).inMinutes;
-                        return Slidable(
-                          actionPane: SlidableDrawerActionPane(),
-                          actionExtentRatio: 0.25,
-                          secondaryActions: <Widget>[
-                            IconSlideAction(
-                              caption: 'Delete',
-                              color: Colors.redAccent,
-                              icon: Icons.delete,
-                              onTap: () {
-                                _removeNotice(
-                                    context,
-                                    snapshot.data.documents
-                                        .elementAt(index)
-                                        .documentID
-                                        .toString());
-                              },
-                            )
+                            ),
+                            Visibility(
+                              visible: (value.getDoneWithCurrentAssignment !=
+                                      true &&
+                                  snapshot.data['noticetype'] == "Assignment"),
+                              child: Expanded(
+                                child: RaisedButton(
+                                    child: Padding(
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: 10, horizontal: 30),
+                                      child: Text(
+                                        "Send",
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 20),
+                                      ),
+                                    ),
+                                    onPressed: () async {
+                                      String uid = Provider.of<CurrentUser>(
+                                              context,
+                                              listen: false)
+                                          .getCurrentUser
+                                          .uid;
+
+                                      String userName =
+                                          Provider.of<CurrentUser>(context,
+                                                  listen: false)
+                                              .getCurrentUser
+                                              .fullName;
+
+                                      // List<String> selectedfile = List();
+                                      // selectedfile.add(fileLocation);
+
+                                      Provider.of<CurrentGroup>(context,
+                                              listen: false)
+                                          .finishedAssignment(
+                                              uid,
+                                              userName,
+                                              _reviewController.text,
+                                              fileurl,
+                                              _filename);
+
+                                      // Navigator.of(context).pop();
+                                    }),
+                              ),
+                            ),
+                            Visibility(
+                              visible: (value.getDoneWithCurrentAssignment !=
+                                      true &&
+                                  snapshot.data['noticetype'] == "Assignment"),
+                              child: Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(10.0),
+                                  child:
+                                      Text("Don't Forgot to press SEND button",
+                                          style: TextStyle(
+                                            color: Colors.redAccent,
+                                            fontWeight: FontWeight.bold,
+                                          )),
+                                ),
+                              ),
+                            ),
                           ],
-                          child: Column(
-                            children: <Widget>[
-                              SizedBox(height: 4),
-                              Padding(
-                                padding: const EdgeInsets.all(10.0),
-                                child: Ourcontener(
-                                  child: Column(
-                                    children: [
-                                      Container(
-                                        child: ListTile(
-                                            title: Column(
-                                              children: [
-                                                (diff <= 0)
-                                                    ? Container(
-                                                        alignment:
-                                                            Alignment.topLeft,
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          color:
-                                                              Colors.amber[900],
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      20.0),
-                                                        ),
-                                                        // color: Colors.amber,
-
-                                                        child: Row(
-                                                          children: [
-                                                            Icon(Icons
-                                                                .access_alarms),
-                                                            Text(
-                                                              " " +
-                                                                      snapshot
-                                                                          .data
-                                                                          .documents
-                                                                          .elementAt(
-                                                                              index)['noticetype'] +
-                                                                      "  Expired" +
-                                                                      "  !!!" ??
-                                                                  "loading.....",
-                                                              style: TextStyle(
-                                                                // color: Colors.white,
-                                                                fontSize: 20.0,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold,
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      )
-                                                    : Container(
-                                                        color: Colors.amber,
-                                                        alignment:
-                                                            AlignmentDirectional
-                                                                .topStart,
-                                                        child: Text(
-                                                          " " +
-                                                                  snapshot.data
-                                                                      .documents
-                                                                      .elementAt(
-                                                                          index)['noticetype'] +
-                                                                  ":" ??
-                                                              "loading.....",
-                                                          style: TextStyle(
-                                                            // color: Colors.white,
-                                                            fontSize: 20.0,
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                Text(
-                                                  snapshot.data.documents
-                                                          .elementAt(
-                                                              index)['name'] ??
-                                                      "loading.....",
-                                                  textAlign: TextAlign.center,
-                                                  style: TextStyle(
-                                                    fontSize: 18.0,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            subtitle: Column(
-                                              children: [
-                                                Row(
-                                                  children: [
-                                                    Text(
-                                                      "Subject: ",
-                                                      style: TextStyle(
-                                                        color: Colors.amber,
-                                                        fontSize: 15.0,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                      ),
-                                                    ),
-                                                    Expanded(
-                                                      child: Text(
-                                                        snapshot.data.documents
-                                                                    .elementAt(
-                                                                        index)[
-                                                                'subject'] ??
-                                                            "loading.....",
-                                                        style: TextStyle(
-                                                          color: Colors.black,
-                                                          fontSize: 13.0,
-                                                          // fontWeight:
-                                                          //     FontWeight.bold,
-                                                        ),
-                                                      ),
-                                                    )
-                                                  ],
-                                                ),
-                                                Row(
-                                                  children: [
-                                                    Text(
-                                                      "Due On: ",
-                                                      style: TextStyle(
-                                                        color: Colors.amber,
-                                                        fontSize: 15.0,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                      ),
-                                                    ),
-                                                    Text(
-                                                      (snapshot.data.documents
-                                                                      .elementAt(index)[
-                                                                  "datecompleted"] !=
-                                                              null)
-                                                          ? DateFormat.yMMMEd("en_US")
-                                                                  .format(snapshot
-                                                                      .data
-                                                                      .documents
-                                                                      .elementAt(index)[
-                                                                          "datecompleted"]
-                                                                      .toDate()) +
-                                                              " at- " +
-                                                              DateFormat("H:mm")
-                                                                  .format(snapshot
-                                                                      .data
-                                                                      .documents
-                                                                      .elementAt(
-                                                                          index)["datecompleted"]
-                                                                      .toDate())
-                                                          : "loading.....",
-                                                      style: TextStyle(
-                                                        color: Colors.black,
-                                                        fontSize: 13.0,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                // (diff > 0)
-                                                //     ? Row(
-                                                //         children: [
-                                                //           Spacer(),
-                                                //           IconButton(
-                                                //               splashColor:
-                                                //                   Colors.grey,
-                                                //               icon: Icon(
-                                                //                 Icons
-                                                //                     .check_circle,
-                                                //                 color: Colors
-                                                //                     .blue[300],
-                                                //                 size: 35,
-                                                //               ),
-                                                //               onPressed: () {
-                                                //                 CurrentUser
-                                                //                     _currentuser =
-                                                //                     Provider.of<
-                                                //                             CurrentUser>(
-                                                //                         context,
-                                                //                         listen:
-                                                //                             false);
-                                                //                 if (_currentuser
-                                                //                         .getCurrentUser
-                                                //                         .uniqueId ==
-                                                //                     null) {
-                                                //                   Scaffold.of(
-                                                //                           context)
-                                                //                       .showSnackBar(new SnackBar(
-                                                //                           content:
-                                                //                               new Text("Failed Please Add uniqueId in profile")));
-                                                //                 } else {
-                                                //                   _attendance(
-                                                //                       context,
-                                                //                       snapshot
-                                                //                           .data
-                                                //                           .documents
-                                                //                           .elementAt(
-                                                //                               index)
-                                                //                           .documentID
-                                                //                           .toString());
-                                                //                 }
-                                                //               }),
-                                                //           SizedBox(
-                                                //             width: 30,
-                                                //           ),
-                                                //           IconButton(
-                                                //               splashColor:
-                                                //                   Colors.grey,
-                                                //               icon: Icon(
-                                                //                 Icons.clear,
-                                                //                 color: Colors
-                                                //                     .red[300],
-                                                //                 size: 35,
-                                                //               ),
-                                                //               onPressed: null),
-                                                //           Spacer(),
-                                                //         ],
-                                                //       )
-                                                //     : Text(""),
-                                                // Row(
-                                                //   children: [
-                                                //     Spacer(),
-                                                //     Text(
-                                                //       "present",
-                                                //       style: TextStyle(
-                                                //           color:
-                                                //               Colors.blue[300]),
-                                                //     ),
-                                                //     SizedBox(
-                                                //       width: 30,
-                                                //     ),
-                                                //     Text("Absent",
-                                                //         style: TextStyle(
-                                                //             color: Colors
-                                                //                 .red[300])),
-                                                //     Spacer(),
-                                                //   ],
-                                                // )
-                                              ],
-                                            ),
-                                            onTap: () async {
-                                              if (diff <= 0) {
-                                                Scaffold.of(context)
-                                                    .showSnackBar(new SnackBar(
-                                                        content: new Text(
-                                                            "Notification is Expired")));
-                                              } else {
-                                                progressdialog.show();
-                                                _openLive(
-                                                    context,
-                                                    snapshot.data.documents
-                                                        .elementAt(index)
-                                                        .documentID
-                                                        .toString());
-                                              }
-
-                                              // progressdialog.show();
-                                              // CurrentUser _currentuser =
-                                              //     Provider.of<CurrentUser>(
-                                              //         context,
-                                              //         listen: false);
-
-                                              // if (value
-                                              //         .getCurrentGroup.leader ==
-                                              //     _currentuser
-                                              //         .getCurrentUser.uid) {
-                                              //   progressdialog.show();
-                                              //   _openAttendanceAdminView(
-                                              //       context,
-                                              //       snapshot.data.documents
-                                              //           .elementAt(index)
-                                              //           .documentID
-                                              //           .toString());
-                                              // }
-                                            }),
-                                      ),
-                                      Padding(
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 10),
-                                        child: Container(
-                                          color: Colors.black12,
-                                          child: Row(
-                                            children: [
-                                              Text(
-                                                (snapshot.data.documents
-                                                                .elementAt(
-                                                                    index)[
-                                                            "datesend"] !=
-                                                        null)
-                                                    ? " " +
-                                                        DateFormat.yMMMMEEEEd(
-                                                                "en_US")
-                                                            .format(snapshot
-                                                                .data.documents
-                                                                .elementAt(index)[
-                                                                    "datesend"]
-                                                                .toDate())
-                                                    : "loading...",
-                                                style: TextStyle(
-                                                  fontSize: 13.0,
-                                                ),
-                                              ),
-                                              Spacer(),
-                                              Text(
-                                                (DateFormat("H:mm").format(
-                                                            snapshot
-                                                                .data.documents
-                                                                .elementAt(index)[
-                                                                    "datesend"]
-                                                                .toDate()) !=
-                                                        null)
-                                                    ? DateFormat("H:mm").format(
-                                                            snapshot
-                                                                .data.documents
-                                                                .elementAt(index)[
-                                                                    "datesend"]
-                                                                .toDate()) +
-                                                        " "
-                                                    : "loading...",
-                                                style: TextStyle(
-                                                  fontSize: 13.0,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      } else {
-                        return Text("Empty");
-                      }
-                    });
+                        ),
+                      )
+                    ],
+                  );
+                }
               }
-            },
-          ),
-        ),
-        floatingActionButton: Consumer<CurrentUser>(
-            builder: (BuildContext context, value2, Widget child) {
-          if (value.getCurrentGroup.leader == value2.getCurrentUser.uid) {
-            return OurFloatButton();
-          } else {
-            return Text("");
-          }
-        }),
+            }),
       );
     });
+  }
+
+  Future getImage() async {
+    File file = await FilePicker.getFile(type: FileType.any);
+
+    if (file != null) {
+      progressdialog.show();
+      progressdialog.update(message: "Uploding ....");
+    }
+    String filename = file.path.split("/").last;
+
+    _uploadImagetoFirebase(file, filename);
+  }
+
+  Future<void> _uploadImagetoFirebase(File image, String filename) async {
+    try {
+      CurrentGroup _currentgroup =
+          Provider.of<CurrentGroup>(context, listen: false);
+      CurrentUser _currentuser =
+          Provider.of<CurrentUser>(context, listen: false);
+
+      // int randomnumber = Random().nextInt(1000);
+      String imageLocation =
+          '${_currentgroup.getCurrentGroup.name}/${_currentgroup.getCurrentGroup.currentNoticeid}/${_currentuser.getCurrentUser.uid}/$filename';
+      setState(() {
+        _filelocation.add(imageLocation);
+      });
+
+      // print(imageLocation);
+      final StorageReference storageReference =
+          FirebaseStorage().ref().child(imageLocation);
+      final StorageUploadTask uploadTask = storageReference.putFile(image);
+
+      await uploadTask.onComplete;
+      // uploadTask.events.listen((event) {
+      //   setState(() {
+      //     _progress = event.snapshot.bytesTransferred.toDouble() /
+      //         event.snapshot.totalByteCount.toDouble();
+      //   });
+      // });
+      // print(_progress);
+      // progressdialog.update(
+      //     message: "Uploading..${(_progress).toStringAsFixed(2)}%");
+      _addPathtodatabase(imageLocation, filename);
+      // print("object");
+
+      progressdialog.update(message: "Done.. Press Send Button !!");
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  String len;
+  void _addPathtodatabase(String location, String filename) async {
+    try {
+      final ref = FirebaseStorage().ref().child(location);
+      var imageString = await ref.getDownloadURL();
+
+      String retval = await ref.getName();
+      print(retval);
+      if (imageString != null) {
+        setState(() {
+          fileurl.add(imageString);
+          loading = !loading;
+          _filename.add(filename);
+        });
+
+        progressdialog.hide().then((isHidden) {
+          // print(isHidden);
+        });
+      }
+    } catch (e) {
+      print(e);
+    }
   }
 }

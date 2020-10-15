@@ -26,6 +26,14 @@ class CurrentUser extends ChangeNotifier {
     return retval;
   }
 
+  void onresetPassowrd(email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+    } catch (e) {
+      print(e);
+    }
+  }
+
   Future<String> signOut() async {
     String retval = "Error";
     try {
