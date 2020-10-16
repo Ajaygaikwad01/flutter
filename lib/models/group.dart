@@ -4,6 +4,7 @@ class OurGroup {
   String id;
   String name;
   String leader;
+  String leaderName;
   String description;
   List<String> members;
   Timestamp groupCreated;
@@ -15,6 +16,7 @@ class OurGroup {
     this.id,
     this.name,
     this.leader,
+    this.leaderName,
     this.description,
     this.members,
     this.groupCreated,

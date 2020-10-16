@@ -27,7 +27,7 @@ class _CallPageState extends State<CallPage> {
   bool muted = false;
   bool hidecam = false;
   RtcEngine _engine;
-
+  TextEditingController _chatController = TextEditingController();
   @override
   void dispose() {
     // clear users
@@ -58,6 +58,7 @@ class _CallPageState extends State<CallPage> {
 
     await _initAgoraRtcEngine();
     _addAgoraEventHandlers();
+    // ignore: deprecated_member_use
     await _engine.enableWebSdkInteroperability(true);
     VideoEncoderConfiguration configuration = VideoEncoderConfiguration();
     configuration.dimensions = VideoDimensions(1920, 1080);
@@ -174,12 +175,12 @@ class _CallPageState extends State<CallPage> {
   }
 
   /// Toolbar layout
-  Widget _toolbar() {
+  Widget get _toolbar {
     if (widget.role == ClientRole.Audience) return Container();
     final views = _getRenderViews();
     return Container(
       alignment: Alignment.bottomRight,
-      padding: const EdgeInsets.symmetric(vertical: 20),
+      padding: const EdgeInsets.symmetric(vertical: 10),
       child: Column(
         children: [
           Row(
@@ -259,6 +260,38 @@ class _CallPageState extends State<CallPage> {
               ],
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Flexible(
+                    child: TextFormField(
+                  controller: _chatController,
+                  decoration: InputDecoration(
+                      prefixIcon: Icon(Icons.chat), hintText: "Chat"),
+                )),
+                // RawMaterialButton(
+                //   onPressed: () {
+                //     print("send");
+                //   },
+                //   child: Icon(
+                //     Icons.send,
+                //     color: Colors.blueAccent,
+                //     size: 22.0,
+                //   ),
+                //   shape: CircleBorder(),
+                //   elevation: 2.0,
+                //   fillColor: Colors.white,
+                //   // padding: const EdgeInsets.all(12.0),
+                // )
+                IconButton(
+                    icon: Icon(Icons.send, color: Colors.blueAccent, size: 35),
+                    onPressed: () {
+                      print("send");
+                    })
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -267,12 +300,13 @@ class _CallPageState extends State<CallPage> {
   /// Info panel to show logs
   Widget _panel() {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 50),
-      alignment: Alignment.bottomCenter,
+      padding: const EdgeInsets.symmetric(vertical: 30),
+      alignment: Alignment.bottomLeft,
       child: FractionallySizedBox(
         heightFactor: 0.5,
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 48),
+          // alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(vertical: 50),
           child: ListView.builder(
             reverse: true,
             itemCount: _infoStrings.length,
@@ -340,7 +374,8 @@ class _CallPageState extends State<CallPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Live Stream'),
+        iconTheme: IconThemeData(color: Colors.white),
+        title: Text('Live Stream', style: TextStyle(color: Colors.white)),
       ),
       backgroundColor: Colors.black,
       body: Center(
@@ -348,7 +383,7 @@ class _CallPageState extends State<CallPage> {
           children: <Widget>[
             _viewRows(),
             _panel(),
-            _toolbar(),
+            _toolbar,
           ],
         ),
       ),

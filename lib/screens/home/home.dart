@@ -103,9 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     progressdialog = ProgressDialog(context,
         type: ProgressDialogType.Normal, isDismissible: false);
-    progressdialog.style(
-      message: "Loading....",
-    );
+    progressdialog.style(message: "Loading...");
     return Scaffold(
       appBar: AppBar(
         // backgroundColor: Colors.greenAccent[100],
@@ -212,6 +210,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     duration: Duration(milliseconds: 110),
                                     onPressed: () async {
                                       setState(() {});
+
                                       await progressdialog.show();
                                       _openGroup(
                                           context, snapshot2.data.documentID);

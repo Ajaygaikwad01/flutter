@@ -141,6 +141,7 @@ class OurDatabase {
       retval.id = groupId;
       retval.name = _docSnapshot.data["name"];
       retval.leader = _docSnapshot.data["leader"];
+      retval.leaderName = _docSnapshot.data["leaderName"];
       retval.description = _docSnapshot.data["Description"];
       retval.members = List<String>.from(_docSnapshot.data["members"]);
       retval.groupCreated = _docSnapshot.data["groupCreated"];

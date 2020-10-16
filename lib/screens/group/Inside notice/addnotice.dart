@@ -1,14 +1,8 @@
 import 'dart:ui';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
-import 'package:intl/intl.dart';
 import 'package:progress_dialog/progress_dialog.dart';
-
 import 'package:provider/provider.dart';
 import 'package:worldetor/models/notice.dart';
-
 import 'package:worldetor/services/database.dart';
 import 'package:worldetor/state/currentuser.dart';
 import 'package:worldetor/utils/ourcontener.dart';
@@ -123,7 +117,7 @@ class _OurAddNoticeState extends State<OurAddNotice> {
                         await progressdialog.show();
 
                         OurNotice notice = OurNotice();
-                        notice.noticetype = "notice";
+                        notice.noticetype = "Notice";
                         notice.name = _noticeTitleController.text;
                         notice.subject = _noticeSubjectController.text;
                         notice.description = _noticeDescriptionController.text;

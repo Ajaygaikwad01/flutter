@@ -48,8 +48,9 @@ class IndexState extends State<IndexPage> {
       builder: (BuildContext context, value, Widget child) {
         return Scaffold(
           appBar: AppBar(
-            title: Text('Waiting room'),
-          ),
+              iconTheme: IconThemeData(color: Colors.white),
+              title:
+                  Text('Waiting room', style: TextStyle(color: Colors.white))),
           body: Center(
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 20),

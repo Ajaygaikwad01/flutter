@@ -18,7 +18,7 @@ class _OurBottomsheetState extends State<OurBottomsheet> {
   List<String> fileurl = List();
   List<String> _filelocation = List();
   List<String> _filename = List();
-  TextEditingController _reviewController = TextEditingController();
+  // TextEditingController _reviewController = TextEditingController();
   bool loading = false;
 
   // double _progress;

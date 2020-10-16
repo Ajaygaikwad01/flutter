@@ -10,7 +10,7 @@ import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:worldetor/screens/group/Inside%20notice/assignmentAdnimPage.dart';
 import 'package:worldetor/screens/group/Inside%20notice/attendanceAdminView.dart';
 import 'package:worldetor/screens/group/Inside%20notice/floatingbutton.dart';
-import 'package:worldetor/screens/group/Inside%20notice/live_pages/index.dart';
+import 'package:worldetor/screens/group/Inside%20notice/live_pages/livewaitingpage.dart';
 import 'package:worldetor/screens/group/Inside%20notice/noticepage.dart';
 import 'package:worldetor/screens/home/drawer.dart';
 import 'package:worldetor/services/database.dart';
@@ -187,7 +187,7 @@ class _OurAlertPageState extends State<OurAlertPage> {
       Widget retval;
       retval = ChangeNotifierProvider(
         create: (context) => CurrentGroup(),
-        child: IndexPage(),
+        child: OurLiveWaitingPage(),
       );
       Navigator.of(context).push(
         MaterialPageRoute(builder: (context) => retval),
@@ -279,7 +279,7 @@ class _OurAlertPageState extends State<OurAlertPage> {
                       var date;
                       if (snapshot.data.documents
                               .elementAt(index)['noticetype'] !=
-                          "notice") {
+                          "Notice") {
                         date = snapshot.data.documents
                             .elementAt(index)["datecompleted"]
                             .toDate();
@@ -287,7 +287,7 @@ class _OurAlertPageState extends State<OurAlertPage> {
                       var diff;
                       if (snapshot.data.documents
                               .elementAt(index)['noticetype'] !=
-                          "notice") {
+                          "Notice") {
                         diff = date.difference(time).inMinutes;
                       } else {
                         diff = 1;
@@ -421,7 +421,7 @@ class _OurAlertPageState extends State<OurAlertPage> {
                                       }
                                     } else if (snapshot.data.documents
                                             .elementAt(index)['noticetype'] ==
-                                        "notice") {
+                                        "Notice") {
                                       progressdialog.show();
                                       _openNotice(
                                           context,
@@ -491,7 +491,7 @@ class _OurAlertPageState extends State<OurAlertPage> {
                                                                     .elementAt(
                                                                         index)[
                                                                 'noticetype'] ==
-                                                            "notice")
+                                                            "Notice")
                                                         ? Icon(Icons.bookmarks,
                                                             color: Colors.lime)
                                                         : (snapshot.data
@@ -608,7 +608,7 @@ class _OurAlertPageState extends State<OurAlertPage> {
                                             visible: (snapshot.data.documents
                                                     .elementAt(
                                                         index)['noticetype'] !=
-                                                "notice"),
+                                                "Notice"),
                                             child: Container(
                                               child: Row(
                                                 children: [

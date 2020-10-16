@@ -30,7 +30,6 @@ class _OurChatPaageState extends State<OurChatPaage> {
         title: Consumer<CurrentGroup>(
           builder: (BuildContext context, value, Widget child) {
             return Text(" Group Chat", style: TextStyle(color: Colors.white));
-            ;
           },
         ),
       ),
