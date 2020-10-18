@@ -30,8 +30,8 @@ class _HomeScreenState extends State<HomeScreen> {
     Alert(
       context: context,
       type: AlertType.info,
-      title: "Delete",
-      desc: "Do you want Delete this Group",
+      title: "Leave Group",
+      desc: "Are you Sure?",
       buttons: [
         DialogButton(
           child: Text(
@@ -43,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         DialogButton(
           child: Text(
-            "Delete",
+            "Leave",
             style: TextStyle(color: Colors.white, fontSize: 20),
           ),
           onPressed: () {
@@ -193,9 +193,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                   actionExtentRatio: 0.30,
                                   secondaryActions: <Widget>[
                                     IconSlideAction(
-                                      caption: 'Delete',
+                                      caption: 'Leave',
                                       color: Colors.redAccent,
-                                      icon: Icons.delete,
+                                      icon: Icons.highlight_remove_rounded,
                                       onTap: () {
                                         setState(() {
                                           loading = !loading;

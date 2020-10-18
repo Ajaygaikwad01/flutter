@@ -192,6 +192,7 @@ class OurDatabase {
 
   Future<String> addnotice(String groupId, OurNotice notice) async {
     String retval = "Error";
+    List attendynames = List();
     try {
       DocumentReference _docref = await _firestore
           .collection("groups")
@@ -206,6 +207,7 @@ class OurDatabase {
         'description': notice.description,
         'noticetype': notice.noticetype,
         'datesend': Timestamp.now(),
+        'attendynames': FieldValue.arrayUnion(attendynames),
         //  'accountCreated': Timestamp.now(),
       });
 
@@ -298,6 +300,14 @@ class OurDatabase {
         "fileUrl": FieldValue.arrayUnion(urlString),
         "fileName": FieldValue.arrayUnion(fileNmae),
       });
+      List _empty = List();
+
+      await Firestore.instance
+          .collection("groups")
+          .document(groupId)
+          .collection("notice")
+          .document(noticeId)
+          .updateData({'markedId': FieldValue.arrayUnion(_empty)});
     } catch (e) {
       print(e);
     }
@@ -328,14 +338,113 @@ class OurDatabase {
     return retval;
   }
 
-  Future<String> getattandance(
-      String groupId, String noticeId, String sendername, String userid) async {
+  // Future<bool> isAssignmentMrked(
+  //   String groupId,
+  //   String noticeId,
+  //   String uid,
+  // ) async {
+  //   bool retval = false;
+  //   try {
+  //     DocumentSnapshot _docsnapshot = await _firestore
+  //         .collection("groups")
+  //         .document(groupId)
+  //         .collection("notice")
+  //         .document(noticeId)
+  //         .collection("assignment")
+  //         .document(uid)
+  //         .get();
+  //     if (_docsnapshot.exists) {
+  //       retval = true;
+  //     }
+  //   } catch (e) {
+  //     print(e);
+  //   }
+  //   return retval;
+  // }
+
+  // Future<bool> isAttendanceMarked(
+  //   String groupId,
+  //   String noticeId,
+  //   String uid,
+  // ) async {
+  //   bool retval = false;
+  //   try {
+  //     DocumentSnapshot _docsnapshot = await _firestore
+  //         .collection("groups")
+  //         .document(groupId)
+  //         .collection("notice")
+  //         .document(noticeId)
+  //         .get();
+  //     if (_docsnapshot["markedId"].cantains(uid)) {
+  //       retval = true;
+  //     }
+  //   } catch (e) {
+  //     print(e);
+  //   }
+  //   return retval;
+  // }
+
+  Future<String> markAdminAttandance(String groupId, String indexval,
+      String uniqueId, String noticeid, String currentTime) async {
+    String retval = "Error";
+    try {
+      int noticepoint = 1;
+      DocumentSnapshot docref = await Firestore.instance
+          .collection("groups")
+          .document(groupId)
+          .collection("group_member")
+          .document(indexval)
+          .get();
+      var currntpoint = docref.data["attend"];
+      int totalpoint = currntpoint + noticepoint;
+
+      print(totalpoint);
+      await Firestore.instance
+          .collection("groups")
+          .document(groupId)
+          .collection("group_member")
+          .document(indexval)
+          .updateData({"attend": totalpoint});
+      // await OurDatabase().groupTotalAttendance(
+      //     groupid, _currentuser.getCurrentUser.uniqueId, currentTime);
+      await Firestore.instance
+          .collection("groups")
+          .document(groupId)
+          .collection("groupTotalAttendance")
+          .document(uniqueId)
+          .updateData({
+        //  'id': _docref.documentID,
+        currentTime: "present",
+      });
+      List uid = List();
+      uid.add(indexval);
+      await Firestore.instance
+          .collection("groups")
+          .document(groupId)
+          .collection("notice")
+          .document(noticeid)
+          .updateData({
+        'markedId': FieldValue.arrayUnion(uid),
+      });
+
+      retval = "Success";
+    } catch (e) {
+      print(e);
+    }
+    return retval;
+  }
+
+  Future<String> getattandance(String groupId, String noticeId,
+      String sendername, String userid, String uniqueId) async {
     String retval = "Error";
     try {
       List<String> names = List();
       List<String> uid = List();
+      List<String> uniqueid = List();
+      List<String> emptylist = List();
       names.add(sendername);
       uid.add(userid);
+      uniqueid.add(uniqueId);
       await _firestore
           .collection("groups")
           .document(groupId)
@@ -344,6 +453,8 @@ class OurDatabase {
           .updateData({
         'attendynames': FieldValue.arrayUnion(names),
         'attendyid': FieldValue.arrayUnion(uid),
+        'uniqueid': FieldValue.arrayUnion(uniqueid),
+        'markedId': FieldValue.arrayUnion(emptylist),
       });
       retval = "Success";
     } catch (e) {

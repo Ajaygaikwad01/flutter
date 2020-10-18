@@ -28,6 +28,11 @@ class _OurDrawerState extends State<OurDrawer> {
             ),
             actions: <Widget>[
               FlatButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text("Cancel")),
+              FlatButton(
                   onPressed: () async {
                     await Firestore.instance
                         .collection("users")
@@ -38,12 +43,7 @@ class _OurDrawerState extends State<OurDrawer> {
                     Scaffold.of(context).showSnackBar(
                         new SnackBar(content: new Text("Unique Id Updated")));
                   },
-                  child: Text("Sunmit")),
-              FlatButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Text("Cancel"))
+                  child: Text("Submit")),
             ],
           );
         });
@@ -57,7 +57,7 @@ class _OurDrawerState extends State<OurDrawer> {
           Container(
             width: double.infinity,
             padding: EdgeInsets.all(20),
-            color: Colors.greenAccent[100],
+            color: Color(0xFF21BFBD),
             child: Center(
               child: Consumer<CurrentUser>(
                 builder: (BuildContext context, value, Widget child) {
@@ -76,26 +76,29 @@ class _OurDrawerState extends State<OurDrawer> {
                             children: <Widget>[
                               Container(
                                 width: 100,
-                                height: 100,
-                                margin: EdgeInsets.only(top: 20, bottom: 8),
-                                decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    image: DecorationImage(
-                                        image: AssetImage(
-                                            "lib/assets/google_logo.png"),
-                                        fit: BoxFit.fill)),
+                                height: 80,
+                                margin: EdgeInsets.only(top: 10, bottom: 8),
+                                child: Icon(Icons.person,
+                                    size: 50, color: Colors.white),
+                                // decoration: BoxDecoration(
+                                //     shape: BoxShape.circle,
+
+                                //     image: DecorationImage(
+                                //         image: AssetImage(
+                                //             "lib/assets/google_logo.png"),
+                                //         fit: BoxFit.fill)),
                               ),
                               Row(
                                 children: [
                                   Text(
                                     "   Unique ID :",
                                     style: TextStyle(
-                                        fontSize: 18, color: Colors.black),
+                                        fontSize: 18, color: Colors.white),
                                   ),
                                   Text(
                                     snapshot.data["uniqueId"] ?? "Add UniqueId",
                                     style: TextStyle(
-                                        fontSize: 17, color: Colors.black),
+                                        fontSize: 17, color: Colors.white),
                                   ),
                                   IconButton(
                                       icon: Icon(Icons.edit, color: Colors.red),
@@ -108,12 +111,12 @@ class _OurDrawerState extends State<OurDrawer> {
                               Text(
                                 snapshot.data["fullName"],
                                 style: TextStyle(
-                                    fontSize: 18, color: Colors.black),
+                                    fontSize: 18, color: Colors.white),
                               ),
                               Text(
                                 snapshot.data["email"],
                                 style: TextStyle(
-                                    fontSize: 16, color: Colors.black),
+                                    fontSize: 16, color: Colors.white),
                               ),
                             ],
                           );

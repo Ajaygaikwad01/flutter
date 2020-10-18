@@ -8,10 +8,12 @@ class CurrentGroup extends ChangeNotifier {
   OurNotice _currentnotice = OurNotice();
   // OurUser _groupmember = OurUser();
   bool _doneWithCurrentAssignment = false;
+  // bool _adminAttendanceMrked = false;
   OurGroup get getCurrentGroup => _currentgroup;
   OurNotice get getCurrentNotice => _currentnotice;
   // OurUser get getgroupmember => _groupmember;
   bool get getDoneWithCurrentAssignment => _doneWithCurrentAssignment;
+  // bool get getAdminAttendanceMarked => _adminAttendanceMrked;
   void updateSteteFromDatabase(String groupId, String userId) async {
     try {
       _currentgroup = await OurDatabase().getGroupInfo(groupId);
@@ -22,9 +24,27 @@ class CurrentGroup extends ChangeNotifier {
       _doneWithCurrentAssignment = await OurDatabase()
           .isUserdoneAssignment(groupId, _currentgroup.currentNoticeid, userId);
       notifyListeners();
+
+      // _adminAttendanceMrked = await OurDatabase()
+      //     .isAttendanceMarked(groupId, _currentgroup.currentNoticeid, userId);
+      // notifyListeners();
     } catch (e) {
       print(e);
     }
+  }
+
+  Future<String> adminMarkedAttendance(String groupId, String indexval,
+      String uniqueId, String noticeid, String currentTime) async {
+    String retval = "Error";
+    try {
+      await OurDatabase().markAdminAttandance(
+          groupId, indexval, uniqueId, noticeid, currentTime);
+      // _adminAttendanceMrked = true;
+      // notifyListeners();
+    } catch (e) {
+      print(e);
+    }
+    return retval;
   }
 
   Future<String> finishedAssignment(String uid, String userName, String review,
@@ -39,6 +59,7 @@ class CurrentGroup extends ChangeNotifier {
           review,
           urlString,
           fileName);
+
       _doneWithCurrentAssignment = true;
       notifyListeners();
     } catch (e) {

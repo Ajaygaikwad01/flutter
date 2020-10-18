@@ -59,7 +59,7 @@ class _OurLiveNoticeState extends State<OurLiveNotice> {
     return Scaffold(
       appBar: AppBar(
         iconTheme: IconThemeData(color: Colors.white),
-        title: Text("Fill Live Information",
+        title: Text("Fill Live Imformation",
             style: TextStyle(color: Colors.white)),
       ),
       body: ListView(
@@ -109,7 +109,18 @@ class _OurLiveNoticeState extends State<OurLiveNotice> {
                   Text(DateFormat("H:mm").format(_selecedtDate)),
                   FlatButton(
                       onPressed: () => _selectDate(context),
-                      child: Text("Selcet Schedule Date")),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Icon(Icons.calendar_today, color: Colors.red),
+                          Text("Selcet Due Date",
+                              style: TextStyle(
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.bold)),
+                        ],
+                      )),
+                  SizedBox(height: 10),
                   RaisedButton(
                       child: Padding(
                         padding:

@@ -61,7 +61,7 @@ class _OurAddAssignmentState extends State<OurAddAssignment> {
     return Scaffold(
       appBar: AppBar(
         iconTheme: IconThemeData(color: Colors.white),
-        title: Text("Fill Assignment Information",
+        title: Text("Fill Assignment Imformation",
             style: TextStyle(color: Colors.white)),
       ),
       body: ListView(
@@ -121,7 +121,18 @@ class _OurAddAssignmentState extends State<OurAddAssignment> {
                   Text(DateFormat("H:mm").format(_selecedtDate)),
                   FlatButton(
                       onPressed: () => _selectDate(context),
-                      child: Text("Selcet Due Date")),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Icon(Icons.calendar_today, color: Colors.red),
+                          Text("Selcet Due Date",
+                              style: TextStyle(
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.bold)),
+                        ],
+                      )),
+                  SizedBox(height: 10),
                   RaisedButton(
                       child: Padding(
                         padding:

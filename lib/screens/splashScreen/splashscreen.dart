@@ -11,13 +11,15 @@ class OurSplashScreen extends StatelessWidget {
         child: Ourcontener(
           child: Center(
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                SizedBox(
-                  height: 20,
-                ),
+                // SizedBox(
+                //   height: 30,
+                // ),
                 AvatarGlow(
                   glowColor: Colors.blue,
-                  endRadius: 90.0,
+                  endRadius: 100.0,
                   duration: Duration(milliseconds: 2000),
                   repeat: true,
                   showTwoGlows: true,
@@ -29,9 +31,9 @@ class OurSplashScreen extends StatelessWidget {
                       backgroundColor: Colors.grey[100],
                       child: Image.asset(
                         "lib/assets/logo.PNG",
-                        height: 70,
+                        height: 80,
                       ),
-                      radius: 60.0,
+                      radius: 70.0,
                     ),
                   ),
                 ),

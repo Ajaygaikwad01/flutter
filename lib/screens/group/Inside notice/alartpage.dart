@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:worldetor/screens/group/Inside%20notice/assignmentAdnimPage.dart';
 import 'package:worldetor/screens/group/Inside%20notice/attendanceAdminView.dart';
+import 'package:worldetor/screens/group/Inside%20notice/attendanceView.dart';
 import 'package:worldetor/screens/group/Inside%20notice/floatingbutton.dart';
 import 'package:worldetor/screens/group/Inside%20notice/live_pages/livewaitingpage.dart';
 import 'package:worldetor/screens/group/Inside%20notice/noticepage.dart';
@@ -56,7 +57,8 @@ class _OurAlertPageState extends State<OurAlertPage> {
         _currentuser.getCurrentUser.groupid,
         noticeId,
         _currentuser.getCurrentUser.fullName,
-        _currentuser.getCurrentUser.uid);
+        _currentuser.getCurrentUser.uid,
+        _currentuser.getCurrentUser.uniqueId);
     if (_returnString == "Success") {
       _attendancedialog();
       Scaffold.of(context).showSnackBar(new SnackBar(
@@ -707,7 +709,8 @@ class _OurAlertPageState extends State<OurAlertPage> {
                                                               splashColor:
                                                                   Colors.grey,
                                                               icon: Icon(
-                                                                Icons.clear,
+                                                                Icons
+                                                                    .highlight_remove,
                                                                 color: Colors
                                                                     .red[300],
                                                                 size: 40,

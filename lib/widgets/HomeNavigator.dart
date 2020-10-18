@@ -22,7 +22,7 @@ class _HomeNavigatorState extends State<HomeNavigator> {
         backgroundColor: Colors.white70,
         items: <Widget>[
           Icon(Icons.home, size: 30),
-          Icon(Icons.video_call, size: 30),
+          Icon(Icons.important_devices, size: 30),
         ],
         onTap: (index) {
           setState(() {

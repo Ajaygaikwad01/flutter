@@ -50,7 +50,7 @@ class _OurAddNoticeState extends State<OurAddNotice> {
     return Scaffold(
       appBar: AppBar(
         iconTheme: IconThemeData(color: Colors.white),
-        title: Text("Fill Notice Information",
+        title: Text("Fill Notice Imformation",
             style: TextStyle(color: Colors.white)),
       ),
       body: ListView(

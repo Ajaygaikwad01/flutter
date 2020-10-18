@@ -260,38 +260,24 @@ class _CallPageState extends State<CallPage> {
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                Flexible(
-                    child: TextFormField(
-                  controller: _chatController,
-                  decoration: InputDecoration(
-                      prefixIcon: Icon(Icons.chat), hintText: "Chat"),
-                )),
-                // RawMaterialButton(
-                //   onPressed: () {
-                //     print("send");
-                //   },
-                //   child: Icon(
-                //     Icons.send,
-                //     color: Colors.blueAccent,
-                //     size: 22.0,
-                //   ),
-                //   shape: CircleBorder(),
-                //   elevation: 2.0,
-                //   fillColor: Colors.white,
-                //   // padding: const EdgeInsets.all(12.0),
-                // )
-                IconButton(
-                    icon: Icon(Icons.send, color: Colors.blueAccent, size: 35),
-                    onPressed: () {
-                      print("send");
-                    })
-              ],
-            ),
-          ),
+          // Padding(
+          //   padding: const EdgeInsets.all(8.0),
+          //   child: Row(
+          //     children: [
+          //       Flexible(
+          //           child: TextFormField(
+          //         controller: _chatController,
+          //         decoration: InputDecoration(
+          //             prefixIcon: Icon(Icons.chat), hintText: "Chat"),
+          //       )),
+          //       IconButton(
+          //           icon: Icon(Icons.send, color: Colors.blueAccent, size: 35),
+          //           onPressed: () {
+          //             print("send");
+          //           })
+          //     ],
+          //   ),
+          // ),
         ],
       ),
     );

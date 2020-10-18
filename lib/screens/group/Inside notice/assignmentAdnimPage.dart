@@ -210,7 +210,7 @@ class _OurAssignmentAdminPageState extends State<OurAssignmentAdminPage> {
                     Scaffold.of(context).showSnackBar(
                         new SnackBar(content: new Text("Due Date Updated")));
                   },
-                  child: Text("Sunmit")),
+                  child: Text("Submit")),
             ],
           );
         });
@@ -257,6 +257,61 @@ class _OurAssignmentAdminPageState extends State<OurAssignmentAdminPage> {
         ),
       ),
     );
+  }
+
+  void _attendbutton(point, groupId, indexuserId, noticeId) async {
+    int noticepoint = point;
+
+    DocumentSnapshot docref = await Firestore.instance
+        .collection("groups")
+        .document(groupId)
+        .collection("group_member")
+        .document(indexuserId)
+        .get();
+    var currntpoint = docref.data["point"];
+    int totalpoint = currntpoint + noticepoint;
+    print(totalpoint);
+    await Firestore.instance
+        .collection("groups")
+        .document(groupId)
+        .collection("group_member")
+        .document(indexuserId)
+        .updateData({"point": totalpoint});
+    List uid = List();
+    uid.add(indexuserId);
+    await Firestore.instance
+        .collection("groups")
+        .document(groupId)
+        .collection("notice")
+        .document(noticeId)
+        .updateData({
+      'markedId': FieldValue.arrayUnion(uid),
+    });
+    // Scaffold.of(context)
+    //     .showSnackBar(new SnackBar(content: new Text("Assignment mark Added")));
+    setState(() {
+      loading = !loading;
+    });
+  }
+
+  Future<List> _getmarkedlist() async {
+    CurrentGroup _currentgroup =
+        Provider.of<CurrentGroup>(context, listen: false);
+    DocumentSnapshot _docsnap = await Firestore.instance
+        .collection("groups")
+        .document(_currentgroup.getCurrentGroup.id)
+        .collection("notice")
+        .document(_currentgroup.getCurrentNotice.id)
+        .get();
+    List _markedlist = _docsnap["markedId"];
+    // if (_docsnap["markedId"] != null) {
+    //   _markedlist = _docsnap["markedId"];
+    //   print(_docsnap["markedId"]);
+    // } else {
+    _markedlist.add(1);
+    // }
+    print(_markedlist.length);
+    return _markedlist;
   }
 
   bool loading = false;
@@ -458,6 +513,7 @@ class _OurAssignmentAdminPageState extends State<OurAssignmentAdminPage> {
                                             ));
                                           },
                                           child: Container(
+                                            height: 40,
                                             decoration: BoxDecoration(
                                                 color: Colors.white,
                                                 borderRadius:
@@ -472,139 +528,162 @@ class _OurAssignmentAdminPageState extends State<OurAssignmentAdminPage> {
                                                         3.5,
                                                       )),
                                                 ]),
-                                            child: Row(
-                                              children: [
-                                                Text(
-                                                  "  " +
-                                                          snapshot.data.documents
-                                                                  .elementAt(
-                                                                      index)[
-                                                              "userName"] ??
-                                                      "Loading...",
-                                                  style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold),
-                                                ),
-                                                Spacer(),
-                                                FlatButton(
-                                                    onPressed: () async {
-                                                      int noticepoint = value
-                                                          .getCurrentNotice
-                                                          .point;
-                                                      DocumentSnapshot docref =
-                                                          await Firestore
-                                                              .instance
-                                                              .collection(
-                                                                  "groups")
-                                                              .document(value
-                                                                  .getCurrentGroup
-                                                                  .id)
-                                                              .collection(
-                                                                  "group_member")
-                                                              .document(snapshot
-                                                                  .data
-                                                                  .documents
-                                                                  .elementAt(
-                                                                      index)
-                                                                  .documentID)
-                                                              .get();
-                                                      var currntpoint =
-                                                          docref.data["point"];
-                                                      int totalpoint =
-                                                          currntpoint +
-                                                              noticepoint;
-                                                      print(totalpoint);
-                                                      await Firestore.instance
-                                                          .collection("groups")
-                                                          .document(value
-                                                              .getCurrentGroup
-                                                              .id)
-                                                          .collection(
-                                                              "group_member")
-                                                          .document(snapshot
-                                                              .data.documents
-                                                              .elementAt(index)
-                                                              .documentID)
-                                                          .updateData({
-                                                        "point": totalpoint
-                                                      });
-                                                      Scaffold.of(context)
-                                                          .showSnackBar(new SnackBar(
-                                                              content: new Text(
-                                                                  "Assignment mark Added")));
-                                                    },
-                                                    child: Row(
-                                                      children: [
-                                                        Icon(
-                                                            Icons
-                                                                .check_box_sharp,
-                                                            color: Colors
-                                                                .blueAccent),
-                                                        Text(
-                                                          "Check",
-                                                          style: TextStyle(
-                                                              color: Colors
-                                                                  .blueAccent,
-                                                              fontSize: 17,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        )
-                                                      ],
-                                                    )),
-                                                // IconButton(
-                                                //     splashColor: Colors.grey,
-                                                //     icon: Icon(
-                                                //         Icons.check_box_sharp,
-                                                //         color:
-                                                //             Colors.blueAccent),
-                                                //     onPressed: () async {
-                                                //       int noticepoint = value
-                                                //           .getCurrentNotice
-                                                //           .point;
-                                                //       DocumentSnapshot docref =
-                                                //           await Firestore
-                                                //               .instance
-                                                //               .collection(
-                                                //                   "groups")
-                                                //               .document(value
-                                                //                   .getCurrentGroup
-                                                //                   .id)
-                                                //               .collection(
-                                                //                   "group_member")
-                                                //               .document(snapshot
-                                                //                   .data
-                                                //                   .documents
-                                                //                   .elementAt(
-                                                //                       index)
-                                                //                   .documentID)
-                                                //               .get();
-                                                //       var currntpoint =
-                                                //           docref.data["point"];
-                                                //       int totalpoint =
-                                                //           currntpoint +
-                                                //               noticepoint;
-                                                //       print(totalpoint);
-                                                //       await Firestore.instance
-                                                //           .collection("groups")
-                                                //           .document(value
-                                                //               .getCurrentGroup
-                                                //               .id)
-                                                //           .collection(
-                                                //               "group_member")
-                                                //           .document(snapshot
-                                                //               .data.documents
-                                                //               .elementAt(index)
-                                                //               .documentID)
-                                                //           .updateData({
-                                                //         "point": totalpoint
-                                                //       });
-                                                //       Scaffold.of(context)
-                                                //           .showSnackBar(new SnackBar(
-                                                //               content: new Text(
-                                                //                   "Assignment mark Added")));
-                                                //     }),
-                                              ],
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: Row(
+                                                children: [
+                                                  Text(
+                                                    snapshot.data.documents
+                                                                .elementAt(
+                                                                    index)[
+                                                            "userName"] ??
+                                                        "Loading...",
+                                                  ),
+                                                  Spacer(),
+                                                  FutureBuilder(
+                                                      future: _getmarkedlist(),
+                                                      builder: (BuildContext
+                                                              context,
+                                                          AsyncSnapshot<dynamic>
+                                                              snapshot2) {
+                                                        if (snapshot2.data ==
+                                                            null) {
+                                                          return Container();
+                                                        } else {
+                                                          return Visibility(
+                                                            visible: (snapshot2
+                                                                    .data
+                                                                    .contains(snapshot
+                                                                        .data
+                                                                        .documents
+                                                                        .elementAt(
+                                                                            index)
+                                                                        .documentID) ==
+                                                                false),
+                                                            child: FlatButton(
+                                                              minWidth: 5,
+                                                              onPressed:
+                                                                  () async {
+                                                                _attendbutton(
+                                                                    value
+                                                                        .getCurrentNotice
+                                                                        .point,
+                                                                    value
+                                                                        .getCurrentGroup
+                                                                        .id,
+                                                                    snapshot
+                                                                        .data
+                                                                        .documents
+                                                                        .elementAt(
+                                                                            index)
+                                                                        .documentID,
+                                                                    value
+                                                                        .getCurrentNotice
+                                                                        .id);
+
+                                                                setState(() {});
+
+                                                                // int noticepoint =
+                                                                // value
+                                                                //     .getCurrentNotice
+                                                                //     .point;
+                                                                // DocumentSnapshot docref = await Firestore
+                                                                //     .instance
+                                                                //     .collection(
+                                                                //         "groups")
+                                                                //     .document(value
+                                                                //         .getCurrentGroup
+                                                                //         .id)
+                                                                //     .collection(
+                                                                //         "group_member")
+                                                                //     .document(snapshot
+                                                                //         .data
+                                                                //         .documents
+                                                                //         .elementAt(
+                                                                //             index)
+                                                                //         .documentID)
+                                                                //     .get();
+                                                                // var currntpoint =
+                                                                //     docref.data[
+                                                                //         "point"];
+                                                                // int totalpoint =
+                                                                //     currntpoint +
+                                                                //         noticepoint;
+                                                                // print(totalpoint);
+                                                                // await Firestore
+                                                                //     .instance
+                                                                //     .collection(
+                                                                //         "groups")
+                                                                //     .document(value
+                                                                //         .getCurrentGroup
+                                                                //         .id)
+                                                                //     .collection(
+                                                                //         "group_member")
+                                                                //     .document(snapshot
+                                                                //         .data
+                                                                //         .documents
+                                                                //         .elementAt(
+                                                                //             index)
+                                                                //         .documentID)
+                                                                //     .updateData({
+                                                                //   "point":
+                                                                //       totalpoint
+                                                                // });
+                                                                // List uid = List();
+                                                                // uid.add(snapshot
+                                                                //     .data
+                                                                //     .documents
+                                                                //     .elementAt(
+                                                                //         index)
+                                                                //     .documentID);
+                                                                // await Firestore
+                                                                //     .instance
+                                                                //     .collection(
+                                                                //         "groups")
+                                                                //     .document(value
+                                                                //         .getCurrentGroup
+                                                                //         .id)
+                                                                //     .collection(
+                                                                //         "notice")
+                                                                //     .document(value
+                                                                //         .getCurrentNotice
+                                                                //         .id)
+                                                                //     .updateData({
+                                                                //   'markedId':
+                                                                //       FieldValue
+                                                                //           .arrayUnion(
+                                                                //               uid),
+                                                                // });
+                                                                Scaffold.of(
+                                                                        context)
+                                                                    .showSnackBar(new SnackBar(
+                                                                        content:
+                                                                            new Text("Assignment mark Added")));
+                                                              },
+                                                              child: Row(
+                                                                children: [
+                                                                  Icon(
+                                                                    Icons
+                                                                        .check_box_sharp,
+                                                                    color: Colors
+                                                                        .blueAccent,
+                                                                    size: 24,
+                                                                  ),
+                                                                  Text("Check",
+                                                                      style: TextStyle(
+                                                                          fontSize:
+                                                                              20,
+                                                                          color:
+                                                                              Colors.blueAccent)),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          );
+                                                        }
+                                                      }),
+                                                ],
+                                              ),
                                             ),
                                           ),
                                         ),
