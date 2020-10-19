@@ -11,6 +11,7 @@ class Oursignupform extends StatefulWidget {
 }
 
 class _OursignupformState extends State<Oursignupform> {
+  final formkey = GlobalKey<FormState>();
   TextEditingController _uniqueIdController = TextEditingController();
   TextEditingController _fullNameController = TextEditingController();
   TextEditingController _emailController = TextEditingController();
@@ -37,6 +38,7 @@ class _OursignupformState extends State<Oursignupform> {
       }
     } catch (e) {
       print(e);
+      progressdialog.hide();
     }
   }
 
@@ -71,46 +73,81 @@ class _OursignupformState extends State<Oursignupform> {
           SizedBox(
             height: 20.0,
           ),
-          TextFormField(
-            controller: _uniqueIdController,
-            decoration: InputDecoration(
-                prefixIcon: Icon(Icons.label_important),
-                hintText: "UniqueId/CollegeId/RollNo"),
-          ),
-          SizedBox(
-            height: 20.0,
-          ),
-          TextFormField(
-            controller: _fullNameController,
-            decoration: InputDecoration(
-                prefixIcon: Icon(Icons.person_outline), hintText: "Full Name"),
-          ),
-          SizedBox(
-            height: 20.0,
-          ),
-          TextFormField(
-            controller: _emailController,
-            decoration: InputDecoration(
-                prefixIcon: Icon(Icons.alternate_email), hintText: "Email"),
-          ),
-          SizedBox(
-            height: 20.0,
-          ),
-          TextFormField(
-            controller: _passswordController,
-            decoration: InputDecoration(
-                prefixIcon: Icon(Icons.lock_outline), hintText: "Password"),
-            obscureText: true,
-          ),
-          SizedBox(
-            height: 20.0,
-          ),
-          TextFormField(
-            controller: _conformpasswordController,
-            decoration: InputDecoration(
-                prefixIcon: Icon(Icons.lock_outline),
-                hintText: "Conform Password"),
-            obscureText: true,
+          Form(
+            key: formkey,
+            child: Column(
+              children: [
+                TextFormField(
+                  validator: (val) {
+                    return val.isEmpty ? "Please provide UniqueId" : null;
+                  },
+                  controller: _uniqueIdController,
+                  decoration: InputDecoration(
+                      prefixIcon: Icon(Icons.label_important),
+                      hintText: "UniqueId/CollegeId/RollNo"),
+                ),
+                SizedBox(
+                  height: 20.0,
+                ),
+                TextFormField(
+                  validator: (val) {
+                    return val.isEmpty
+                        ? "Please provide vaild User Name"
+                        : null;
+                  },
+                  controller: _fullNameController,
+                  decoration: InputDecoration(
+                      prefixIcon: Icon(Icons.person_outline),
+                      hintText: "Full Name"),
+                ),
+                SizedBox(
+                  height: 20.0,
+                ),
+                TextFormField(
+                  validator: (val) {
+                    return RegExp(
+                                r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                            .hasMatch(val)
+                        ? null
+                        : "Please provide valid email id";
+                  },
+                  controller: _emailController,
+                  decoration: InputDecoration(
+                      prefixIcon: Icon(Icons.alternate_email),
+                      hintText: "Email"),
+                ),
+                SizedBox(
+                  height: 20.0,
+                ),
+                TextFormField(
+                  validator: (val) {
+                    return val.isEmpty || val.length < 6
+                        ? "Minimum 6 character required"
+                        : null;
+                  },
+                  controller: _passswordController,
+                  decoration: InputDecoration(
+                      prefixIcon: Icon(Icons.lock_outline),
+                      hintText: "Password"),
+                  obscureText: true,
+                ),
+                SizedBox(
+                  height: 20.0,
+                ),
+                TextFormField(
+                  validator: (val) {
+                    return val.isEmpty || val.length < 6
+                        ? "Minimum 6 character required"
+                        : null;
+                  },
+                  controller: _conformpasswordController,
+                  decoration: InputDecoration(
+                      prefixIcon: Icon(Icons.lock_outline),
+                      hintText: "Conform Password"),
+                  obscureText: true,
+                ),
+              ],
+            ),
           ),
           SizedBox(
             height: 20.0,
@@ -128,22 +165,24 @@ class _OursignupformState extends State<Oursignupform> {
               ),
             ),
             onPressed: () async {
-              if (_passswordController.text ==
-                  _conformpasswordController.text) {
-                await progressdialog.show();
-                _signUpUser(
-                    _emailController.text,
-                    _passswordController.text,
-                    _fullNameController.text,
-                    _uniqueIdController.text,
-                    context);
-              } else {
-                Scaffold.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text("password doesn't match"),
-                    duration: Duration(seconds: 1),
-                  ),
-                );
+              if (formkey.currentState.validate()) {
+                if (_passswordController.text ==
+                    _conformpasswordController.text) {
+                  await progressdialog.show();
+                  _signUpUser(
+                      _emailController.text,
+                      _passswordController.text,
+                      _fullNameController.text,
+                      _uniqueIdController.text,
+                      context);
+                } else {
+                  Scaffold.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text("password doesn't match"),
+                      duration: Duration(seconds: 1),
+                    ),
+                  );
+                }
               }
             },
           ),

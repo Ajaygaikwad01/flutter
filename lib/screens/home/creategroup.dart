@@ -74,6 +74,7 @@ class _OurCreateGroupState extends State<OurCreateGroup> {
     }
   }
 
+  final formkey = GlobalKey<FormState>();
   TextEditingController _groupNameController = TextEditingController();
   TextEditingController _groupdescriptionController = TextEditingController();
   ProgressDialog progressdialog;
@@ -118,13 +119,21 @@ class _OurCreateGroupState extends State<OurCreateGroup> {
                         child: Ourcontener(
                           child: Column(
                             children: <Widget>[
-                              TextFormField(
-                                controller: _groupNameController,
-                                decoration: InputDecoration(
-                                    prefixIcon: Icon(Icons.group),
-                                    hintText: "Group Name"),
-                                minLines: 1,
-                                maxLength: 25,
+                              Form(
+                                key: formkey,
+                                child: TextFormField(
+                                  validator: (val) {
+                                    return val.isEmpty
+                                        ? "Please provide vaild Group Name"
+                                        : null;
+                                  },
+                                  controller: _groupNameController,
+                                  decoration: InputDecoration(
+                                      prefixIcon: Icon(Icons.group),
+                                      hintText: "Group Name"),
+                                  minLines: 1,
+                                  maxLength: 25,
+                                ),
                               ),
                               SizedBox(
                                 height: 20.0,
@@ -152,15 +161,17 @@ class _OurCreateGroupState extends State<OurCreateGroup> {
                                     ),
                                   ),
                                   onPressed: () {
-                                    if (snapshot.data["uniqueId"] != null) {
-                                      progressdialog.show();
-                                      _createGroup(
-                                          context,
-                                          _groupNameController.text,
-                                          _groupdescriptionController.text);
-                                    } else {
-                                      print("uniqueid not avilable");
-                                      _alertdialog();
+                                    if (formkey.currentState.validate()) {
+                                      if (snapshot.data["uniqueId"] != null) {
+                                        progressdialog.show();
+                                        _createGroup(
+                                            context,
+                                            _groupNameController.text,
+                                            _groupdescriptionController.text);
+                                      } else {
+                                        print("uniqueid not avilable");
+                                        _alertdialog();
+                                      }
                                     }
                                   })
                             ],

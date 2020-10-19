@@ -1,13 +1,11 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:provider/provider.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:worldetor/screens/login/resetpassword.dart';
-
 import 'package:worldetor/screens/signup/signup.dart';
 import 'package:worldetor/state/currentuser.dart';
-
 import 'package:worldetor/widgets/HomeNavigator.dart';
 
 enum LoginType { email, google }
@@ -18,8 +16,30 @@ class OurNewLoginPage extends StatefulWidget {
 }
 
 class _OurNewLoginPageState extends State<OurNewLoginPage> {
+  final formkey = GlobalKey<FormState>();
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passswordController = TextEditingController();
+  void _deletedialog() {
+    Alert(
+      context: context,
+      type: AlertType.warning,
+      title: "Error",
+      desc: "Invalid Imformation!",
+      buttons: [
+        DialogButton(
+          child: Text(
+            "Close",
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+          onPressed: () => Navigator.pop(context),
+          gradient: LinearGradient(colors: [
+            Color.fromRGBO(116, 116, 191, 1.0),
+            Color.fromRGBO(52, 138, 199, 1.0)
+          ]),
+        ),
+      ],
+    ).show();
+  }
 
   void _loginUser({
     @required LoginType type,
@@ -49,14 +69,16 @@ class _OurNewLoginPageState extends State<OurNewLoginPage> {
             (route) => false);
       } else {
         await progressdialog.hide();
-        Scaffold.of(context).showSnackBar(
-          SnackBar(
-            content: Text(_returnString),
-            duration: Duration(seconds: 1),
-          ),
-        );
+        // Scaffold.of(context).showSnackBar(
+        //   new SnackBar(
+        //     content: Text(_returnString),
+        //     duration: Duration(seconds: 1),
+        // ),
+        // );
+        _deletedialog();
       }
     } catch (e) {
+      progressdialog.hide();
       print(e);
     }
   }
@@ -114,52 +136,52 @@ class _OurNewLoginPageState extends State<OurNewLoginPage> {
       backgroundColor: Color(0xFF21BFBD),
       body: ListView(
         children: <Widget>[
-          Padding(
-            padding: EdgeInsets.only(top: 15.0, left: 10.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                // IconButton(
-                //   icon: Icon(Icons.arrow_back_ios),
-                //   color: Colors.white,
-                //   onPressed: () {
-                //     Navigator.of(context).pop();
-                //   },
-                // ),
-                Container(
-                    width: 125.0,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        // IconButton(
-                        //   icon: Icon(Icons.cached),
-                        //   color: Colors.white,
-                        //   onPressed: () {
-                        //     setState(() {});
-                        //   },
-                        // ),
-                        // IconButton(
-                        //   icon: Icon(Icons.menu),
-                        //   color: Colors.white,
-                        //   onPressed: () {},
-                        // )
-                      ],
-                    ))
-              ],
-            ),
-          ),
+          // Padding(
+          //   padding: EdgeInsets.only(top: 15.0, left: 10.0),
+          //   child: Row(
+          //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //     children: <Widget>[
+          //       // IconButton(
+          //       //   icon: Icon(Icons.arrow_back_ios),
+          //       //   color: Colors.white,
+          //       //   onPressed: () {
+          //       //     Navigator.of(context).pop();
+          //       //   },
+          //       // ),
+          //       Container(
+          //           width: 125.0,
+          //           child: Row(
+          //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //             children: <Widget>[
+          //               // IconButton(
+          //               //   icon: Icon(Icons.cached),
+          //               //   color: Colors.white,
+          //               //   onPressed: () {
+          //               //     setState(() {});
+          //               //   },
+          //               // ),
+          //               // IconButton(
+          //               //   icon: Icon(Icons.menu),
+          //               //   color: Colors.white,
+          //               //   onPressed: () {},
+          //               // )
+          //             ],
+          //           ))
+          //     ],
+          //   ),
+          // ),
           SizedBox(height: 25.0),
           Padding(
             padding: EdgeInsets.only(left: 40.0),
             child: Row(
               children: <Widget>[
-                Text("TM",
+                Text("TM'",
                     style: TextStyle(
                         // fontFamily: 'Montserrat',
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 25.0)),
-                SizedBox(width: 10.0),
+                SizedBox(width: 5.0),
                 Expanded(
                   child: Text("meet",
                       style: TextStyle(
@@ -201,21 +223,40 @@ class _OurNewLoginPageState extends State<OurNewLoginPage> {
                 SizedBox(
                   height: 30.0,
                 ),
-                TextFormField(
-                  controller: _emailController,
-                  decoration: InputDecoration(
-                      prefixIcon: Icon(Icons.alternate_email),
-                      hintText: "Email"),
-                ),
-                SizedBox(
-                  height: 10.0,
-                ),
-                TextFormField(
-                  controller: _passswordController,
-                  decoration: InputDecoration(
-                      prefixIcon: Icon(Icons.lock_outline),
-                      hintText: "Password"),
-                  obscureText: true,
+                Form(
+                  key: formkey,
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        validator: (val) {
+                          return RegExp(
+                                      r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                                  .hasMatch(val)
+                              ? null
+                              : "Please provide valid email id";
+                        },
+                        controller: _emailController,
+                        decoration: InputDecoration(
+                            prefixIcon: Icon(Icons.alternate_email),
+                            hintText: "Email"),
+                      ),
+                      SizedBox(
+                        height: 10.0,
+                      ),
+                      TextFormField(
+                        validator: (val) {
+                          return val.isEmpty || val.length < 6
+                              ? "Minimum 6 character required"
+                              : null;
+                        },
+                        controller: _passswordController,
+                        decoration: InputDecoration(
+                            prefixIcon: Icon(Icons.lock_outline),
+                            hintText: "Password"),
+                        obscureText: true,
+                      ),
+                    ],
+                  ),
                 ),
                 Container(
                   alignment: AlignmentDirectional.bottomEnd,
@@ -248,12 +289,14 @@ class _OurNewLoginPageState extends State<OurNewLoginPage> {
                       ),
                     ),
                     onPressed: () async {
-                      await progressdialog.show();
-                      _loginUser(
-                          type: LoginType.email,
-                          email: _emailController.text,
-                          password: _passswordController.text,
-                          context: context);
+                      if (formkey.currentState.validate()) {
+                        await progressdialog.show();
+                        _loginUser(
+                            type: LoginType.email,
+                            email: _emailController.text,
+                            password: _passswordController.text,
+                            context: context);
+                      }
                     },
                   ),
                 ),

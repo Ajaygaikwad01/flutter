@@ -71,6 +71,7 @@ class _OurJoinGroupState extends State<OurJoinGroup> {
     }
   }
 
+  final formkey = GlobalKey<FormState>();
   TextEditingController _groupIdController = TextEditingController();
 
   // ProgressDialog progressdialog;
@@ -112,11 +113,19 @@ class _OurJoinGroupState extends State<OurJoinGroup> {
                       child: Ourcontener(
                         child: Column(
                           children: <Widget>[
-                            TextFormField(
-                              controller: _groupIdController,
-                              decoration: InputDecoration(
-                                  prefixIcon: Icon(Icons.group),
-                                  hintText: "Group Id"),
+                            Form(
+                              key: formkey,
+                              child: TextFormField(
+                                validator: (val) {
+                                  return val.isEmpty
+                                      ? "Please provide vaild GroupId"
+                                      : null;
+                                },
+                                controller: _groupIdController,
+                                decoration: InputDecoration(
+                                    prefixIcon: Icon(Icons.group),
+                                    hintText: "Group Id"),
+                              ),
                             ),
                             SizedBox(
                               height: 20.0,
@@ -134,12 +143,14 @@ class _OurJoinGroupState extends State<OurJoinGroup> {
                                   ),
                                 ),
                                 onPressed: () {
-                                  if (snapshot.data["uniqueId"] != null) {
-                                    // progressdialog.show();
-                                    _joinGroup(
-                                        context, _groupIdController.text);
-                                  } else {
-                                    _alertdialog();
+                                  if (formkey.currentState.validate()) {
+                                    if (snapshot.data["uniqueId"] != null) {
+                                      // progressdialog.show();
+                                      _joinGroup(
+                                          context, _groupIdController.text);
+                                    } else {
+                                      _alertdialog();
+                                    }
                                   }
                                 })
                           ],
