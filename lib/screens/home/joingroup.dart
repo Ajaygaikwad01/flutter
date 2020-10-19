@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:progress_dialog/progress_dialog.dart';
+
 import 'package:provider/provider.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:worldetor/screens/root/root.dart';
@@ -56,7 +56,7 @@ class _OurJoinGroupState extends State<OurJoinGroup> {
         _currentuser.getCurrentUser.uniqueId);
 
     if (_returnString == "Success") {
-      progressdialog.hide();
+      // progressdialog.hide();
       Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
@@ -64,7 +64,7 @@ class _OurJoinGroupState extends State<OurJoinGroup> {
           ),
           (route) => false);
     } else {
-      progressdialog.hide();
+      // progressdialog.hide();
       Scaffold.of(context).showSnackBar(SnackBar(
           content: Text("Failed something went wrong"),
           duration: Duration(seconds: 1)));
@@ -73,16 +73,17 @@ class _OurJoinGroupState extends State<OurJoinGroup> {
 
   TextEditingController _groupIdController = TextEditingController();
 
-  ProgressDialog progressdialog;
+  // ProgressDialog progressdialog;
   @override
   Widget build(BuildContext context) {
-    progressdialog = ProgressDialog(context, isDismissible: false);
-    progressdialog.update(
-      message: "Loading....",
-    );
+    // progressdialog = ProgressDialog(context, isDismissible: true);
+    // progressdialog.style(
+    //   message: "Loading....",
+    // );
     return Scaffold(
       appBar: AppBar(
-        title: Text("Create Group"),
+        iconTheme: IconThemeData(color: Colors.white),
+        title: Text("Join Group", style: TextStyle(color: Colors.white)),
       ),
       body: Consumer<CurrentUser>(
           builder: (BuildContext context, value, Widget child) {
@@ -134,7 +135,7 @@ class _OurJoinGroupState extends State<OurJoinGroup> {
                                 ),
                                 onPressed: () {
                                   if (snapshot.data["uniqueId"] != null) {
-                                    progressdialog.show();
+                                    // progressdialog.show();
                                     _joinGroup(
                                         context, _groupIdController.text);
                                   } else {

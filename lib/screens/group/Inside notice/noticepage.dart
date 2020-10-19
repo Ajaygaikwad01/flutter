@@ -31,7 +31,7 @@ class _OurNoticePageState extends State<OurNoticePage> {
       onPressed: () {
         value
             ? Scaffold.of(context).showSnackBar(
-                new SnackBar(content: new Text("Assignment Allready Submited")))
+                new SnackBar(content: new Text("Assignment Already Submited")))
             : getImage();
       },
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
@@ -120,6 +120,16 @@ class _OurNoticePageState extends State<OurNoticePage> {
                                       color: Colors.white,
                                       onPressed: () {
                                         setState(() {});
+                                        Scaffold.of(context).showSnackBar(
+                                            SnackBar(
+                                                content: Row(
+                                                  children: [
+                                                    Icon(Icons.check_circle),
+                                                    Text("Refreshed"),
+                                                  ],
+                                                ),
+                                                duration:
+                                                    Duration(seconds: 1)));
                                       },
                                     ),
                                     IconButton(

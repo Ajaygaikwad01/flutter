@@ -128,8 +128,10 @@ class _OurDrawerState extends State<OurDrawer> {
           ),
           ListTile(
             leading: Icon(Icons.logout),
-            title: Text("sign Out",
-                style: TextStyle(fontSize: 18, color: Colors.black)),
+            title: Expanded(
+              child: Text("signOut",
+                  style: TextStyle(fontSize: 18, color: Colors.black)),
+            ),
             onTap: () async {
               CurrentUser _currentuser =
                   Provider.of<CurrentUser>(context, listen: false);

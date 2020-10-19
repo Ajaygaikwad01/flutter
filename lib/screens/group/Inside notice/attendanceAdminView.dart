@@ -333,6 +333,16 @@ class _OurAttendanceAdminPageState extends State<OurAttendanceAdminPage> {
                                       color: Colors.white,
                                       onPressed: () {
                                         setState(() {});
+                                        Scaffold.of(context).showSnackBar(
+                                            SnackBar(
+                                                content: Row(
+                                                  children: [
+                                                    Icon(Icons.check_circle),
+                                                    Text("Refreshed"),
+                                                  ],
+                                                ),
+                                                duration:
+                                                    Duration(seconds: 1)));
                                       },
                                     ),
                                     Row(
@@ -417,154 +427,133 @@ class _OurAttendanceAdminPageState extends State<OurAttendanceAdminPage> {
                             SizedBox(
                               height: 7,
                             ),
-                            Visibility(
-                              visible: (snapshot.data["attendynames"].length !=
-                                  null),
-                              child: Expanded(
-                                child: ListView.builder(
-                                  itemCount:
-                                      snapshot.data["attendynames"].length ?? 1,
-                                  itemBuilder:
-                                      (BuildContext context, int index) {
-                                    String name =
-                                        snapshot.data["attendynames"][index];
-                                    String nameid =
-                                        snapshot.data["attendyid"][index];
-                                    String uniqueid =
-                                        snapshot.data["uniqueid"][index];
+                            Expanded(
+                              child: ListView.builder(
+                                itemCount: snapshot.data["attendynames"].length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  String name =
+                                      snapshot.data["attendynames"][index];
+                                  String nameid =
+                                      snapshot.data["attendyid"][index];
+                                  String uniqueid =
+                                      snapshot.data["uniqueid"][index];
 
-                                    return Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 1, horizontal: 10),
-                                      child: Slidable(
-                                        actionPane: SlidableDrawerActionPane(),
-                                        actionExtentRatio: 0.30,
-                                        secondaryActions: <Widget>[
-                                          IconSlideAction(
-                                            caption: 'Delete',
-                                            color: Colors.redAccent,
-                                            icon: Icons.delete,
-                                            onTap: () {
-                                              _deletedialog(
-                                                  value.getCurrentGroup.id,
-                                                  value.getCurrentNotice.id,
-                                                  name,
-                                                  nameid,
-                                                  uniqueid);
-                                            },
-                                          )
-                                        ],
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(3.0),
-                                          child: Bounce(
-                                            duration:
-                                                Duration(milliseconds: 110),
-                                            onPressed: () {},
-                                            child: Container(
-                                              height: 40,
-                                              decoration: BoxDecoration(
-                                                  color: Colors.white,
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          18.0),
-                                                  boxShadow: [
-                                                    BoxShadow(
-                                                        color: Colors.grey,
-                                                        blurRadius: 9.0,
-                                                        spreadRadius: 5.0,
-                                                        offset: Offset(
-                                                          4.0,
-                                                          3.5,
-                                                        )),
-                                                  ]),
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(8.0),
-                                                child: Row(
-                                                  children: [
-                                                    Text(
-                                                        snapshot.data[
-                                                                    "attendynames"]
-                                                                [index] ??
-                                                            "Loading ",
-                                                        style: TextStyle(
-                                                            fontSize: 14)),
-                                                    Spacer(),
-                                                    FutureBuilder(
-                                                        future:
-                                                            _getmarkedlist(),
-                                                        builder: (context,
-                                                            snapshot2) {
-                                                          if (snapshot2.data ==
-                                                              null) {
-                                                            return Container();
-                                                          } else {
-                                                            return Visibility(
-                                                              visible: (snapshot2
-                                                                      .data
-                                                                      .contains(
-                                                                          snapshot.data["attendyid"]
-                                                                              [
-                                                                              index]) ==
-                                                                  false),
-                                                              child: FlatButton(
-                                                                minWidth: 10,
-                                                                child: Row(
-                                                                  children: [
-                                                                    Icon(
-                                                                      Icons
-                                                                          .check_box_sharp,
-                                                                      color: Colors
-                                                                          .blueAccent,
-                                                                      size: 24,
-                                                                    ),
-                                                                    Text(
-                                                                        "Check",
-                                                                        style: TextStyle(
-                                                                            fontSize:
-                                                                                20,
-                                                                            color:
-                                                                                Colors.blueAccent)),
-                                                                  ],
-                                                                ),
-                                                                onPressed: () {
-                                                                  attendbutton(
-                                                                      value
-                                                                          .getCurrentGroup
-                                                                          .id,
-                                                                      nameid,
-                                                                      uniqueid);
-
-                                                                  // _removename(
-                                                                  //     value
-                                                                  //         .getCurrentGroup
-                                                                  //         .id,
-                                                                  //     value
-                                                                  //         .getCurrentNotice
-                                                                  //         .id,
-                                                                  //     name,
-                                                                  //     nameid);
-
-                                                                  Scaffold.of(
-                                                                          context)
-                                                                      .showSnackBar(new SnackBar(
-                                                                          content:
-                                                                              new Text("Attendance marked")));
-                                                                },
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 1, horizontal: 10),
+                                    child: Slidable(
+                                      actionPane: SlidableDrawerActionPane(),
+                                      actionExtentRatio: 0.30,
+                                      secondaryActions: <Widget>[
+                                        IconSlideAction(
+                                          caption: 'Delete',
+                                          color: Colors.redAccent,
+                                          icon: Icons.delete,
+                                          onTap: () {
+                                            _deletedialog(
+                                                value.getCurrentGroup.id,
+                                                value.getCurrentNotice.id,
+                                                name,
+                                                nameid,
+                                                uniqueid);
+                                          },
+                                        )
+                                      ],
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(3.0),
+                                        child: Bounce(
+                                          duration: Duration(milliseconds: 110),
+                                          onPressed: () {},
+                                          child: Container(
+                                            height: 40,
+                                            decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                borderRadius:
+                                                    BorderRadius.circular(18.0),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                      color: Colors.grey,
+                                                      blurRadius: 9.0,
+                                                      spreadRadius: 5.0,
+                                                      offset: Offset(
+                                                        4.0,
+                                                        3.5,
+                                                      )),
+                                                ]),
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: Row(
+                                                children: [
+                                                  Text(
+                                                      snapshot.data[
+                                                                  "attendynames"]
+                                                              [index] ??
+                                                          "Loading ",
+                                                      style: TextStyle(
+                                                          fontSize: 14)),
+                                                  Spacer(),
+                                                  FutureBuilder(
+                                                      future: _getmarkedlist(),
+                                                      builder:
+                                                          (context, snapshot2) {
+                                                        if (snapshot2.data ==
+                                                            null) {
+                                                          return Container();
+                                                        } else {
+                                                          return Visibility(
+                                                            visible: (snapshot2
+                                                                    .data
+                                                                    .contains(snapshot
+                                                                            .data["attendyid"]
+                                                                        [
+                                                                        index]) ==
+                                                                false),
+                                                            child: FlatButton(
+                                                              minWidth: 10,
+                                                              child: Row(
+                                                                children: [
+                                                                  Icon(
+                                                                    Icons
+                                                                        .check_box_sharp,
+                                                                    color: Colors
+                                                                        .blueAccent,
+                                                                    size: 24,
+                                                                  ),
+                                                                  Text("Check",
+                                                                      style: TextStyle(
+                                                                          fontSize:
+                                                                              20,
+                                                                          color:
+                                                                              Colors.blueAccent)),
+                                                                ],
                                                               ),
-                                                            );
-                                                          }
-                                                        })
-                                                  ],
-                                                ),
+                                                              onPressed: () {
+                                                                attendbutton(
+                                                                    value
+                                                                        .getCurrentGroup
+                                                                        .id,
+                                                                    nameid,
+                                                                    uniqueid);
+                                                                Scaffold.of(
+                                                                        context)
+                                                                    .showSnackBar(new SnackBar(
+                                                                        content:
+                                                                            new Text("Attendance marked")));
+                                                              },
+                                                            ),
+                                                          );
+                                                        }
+                                                      })
+                                                ],
                                               ),
                                             ),
                                           ),
                                         ),
                                       ),
-                                    );
-                                  },
-                                ),
+                                    ),
+                                  );
+                                },
                               ),
                             )
                           ],

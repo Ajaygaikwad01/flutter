@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:worldetor/screens/login/login.dart';
+
+import 'package:worldetor/screens/login/loginN.dart';
 import 'package:worldetor/screens/splashScreen/splashscreen.dart';
 import 'package:worldetor/state/currentuser.dart';
 import 'package:worldetor/widgets/HomeNavigator.dart';
@@ -59,8 +60,8 @@ class _OurRootState extends State<OurRoot> {
         retval = HomeNavigator();
         break;
       case AuthStatus.notloggedIn:
-        retval = Ourlogin();
-        // retval = OurLoginnew();
+        // retval = Ourlogin();
+        retval = OurNewLoginPage();
         break;
       // case AuthStatus.notInGroup:
       //   retval = HomeNavigator();

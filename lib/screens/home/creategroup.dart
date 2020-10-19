@@ -68,9 +68,9 @@ class _OurCreateGroupState extends State<OurCreateGroup> {
           (route) => false);
     } else {
       progressdialog.hide();
-      // showSnackBar(SnackBar(
-      //     content: Text("Failed something went wrong"),
-      //     duration: Duration(seconds: 1)));
+      Scaffold.of(context).showSnackBar(SnackBar(
+          content: Text("Failed something went wrong"),
+          duration: Duration(seconds: 1)));
     }
   }
 
@@ -79,13 +79,17 @@ class _OurCreateGroupState extends State<OurCreateGroup> {
   ProgressDialog progressdialog;
   @override
   Widget build(BuildContext context) {
-    progressdialog = ProgressDialog(context, isDismissible: false);
-    progressdialog.update(
+    progressdialog = ProgressDialog(context, isDismissible: true);
+    progressdialog.style(
       message: "Loading....",
     );
     return Scaffold(
         appBar: AppBar(
-          title: Text("Create Group"),
+          iconTheme: IconThemeData(color: Colors.white),
+          title: Text(
+            "Create Group",
+            style: TextStyle(color: Colors.white),
+          ),
         ),
         body: Consumer<CurrentUser>(
             builder: (BuildContext context, value, Widget child) {
@@ -119,6 +123,7 @@ class _OurCreateGroupState extends State<OurCreateGroup> {
                                 decoration: InputDecoration(
                                     prefixIcon: Icon(Icons.group),
                                     hintText: "Group Name"),
+                                minLines: 1,
                                 maxLength: 25,
                               ),
                               SizedBox(

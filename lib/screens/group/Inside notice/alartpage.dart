@@ -1,15 +1,16 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bounce/flutter_bounce.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:provider/provider.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:worldetor/screens/group/Inside%20notice/assignmentAdnimPage.dart';
 import 'package:worldetor/screens/group/Inside%20notice/attendanceAdminView.dart';
-import 'package:worldetor/screens/group/Inside%20notice/attendanceView.dart';
 import 'package:worldetor/screens/group/Inside%20notice/floatingbutton.dart';
 import 'package:worldetor/screens/group/Inside%20notice/live_pages/livewaitingpage.dart';
 import 'package:worldetor/screens/group/Inside%20notice/noticepage.dart';
@@ -108,8 +109,9 @@ class _OurAlertPageState extends State<OurAlertPage> {
     String _returnString = await OurDatabase()
         .removeNotice(_currentuser.getCurrentUser.groupid, noticeId);
     if (_returnString == "Success") {
-      Scaffold.of(context).showSnackBar(
-          new SnackBar(content: new Text("Notification Dismissed")));
+      Scaffold.of(context).showSnackBar(new SnackBar(
+          content: new Text("Notification Dismissed"),
+          duration: Duration(seconds: 1)));
     }
   }
 
@@ -222,6 +224,25 @@ class _OurAlertPageState extends State<OurAlertPage> {
     super.dispose();
   }
 
+  RefreshController _refreshController =
+      RefreshController(initialRefresh: false);
+
+  void _onRefresh() async {
+    // monitor network fetch
+    await Future.delayed(Duration(milliseconds: 1000));
+    // if failed,use refreshFailed()
+    _refreshController.refreshCompleted();
+  }
+
+  void _onLoading() async {
+    // monitor network fetch
+    await Future.delayed(Duration(milliseconds: 1000));
+    // if failed,use loadFailed(),if no data return,use LoadNodata()
+    // items.add((items.length+1).toString());
+    if (mounted) setState(() {});
+    _refreshController.loadComplete();
+  }
+
   ProgressDialog progressdialog;
   @override
   Widget build(BuildContext context) {
@@ -244,7 +265,14 @@ class _OurAlertPageState extends State<OurAlertPage> {
               icon: Icon(Icons.cached_outlined),
               onPressed: () async {
                 setState(() {});
-                print("Refreshing");
+                Scaffold.of(context).showSnackBar(SnackBar(
+                    content: Row(
+                      children: [
+                        Icon(Icons.check_circle),
+                        Text("Refreshed"),
+                      ],
+                    ),
+                    duration: Duration(seconds: 1)));
               },
             ),
             IconButton(
@@ -273,142 +301,209 @@ class _OurAlertPageState extends State<OurAlertPage> {
                   child: Text("empty"),
                 );
               } else {
-                return ListView.builder(
-                    // reverse: true,
-                    itemCount: snapshot.data.documents.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      // var now = DateTime.now();
-                      var date;
-                      if (snapshot.data.documents
-                              .elementAt(index)['noticetype'] !=
-                          "Notice") {
-                        date = snapshot.data.documents
-                            .elementAt(index)["datecompleted"]
-                            .toDate();
-                      }
-                      var diff;
-                      if (snapshot.data.documents
-                              .elementAt(index)['noticetype'] !=
-                          "Notice") {
-                        diff = date.difference(time).inMinutes;
-                      } else {
-                        diff = 1;
-                      }
-                      return Slidable(
-                        actionPane: SlidableDrawerActionPane(),
-                        actionExtentRatio: 0.25,
-                        secondaryActions: <Widget>[
-                          IconSlideAction(
-                            caption: 'Delete',
-                            color: Colors.redAccent,
-                            icon: Icons.delete,
-                            onTap: () {
-                              if (value.getCurrentGroup.leader ==
-                                  _currentuser.getCurrentUser.uid) {
-                                _removeNoticedialog(
-                                    context,
-                                    snapshot.data.documents
-                                        .elementAt(index)
-                                        .documentID
-                                        .toString());
-                                // _removeNotice(
-                                //     context,
-                                //     snapshot.data.documents
-                                //         .elementAt(index)
-                                //         .documentID
-                                //         .toString());
-                              } else {
-                                Scaffold.of(context).showSnackBar(new SnackBar(
-                                    content:
-                                        new Text("You are not Authorized!")));
-                              }
-                            },
-                          )
-                        ],
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                  alignment: Alignment.topCenter,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(40.0),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                          (snapshot.data.documents.elementAt(
-                                                      index)["datesend"] !=
-                                                  null)
-                                              ? DateFormat.E("en_US").format(
-                                                  snapshot.data.documents
-                                                      .elementAt(
-                                                          index)["datesend"]
-                                                      .toDate())
-                                              : "loading...",
-                                          style: TextStyle(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.bold,
-                                          )),
-                                      Text(
-                                          (snapshot.data.documents.elementAt(
-                                                      index)["datesend"] !=
-                                                  null)
-                                              ? "    " +
-                                                  DateFormat.d("en_US").format(
-                                                      snapshot.data.documents
-                                                          .elementAt(
-                                                              index)["datesend"]
-                                                          .toDate()) +
-                                                  "    "
-                                              : "loading...",
-                                          style: TextStyle(
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.bold,
-                                          )),
-                                      Text(
-                                          (snapshot.data.documents.elementAt(
-                                                      index)["datesend"] !=
-                                                  null)
-                                              ? DateFormat.MMM("en_US").format(
-                                                  snapshot.data.documents
-                                                      .elementAt(
-                                                          index)["datesend"]
-                                                      .toDate())
-                                              : "loading...",
-                                          style: TextStyle(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.bold,
-                                          )),
-                                    ],
-                                  )),
-                              SizedBox(
-                                width: 2,
-                              ),
-                              Expanded(
-                                child: Bounce(
-                                  duration: Duration(milliseconds: 100),
-                                  onPressed: () async {
-                                    setState(() {});
-                                    if (snapshot.data.documents
-                                            .elementAt(index)['noticetype'] ==
-                                        "Assignment") {
-                                      if (value.getCurrentGroup.leader ==
-                                          _currentuser.getCurrentUser.uid) {
+                return SmartRefresher(
+                  enablePullDown: true,
+                  // enablePullUp: true,
+                  header: WaterDropHeader(),
+                  // footer: CustomFooter(
+                  //   builder: (BuildContext context, LoadStatus mode) {
+                  //     Widget body;
+                  //     if (mode == LoadStatus.idle) {
+                  //       body = Text("pull up load");
+                  //     } else if (mode == LoadStatus.loading) {
+                  //       body = CupertinoActivityIndicator();
+                  //     } else if (mode == LoadStatus.failed) {
+                  //       body = Text("Load Failed!Click retry!");
+                  //     } else if (mode == LoadStatus.canLoading) {
+                  //       body = Text("release to load more");
+                  //     } else {
+                  //       body = Text("No more Data");
+                  //     }
+                  //     return Container(
+                  //       height: 55.0,
+                  //       child: Center(child: body),
+                  //     );
+                  //   },
+                  // ),
+                  controller: _refreshController,
+                  onRefresh: _onRefresh,
+                  onLoading: _onLoading,
+                  child: ListView.builder(
+                      // reverse: true,
+                      itemCount: snapshot.data.documents.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        // var now = DateTime.now();
+                        var date;
+                        if (snapshot.data.documents
+                                .elementAt(index)['noticetype'] !=
+                            "Notice") {
+                          date = snapshot.data.documents
+                              .elementAt(index)["datecompleted"]
+                              .toDate();
+                        }
+                        var diff;
+                        if (snapshot.data.documents
+                                .elementAt(index)['noticetype'] !=
+                            "Notice") {
+                          diff = date.difference(time).inMinutes;
+                        } else {
+                          diff = 1;
+                        }
+                        return Slidable(
+                          actionPane: SlidableDrawerActionPane(),
+                          actionExtentRatio: 0.25,
+                          secondaryActions: <Widget>[
+                            IconSlideAction(
+                              caption: 'Delete',
+                              color: Colors.redAccent,
+                              icon: Icons.delete,
+                              onTap: () {
+                                if (value.getCurrentGroup.leader ==
+                                    _currentuser.getCurrentUser.uid) {
+                                  _removeNoticedialog(
+                                      context,
+                                      snapshot.data.documents
+                                          .elementAt(index)
+                                          .documentID
+                                          .toString());
+                                  // _removeNotice(
+                                  //     context,
+                                  //     snapshot.data.documents
+                                  //         .elementAt(index)
+                                  //         .documentID
+                                  //         .toString());
+                                } else {
+                                  Scaffold.of(context).showSnackBar(
+                                      new SnackBar(
+                                          content: new Text(
+                                              "You are not Authorized!")));
+                                }
+                              },
+                            )
+                          ],
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                    alignment: Alignment.topCenter,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(40.0),
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                            (snapshot.data.documents.elementAt(
+                                                        index)["datesend"] !=
+                                                    null)
+                                                ? DateFormat.E("en_US").format(
+                                                    snapshot.data.documents
+                                                        .elementAt(
+                                                            index)["datesend"]
+                                                        .toDate())
+                                                : "loading...",
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.bold,
+                                            )),
+                                        Text(
+                                            (snapshot.data.documents.elementAt(
+                                                        index)["datesend"] !=
+                                                    null)
+                                                ? "    " +
+                                                    DateFormat.d("en_US")
+                                                        .format(snapshot
+                                                            .data.documents
+                                                            .elementAt(index)[
+                                                                "datesend"]
+                                                            .toDate()) +
+                                                    "    "
+                                                : "loading...",
+                                            style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold,
+                                            )),
+                                        Text(
+                                            (snapshot.data.documents.elementAt(
+                                                        index)["datesend"] !=
+                                                    null)
+                                                ? DateFormat.MMM("en_US")
+                                                    .format(snapshot
+                                                        .data.documents
+                                                        .elementAt(
+                                                            index)["datesend"]
+                                                        .toDate())
+                                                : "loading...",
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.bold,
+                                            )),
+                                      ],
+                                    )),
+                                SizedBox(
+                                  width: 2,
+                                ),
+                                Expanded(
+                                  child: Bounce(
+                                    duration: Duration(milliseconds: 100),
+                                    onPressed: () async {
+                                      setState(() {});
+                                      if (snapshot.data.documents
+                                              .elementAt(index)['noticetype'] ==
+                                          "Assignment") {
+                                        if (value.getCurrentGroup.leader ==
+                                            _currentuser.getCurrentUser.uid) {
+                                          progressdialog.show();
+                                          _openAssignmentAdminView(
+                                              context,
+                                              snapshot.data.documents
+                                                  .elementAt(index)
+                                                  .documentID
+                                                  .toString());
+                                        } else {
+                                          if (diff > 0) {
+                                            progressdialog.show();
+                                            _openNotice(
+                                                context,
+                                                snapshot.data.documents
+                                                    .elementAt(index)
+                                                    .documentID
+                                                    .toString());
+                                          } else {
+                                            Scaffold.of(context).showSnackBar(
+                                                new SnackBar(
+                                                    content: new Text(
+                                                        "Notification Expired")));
+                                          }
+                                        }
+                                      } else if (snapshot.data.documents
+                                              .elementAt(index)['noticetype'] ==
+                                          "Notice") {
                                         progressdialog.show();
-                                        _openAssignmentAdminView(
+                                        _openNotice(
                                             context,
                                             snapshot.data.documents
                                                 .elementAt(index)
                                                 .documentID
                                                 .toString());
-                                      } else {
-                                        if (diff > 0) {
+                                      } else if (snapshot.data.documents
+                                              .elementAt(index)['noticetype'] ==
+                                          "Live") {
+                                        if (value.getCurrentGroup.leader ==
+                                            _currentuser.getCurrentUser.uid) {
                                           progressdialog.show();
-                                          _openNotice(
+                                          _openLive(
+                                              context,
+                                              snapshot.data.documents
+                                                  .elementAt(index)
+                                                  .documentID
+                                                  .toString());
+                                        } else if (diff > 0) {
+                                          progressdialog.show();
+                                          _openLive(
                                               context,
                                               snapshot.data.documents
                                                   .elementAt(index)
@@ -420,340 +515,301 @@ class _OurAlertPageState extends State<OurAlertPage> {
                                                   content: new Text(
                                                       "Notification Expired")));
                                         }
+                                      } else if (snapshot.data.documents
+                                              .elementAt(index)['noticetype'] ==
+                                          "Attendance") {
+                                        if (value.getCurrentGroup.leader ==
+                                            _currentuser.getCurrentUser.uid) {
+                                          progressdialog.show();
+                                          _openAttendanceAdminView(
+                                              context,
+                                              snapshot.data.documents
+                                                  .elementAt(index)
+                                                  .documentID
+                                                  .toString());
+                                        }
                                       }
-                                    } else if (snapshot.data.documents
-                                            .elementAt(index)['noticetype'] ==
-                                        "Notice") {
-                                      progressdialog.show();
-                                      _openNotice(
-                                          context,
-                                          snapshot.data.documents
-                                              .elementAt(index)
-                                              .documentID
-                                              .toString());
-                                    } else if (snapshot.data.documents
-                                            .elementAt(index)['noticetype'] ==
-                                        "Live") {
-                                      if (value.getCurrentGroup.leader ==
-                                          _currentuser.getCurrentUser.uid) {
-                                        progressdialog.show();
-                                        _openLive(
-                                            context,
-                                            snapshot.data.documents
-                                                .elementAt(index)
-                                                .documentID
-                                                .toString());
-                                      } else if (diff > 0) {
-                                        progressdialog.show();
-                                        _openLive(
-                                            context,
-                                            snapshot.data.documents
-                                                .elementAt(index)
-                                                .documentID
-                                                .toString());
-                                      } else {
-                                        Scaffold.of(context).showSnackBar(
-                                            new SnackBar(
-                                                content: new Text(
-                                                    "Notification Expired")));
-                                      }
-                                    } else if (snapshot.data.documents
-                                            .elementAt(index)['noticetype'] ==
-                                        "Attendance") {
-                                      if (value.getCurrentGroup.leader ==
-                                          _currentuser.getCurrentUser.uid) {
-                                        progressdialog.show();
-                                        _openAttendanceAdminView(
-                                            context,
-                                            snapshot.data.documents
-                                                .elementAt(index)
-                                                .documentID
-                                                .toString());
-                                      }
-                                    }
-                                  },
-                                  child: Opacity(
-                                    opacity: (diff <= 0) ? 0.4 : 1,
-                                    child: Ourcontener(
-                                      child: Column(
-                                        children: [
-                                          Container(
-                                            child: Row(
-                                              children: [
-                                                (snapshot.data.documents
+                                    },
+                                    child: Opacity(
+                                      opacity: (diff <= 0) ? 0.4 : 1,
+                                      child: Ourcontener(
+                                        child: Column(
+                                          children: [
+                                            Container(
+                                              child: Row(
+                                                children: [
+                                                  (snapshot.data.documents
+                                                                  .elementAt(index)[
+                                                              'noticetype'] ==
+                                                          "Assignment")
+                                                      ? Icon(
+                                                          Icons.assignment,
+                                                          color: Colors.orange,
+                                                        )
+                                                      : (snapshot.data.documents
+                                                                      .elementAt(
+                                                                          index)[
+                                                                  'noticetype'] ==
+                                                              "Notice")
+                                                          ? Icon(Icons.bookmarks,
+                                                              color:
+                                                                  Colors.lime)
+                                                          : (snapshot.data.documents
+                                                                          .elementAt(index)[
+                                                                      'noticetype'] ==
+                                                                  "Live")
+                                                              ? Icon(Icons.video_call,
+                                                                  color: Colors
+                                                                      .blue)
+                                                              : Icon(
+                                                                  Icons.check_circle,
+                                                                  color: Colors.green),
+                                                  Text(
+                                                      " " +
+                                                          snapshot.data.documents
+                                                                  .elementAt(
+                                                                      index)[
+                                                              'noticetype'] +
+                                                          ":",
+                                                      style: TextStyle(
+                                                        fontSize: 17,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      )),
+                                                  Spacer(),
+                                                  Visibility(
+                                                    visible: (snapshot
+                                                                .data.documents
                                                                 .elementAt(
                                                                     index)[
                                                             'noticetype'] ==
-                                                        "Assignment")
-                                                    ? Icon(
-                                                        Icons.assignment,
-                                                        color: Colors.orange,
-                                                      )
-                                                    : (snapshot.data.documents
-                                                                    .elementAt(
-                                                                        index)[
-                                                                'noticetype'] ==
-                                                            "Notice")
-                                                        ? Icon(Icons.bookmarks,
-                                                            color: Colors.lime)
-                                                        : (snapshot.data
-                                                                        .documents
-                                                                        .elementAt(
-                                                                            index)[
-                                                                    'noticetype'] ==
-                                                                "Live")
-                                                            ? Icon(
-                                                                Icons
-                                                                    .video_call,
-                                                                color:
-                                                                    Colors.blue)
-                                                            : Icon(
-                                                                Icons
-                                                                    .check_circle,
-                                                                color: Colors
-                                                                    .green),
-                                                Text(
-                                                    " " +
-                                                        snapshot.data.documents
-                                                                .elementAt(
-                                                                    index)[
-                                                            'noticetype'] +
-                                                        ":",
-                                                    style: TextStyle(
-                                                      fontSize: 17,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                    )),
-                                                Spacer(),
-                                                Visibility(
-                                                  visible: (snapshot
-                                                              .data.documents
-                                                              .elementAt(index)[
-                                                          'noticetype'] ==
-                                                      "Assignment"),
-                                                  child: Container(
-                                                    decoration: BoxDecoration(
-                                                      color: Colors.redAccent,
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              20.0),
-                                                    ),
-                                                    // color: Colors.redAccent,
-                                                    child: Text(
-                                                      "  " +
-                                                              snapshot.data
-                                                                  .documents
-                                                                  .elementAt(index)[
-                                                                      'point']
-                                                                  .toString() +
-                                                              "  " ??
-                                                          "loading.....",
-                                                      style: TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 17.0,
-                                                        fontWeight:
-                                                            FontWeight.bold,
+                                                        "Assignment"),
+                                                    child: Container(
+                                                      decoration: BoxDecoration(
+                                                        color: Colors.redAccent,
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(20.0),
+                                                      ),
+                                                      // color: Colors.redAccent,
+                                                      child: Text(
+                                                        "  " +
+                                                                snapshot.data
+                                                                    .documents
+                                                                    .elementAt(index)[
+                                                                        'point']
+                                                                    .toString() +
+                                                                "  " ??
+                                                            "loading.....",
+                                                        style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 17.0,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ),
                                                       ),
                                                     ),
                                                   ),
-                                                ),
-                                              ],
+                                                ],
+                                              ),
                                             ),
-                                          ),
-                                          SizedBox(height: 5),
-                                          Container(
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Text(
-                                                    snapshot.data.documents
-                                                                .elementAt(
-                                                                    index)[
-                                                            'name'] ??
-                                                        "loading.....",
-                                                    style: TextStyle(
-                                                      fontSize: 18,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                    )),
-                                              ],
-                                            ),
-                                          ),
-                                          SizedBox(height: 5),
-                                          Container(
-                                            child: Row(
-                                              children: [
-                                                Text("Subject:  ",
-                                                    style: TextStyle(
-                                                      color: Colors.amber[900],
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                    )),
-                                                Expanded(
-                                                  child: Text(
+                                            SizedBox(height: 5),
+                                            Container(
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  Text(
                                                       snapshot.data.documents
                                                                   .elementAt(
                                                                       index)[
-                                                              'subject'] ??
+                                                              'name'] ??
                                                           "loading.....",
                                                       style: TextStyle(
-                                                        fontSize: 14,
-                                                        //  fontWeight: FontWeight.bold,
+                                                        fontSize: 18,
+                                                        fontWeight:
+                                                            FontWeight.bold,
                                                       )),
-                                                ),
-                                              ],
+                                                ],
+                                              ),
                                             ),
-                                          ),
-                                          SizedBox(height: 6),
-                                          Visibility(
-                                            visible: (snapshot.data.documents
-                                                    .elementAt(
-                                                        index)['noticetype'] !=
-                                                "Notice"),
-                                            child: Container(
+                                            SizedBox(height: 5),
+                                            Container(
                                               child: Row(
                                                 children: [
-                                                  Text("Due Date:  ",
+                                                  Text("Subject:  ",
                                                       style: TextStyle(
                                                         color:
                                                             Colors.amber[900],
                                                         fontWeight:
                                                             FontWeight.bold,
                                                       )),
-                                                  Text(
-                                                      (snapshot.data.documents
-                                                                      .elementAt(index)[
-                                                                  "datecompleted"] !=
-                                                              null)
-                                                          ? DateFormat.yMMMEd("en_US")
-                                                                  .format(snapshot
-                                                                      .data
-                                                                      .documents
-                                                                      .elementAt(index)[
-                                                                          "datecompleted"]
-                                                                      .toDate()) +
-                                                              " at- " +
-                                                              DateFormat("H:mm")
-                                                                  .format(snapshot
-                                                                      .data
-                                                                      .documents
-                                                                      .elementAt(
-                                                                          index)["datecompleted"]
-                                                                      .toDate())
-                                                          : "loading.....",
-                                                      style: TextStyle(
-                                                        fontSize: 14,
-                                                        //  fontWeight: FontWeight.bold,
-                                                      )),
+                                                  Expanded(
+                                                    child: Text(
+                                                        snapshot.data.documents
+                                                                    .elementAt(
+                                                                        index)[
+                                                                'subject'] ??
+                                                            "loading.....",
+                                                        style: TextStyle(
+                                                          fontSize: 14,
+                                                          //  fontWeight: FontWeight.bold,
+                                                        )),
+                                                  ),
                                                 ],
                                               ),
                                             ),
-                                          ),
-                                          SizedBox(height: 5),
-                                          Visibility(
-                                            visible: (snapshot.data.documents
-                                                    .elementAt(
-                                                        index)['noticetype'] ==
-                                                "Attendance"),
-                                            child: Container(
-                                                child: Column(
-                                              children: [
-                                                (diff > 0)
-                                                    ? Row(
-                                                        children: [
-                                                          Spacer(),
-                                                          IconButton(
-                                                              splashColor:
-                                                                  Colors.grey,
-                                                              icon: Icon(
-                                                                Icons
-                                                                    .check_circle,
-                                                                color: Colors
-                                                                    .blue[300],
-                                                                size: 40,
-                                                              ),
-                                                              onPressed: () {
-                                                                CurrentUser
-                                                                    _currentuser =
-                                                                    Provider.of<
-                                                                            CurrentUser>(
-                                                                        context,
-                                                                        listen:
-                                                                            false);
-                                                                if (_currentuser
-                                                                        .getCurrentUser
-                                                                        .uniqueId ==
-                                                                    null) {
-                                                                  Scaffold.of(
-                                                                          context)
-                                                                      .showSnackBar(new SnackBar(
-                                                                          content:
-                                                                              new Text("Failed Please Add uniqueId in profile")));
-                                                                } else {
-                                                                  _attendance(
-                                                                      context,
-                                                                      snapshot
-                                                                          .data
-                                                                          .documents
-                                                                          .elementAt(
-                                                                              index)
-                                                                          .documentID
-                                                                          .toString());
-                                                                }
-                                                              }),
-                                                          SizedBox(
-                                                            width: 35,
-                                                          ),
-                                                          IconButton(
-                                                              splashColor:
-                                                                  Colors.grey,
-                                                              icon: Icon(
-                                                                Icons
-                                                                    .highlight_remove,
-                                                                color: Colors
-                                                                    .red[300],
-                                                                size: 40,
-                                                              ),
-                                                              onPressed: () {}),
-                                                          Spacer(),
-                                                        ],
-                                                      )
-                                                    : Text(""),
-                                                Row(
+                                            SizedBox(height: 6),
+                                            Visibility(
+                                              visible: (snapshot.data.documents
+                                                          .elementAt(index)[
+                                                      'noticetype'] !=
+                                                  "Notice"),
+                                              child: Container(
+                                                child: Row(
                                                   children: [
-                                                    Spacer(),
-                                                    Text(
-                                                      "present",
-                                                      style: TextStyle(
-                                                          color:
-                                                              Colors.blue[300]),
-                                                    ),
-                                                    SizedBox(
-                                                      width: 30,
-                                                    ),
-                                                    Text("Absent",
+                                                    Text("Due Date:  ",
                                                         style: TextStyle(
-                                                            color: Colors
-                                                                .red[300])),
-                                                    Spacer(),
+                                                          color:
+                                                              Colors.amber[900],
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        )),
+                                                    Text(
+                                                        (snapshot.data.documents
+                                                                        .elementAt(
+                                                                            index)[
+                                                                    "datecompleted"] !=
+                                                                null)
+                                                            ? DateFormat.yMMMEd("en_US").format(snapshot
+                                                                    .data
+                                                                    .documents
+                                                                    .elementAt(index)[
+                                                                        "datecompleted"]
+                                                                    .toDate()) +
+                                                                " at- " +
+                                                                DateFormat("H:mm")
+                                                                    .format(snapshot
+                                                                        .data
+                                                                        .documents
+                                                                        .elementAt(
+                                                                            index)["datecompleted"]
+                                                                        .toDate())
+                                                            : "loading.....",
+                                                        style: TextStyle(
+                                                          fontSize: 14,
+                                                          //  fontWeight: FontWeight.bold,
+                                                        )),
                                                   ],
                                                 ),
-                                              ],
-                                            )),
-                                          ),
-                                          SizedBox(height: 5),
-                                        ],
+                                              ),
+                                            ),
+                                            SizedBox(height: 5),
+                                            Visibility(
+                                              visible: (snapshot.data.documents
+                                                          .elementAt(index)[
+                                                      'noticetype'] ==
+                                                  "Attendance"),
+                                              child: Container(
+                                                  child: Column(
+                                                children: [
+                                                  (diff > 0)
+                                                      ? Row(
+                                                          children: [
+                                                            Spacer(),
+                                                            IconButton(
+                                                                splashColor:
+                                                                    Colors.grey,
+                                                                icon: Icon(
+                                                                  Icons
+                                                                      .check_circle,
+                                                                  color: Colors
+                                                                          .blue[
+                                                                      300],
+                                                                  size: 40,
+                                                                ),
+                                                                onPressed: () {
+                                                                  CurrentUser
+                                                                      _currentuser =
+                                                                      Provider.of<
+                                                                              CurrentUser>(
+                                                                          context,
+                                                                          listen:
+                                                                              false);
+                                                                  if (_currentuser
+                                                                          .getCurrentUser
+                                                                          .uniqueId ==
+                                                                      null) {
+                                                                    Scaffold.of(
+                                                                            context)
+                                                                        .showSnackBar(new SnackBar(
+                                                                            content:
+                                                                                new Text("Failed Please Add uniqueId in profile")));
+                                                                  } else {
+                                                                    _attendance(
+                                                                        context,
+                                                                        snapshot
+                                                                            .data
+                                                                            .documents
+                                                                            .elementAt(index)
+                                                                            .documentID
+                                                                            .toString());
+                                                                  }
+                                                                }),
+                                                            SizedBox(
+                                                              width: 35,
+                                                            ),
+                                                            IconButton(
+                                                                splashColor:
+                                                                    Colors.grey,
+                                                                icon: Icon(
+                                                                  Icons
+                                                                      .highlight_remove,
+                                                                  color: Colors
+                                                                      .red[300],
+                                                                  size: 40,
+                                                                ),
+                                                                onPressed:
+                                                                    () {}),
+                                                            Spacer(),
+                                                          ],
+                                                        )
+                                                      : Text(""),
+                                                  Row(
+                                                    children: [
+                                                      Spacer(),
+                                                      Text(
+                                                        "present",
+                                                        style: TextStyle(
+                                                            color: Colors
+                                                                .blue[300]),
+                                                      ),
+                                                      SizedBox(
+                                                        width: 30,
+                                                      ),
+                                                      Text("Absent",
+                                                          style: TextStyle(
+                                                              color: Colors
+                                                                  .red[300])),
+                                                      Spacer(),
+                                                    ],
+                                                  ),
+                                                ],
+                                              )),
+                                            ),
+                                            SizedBox(height: 5),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    });
+                        );
+                      }),
+                );
               }
             },
           ),

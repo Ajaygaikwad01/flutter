@@ -374,6 +374,16 @@ class _OurAssignmentAdminPageState extends State<OurAssignmentAdminPage> {
                                       color: Colors.white,
                                       onPressed: () {
                                         setState(() {});
+                                        Scaffold.of(context).showSnackBar(
+                                            SnackBar(
+                                                content: Row(
+                                                  children: [
+                                                    Icon(Icons.check_circle),
+                                                    Text("Refreshed"),
+                                                  ],
+                                                ),
+                                                duration:
+                                                    Duration(seconds: 1)));
                                       },
                                     ),
                                     Row(

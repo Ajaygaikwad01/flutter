@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:provider/provider.dart';
 import 'package:worldetor/state/currentuser.dart';
-import 'package:worldetor/utils/ourcontener.dart';
 
 class Oursignupform extends StatefulWidget {
   @override
@@ -50,11 +49,16 @@ class _OursignupformState extends State<Oursignupform> {
     progressdialog.style(
       message: "Loading....",
     );
-    return Ourcontener(
+    return Container(
+      padding: EdgeInsets.all(12.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15.0),
+      ),
       child: Column(
         children: <Widget>[
           Padding(
-            padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 8.0),
+            padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
             child: Text(
               "Sign Up",
               style: TextStyle(
@@ -63,6 +67,9 @@ class _OursignupformState extends State<Oursignupform> {
                 fontWeight: FontWeight.bold,
               ),
             ),
+          ),
+          SizedBox(
+            height: 20.0,
           ),
           TextFormField(
             controller: _uniqueIdController,

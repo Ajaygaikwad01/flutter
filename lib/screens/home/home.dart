@@ -120,7 +120,15 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             onPressed: () async {
               setState(() {});
-              print("Refreshing");
+              Scaffold.of(context).showSnackBar(SnackBar(
+                  content: Row(
+                    children: [
+                      Icon(Icons.check_circle),
+                      Text("Refreshed"),
+                    ],
+                  ),
+                  duration: Duration(seconds: 1)));
+              // print("Refreshing");
             },
           ),
           PopupMenuButton<String>(
@@ -157,7 +165,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Consumer<CurrentUser>(
           builder: (BuildContext context, value, Widget child) {
         if (value.getCurrentUser.listGroup == null) {
-          return Center(child: Text("Create OR join Group"));
+          return Center(child: Text("Create OR Join Group"));
         } else {
           return StreamBuilder(
               stream: Firestore.instance
