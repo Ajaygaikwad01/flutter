@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:provider/provider.dart';
 import 'package:worldetor/screens/group/Inside%20notice/addAttendance.dart';
 import 'package:worldetor/screens/group/Inside%20notice/addasignment.dart';
 import 'package:worldetor/screens/group/Inside%20notice/live_pages/addlive.dart';
 import 'package:worldetor/screens/group/Inside%20notice/addnotice.dart';
+import 'package:worldetor/state/currentgroup.dart';
 
 class OurFloatButton extends StatefulWidget {
   @override
@@ -33,9 +35,17 @@ class _OurFloatButtonState extends State<OurFloatButton> {
           label: "Assignment",
           labelStyle: TextStyle(fontSize: 16),
           onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => OurAddAssignment()),
+            Widget retval;
+            retval = ChangeNotifierProvider(
+              create: (context) => CurrentGroup(),
+              child: OurAddAssignment(),
             );
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => retval),
+            );
+            // Navigator.of(context).push(
+            //   MaterialPageRoute(builder: (context) => retval),
+            // );
           },
         ),
         SpeedDialChild(
@@ -45,11 +55,19 @@ class _OurFloatButtonState extends State<OurFloatButton> {
           label: "Attendance",
           labelStyle: TextStyle(fontSize: 16),
           onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => OurAddAttendance(),
-              ),
+            Widget retval;
+            retval = ChangeNotifierProvider(
+              create: (context) => CurrentGroup(),
+              child: OurAddAttendance(),
             );
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => retval),
+            );
+            // Navigator.of(context).push(
+            //   MaterialPageRoute(
+            //     builder: (context) => OurAddAttendance(),
+            //   ),
+            // );
           },
         ),
         SpeedDialChild(
@@ -59,11 +77,19 @@ class _OurFloatButtonState extends State<OurFloatButton> {
           label: "Notice",
           labelStyle: TextStyle(fontSize: 16),
           onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => OurAddNotice(),
-              ),
+            Widget retval;
+            retval = ChangeNotifierProvider(
+              create: (context) => CurrentGroup(),
+              child: OurAddNotice(),
             );
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => retval),
+            );
+            // Navigator.of(context).push(
+            //   MaterialPageRoute(
+            //     builder: (context) => OurAddNotice(),
+            //   ),
+            // );
           },
         ),
         SpeedDialChild(
@@ -73,11 +99,19 @@ class _OurFloatButtonState extends State<OurFloatButton> {
           label: "Live",
           labelStyle: TextStyle(fontSize: 16),
           onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => OurLiveNotice(),
-              ),
+            Widget retval;
+            retval = ChangeNotifierProvider(
+              create: (context) => CurrentGroup(),
+              child: OurLiveNotice(),
             );
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => retval),
+            );
+            // Navigator.of(context).push(
+            //   MaterialPageRoute(
+            //     builder: (context) => OurLiveNotice(),
+            //   ),
+            // );
           },
         )
       ],

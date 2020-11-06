@@ -6,6 +6,7 @@ class OurNotice {
   int point;
   Timestamp datecompleted;
   Timestamp datesend;
+  Timestamp dateLiveStart;
   String noticetype;
   String subject;
   String description;
@@ -16,6 +17,7 @@ class OurNotice {
     this.point,
     this.datecompleted,
     this.datesend,
+    this.dateLiveStart,
     this.noticetype,
     this.subject,
     this.description,

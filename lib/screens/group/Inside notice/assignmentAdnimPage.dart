@@ -4,7 +4,7 @@ import 'package:flutter_bounce/flutter_bounce.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
-import 'package:progress_dialog/progress_dialog.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:worldetor/screens/group/Inside%20notice/assignmentBox.dart';
@@ -63,6 +63,9 @@ class _OurAssignmentAdminPageState extends State<OurAssignmentAdminPage> {
   }
 
   void _removename(groupId, noticeId, assignmentId) async {
+    setState(() {
+      loadingcircle = true;
+    });
     await Firestore.instance
         .collection("groups")
         .document(groupId)
@@ -71,6 +74,9 @@ class _OurAssignmentAdminPageState extends State<OurAssignmentAdminPage> {
         .collection("assignment")
         .document(assignmentId)
         .delete();
+    setState(() {
+      loadingcircle = false;
+    });
   }
 
   void _openNotice(
@@ -82,7 +88,9 @@ class _OurAssignmentAdminPageState extends State<OurAssignmentAdminPage> {
         .openNotice(_currentuser.getCurrentUser.groupid, noticeId);
 
     if (_returnString == "Success") {
-      progressdialog.hide();
+      setState(() {
+        loadingcircle = false;
+      });
       Widget retval;
       retval = ChangeNotifierProvider(
         create: (context) => CurrentGroup(),
@@ -92,7 +100,9 @@ class _OurAssignmentAdminPageState extends State<OurAssignmentAdminPage> {
         MaterialPageRoute(builder: (context) => retval),
       );
     } else {
-      progressdialog.hide();
+      setState(() {
+        loadingcircle = false;
+      });
     }
   }
 
@@ -104,10 +114,10 @@ class _OurAssignmentAdminPageState extends State<OurAssignmentAdminPage> {
         child: OutlineButton(
           splashColor: Colors.grey,
           onPressed: () async {
-            progressdialog.show();
+            setState(() {
+              loadingcircle = true;
+            });
             _openNotice(context, uniqueId);
-            //  await progressdialog.show();
-            // _loginUser(type: LoginType.google, context: context);
           },
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(60)),
@@ -142,8 +152,10 @@ class _OurAssignmentAdminPageState extends State<OurAssignmentAdminPage> {
     Alert(
       context: context,
       type: AlertType.success,
-      title: "Success",
-      desc: "Due Date Changed",
+      title: "Due Date Changed",
+      desc: DateFormat.yMMMMd("en_US").format(_selecedtDate) +
+          " at " +
+          DateFormat("H:mm").format(_selecedtDate),
       buttons: [
         DialogButton(
           child: Text(
@@ -183,11 +195,23 @@ class _OurAssignmentAdminPageState extends State<OurAssignmentAdminPage> {
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(DateFormat.yMMMMd("en_US").format(_selecedtDate)),
-                Text(DateFormat("H:mm").format(_selecedtDate)),
-                FlatButton(
-                    onPressed: () => _selectDate(context),
-                    child: Text("Selcet Due Date")),
+                // Text(DateFormat.yMMMMd("en_US").format(_selecedtDate)),
+                // Text(DateFormat("H:mm").format(_selecedtDate)),
+                Container(
+                  height: 35,
+                  width: 180,
+                  child: RaisedButton(
+                      onPressed: () => _selectDate(context),
+                      child: Row(
+                        children: [
+                          Icon(Icons.calendar_today, color: Colors.red),
+                          Text("Selcet Due Date",
+                              style: TextStyle(
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.bold)),
+                        ],
+                      )),
+                ),
               ],
             ),
             actions: <Widget>[
@@ -198,17 +222,23 @@ class _OurAssignmentAdminPageState extends State<OurAssignmentAdminPage> {
                   child: Text("Cancel")),
               FlatButton(
                   onPressed: () async {
+                    setState(() {
+                      loadingcircle = true;
+                    });
+
                     await Firestore.instance
                         .collection("groups")
                         .document(groupid)
                         .collection("notice")
                         .document(noticeid)
                         .updateData({'datecompleted': _selecedtDate});
-
+                    setState(() {
+                      loadingcircle = false;
+                    });
                     Navigator.of(context).pop();
                     _alertDueDatedialog();
-                    Scaffold.of(context).showSnackBar(
-                        new SnackBar(content: new Text("Due Date Updated")));
+                    // Scaffold.of(context).showSnackBar(
+                    //     new SnackBar(content: new Text("Due Date Updated")));
                   },
                   child: Text("Submit")),
             ],
@@ -225,8 +255,6 @@ class _OurAssignmentAdminPageState extends State<OurAssignmentAdminPage> {
           splashColor: Colors.grey,
           onPressed: () async {
             _dialogbox(context, groupid, noticeid);
-            //  await progressdialog.show();
-            // _loginUser(type: LoginType.google, context: context);
           },
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(60)),
@@ -241,13 +269,11 @@ class _OurAssignmentAdminPageState extends State<OurAssignmentAdminPage> {
                 Icon(Icons.calendar_today),
                 Padding(
                   padding: const EdgeInsets.only(left: 1),
-                  child: Expanded(
-                    child: Text(
-                      'Change DueDate',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                      ),
+                  child: Text(
+                    'Change DueDate',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey,
                     ),
                   ),
                 )
@@ -259,459 +285,365 @@ class _OurAssignmentAdminPageState extends State<OurAssignmentAdminPage> {
     );
   }
 
-  void _attendbutton(point, groupId, indexuserId, noticeId) async {
-    int noticepoint = point;
-
-    DocumentSnapshot docref = await Firestore.instance
-        .collection("groups")
-        .document(groupId)
-        .collection("group_member")
-        .document(indexuserId)
-        .get();
-    var currntpoint = docref.data["point"];
-    int totalpoint = currntpoint + noticepoint;
-    print(totalpoint);
-    await Firestore.instance
-        .collection("groups")
-        .document(groupId)
-        .collection("group_member")
-        .document(indexuserId)
-        .updateData({"point": totalpoint});
-    List uid = List();
-    uid.add(indexuserId);
-    await Firestore.instance
-        .collection("groups")
-        .document(groupId)
-        .collection("notice")
-        .document(noticeId)
-        .updateData({
-      'markedId': FieldValue.arrayUnion(uid),
-    });
-    // Scaffold.of(context)
-    //     .showSnackBar(new SnackBar(content: new Text("Assignment mark Added")));
-    setState(() {
-      loading = !loading;
-    });
-  }
-
-  Future<List> _getmarkedlist() async {
-    CurrentGroup _currentgroup =
-        Provider.of<CurrentGroup>(context, listen: false);
-    DocumentSnapshot _docsnap = await Firestore.instance
-        .collection("groups")
-        .document(_currentgroup.getCurrentGroup.id)
-        .collection("notice")
-        .document(_currentgroup.getCurrentNotice.id)
-        .get();
-    List _markedlist = _docsnap["markedId"];
-    // if (_docsnap["markedId"] != null) {
-    //   _markedlist = _docsnap["markedId"];
-    //   print(_docsnap["markedId"]);
-    // } else {
-    _markedlist.add(1);
-    // }
-    print(_markedlist.length);
-    return _markedlist;
-  }
-
   bool loading = false;
   // double _progress;
-  ProgressDialog progressdialog;
+  bool loadingcircle = false;
   @override
   Widget build(BuildContext context) {
-    progressdialog = ProgressDialog(context,
-        type: ProgressDialogType.Normal, isDismissible: false);
-    progressdialog.style(
-      message: "Loading....",
-    );
-
-    return Consumer<CurrentGroup>(
-        builder: (BuildContext context, value, Widget child) {
-      return Scaffold(
-        backgroundColor: Color(0xFF21BFBD),
-        body: StreamBuilder(
-            stream: Firestore.instance
-                .collection("groups")
-                .document(value.getCurrentGroup.id)
-                .collection("notice")
-                .document(value.getCurrentGroup.currentNoticeid)
-                .collection("assignment")
-                .snapshots(),
-            builder:
-                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (snapshot.data == null) {
-                return Center(
-                  child: CircularProgressIndicator(),
-                );
-              } else {
-                if (snapshot.data.documents == null) {
+    return ModalProgressHUD(
+      inAsyncCall: loadingcircle,
+      child: Consumer<CurrentGroup>(
+          builder: (BuildContext context, value, Widget child) {
+        return Scaffold(
+          backgroundColor: Colors.cyan,
+          body: StreamBuilder(
+              stream: Firestore.instance
+                  .collection("groups")
+                  .document(value.getCurrentGroup.id)
+                  .collection("notice")
+                  .document(value.getCurrentGroup.currentNoticeid)
+                  .collection("assignment")
+                  .snapshots(),
+              builder: (BuildContext context,
+                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                if (snapshot.data == null) {
                   return Center(
                     child: CircularProgressIndicator(),
                   );
                 } else {
-                  return ListView(
-                    children: <Widget>[
-                      Padding(
-                        padding: EdgeInsets.only(top: 15.0, left: 10.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            IconButton(
-                              icon: Icon(Icons.arrow_back_ios),
-                              color: Colors.white,
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                            Container(
-                                width: 125.0,
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: <Widget>[
-                                    IconButton(
-                                      icon: Icon(Icons.cached),
-                                      color: Colors.white,
-                                      onPressed: () {
-                                        setState(() {});
-                                        Scaffold.of(context).showSnackBar(
-                                            SnackBar(
-                                                content: Row(
-                                                  children: [
-                                                    Icon(Icons.check_circle),
-                                                    Text("Refreshed"),
-                                                  ],
-                                                ),
-                                                duration:
-                                                    Duration(seconds: 1)));
-                                      },
-                                    ),
-                                    Row(
-                                      children: [
-                                        Icon(Icons.people_alt,
-                                            color: Colors.white),
-                                        Text(
-                                          " " +
-                                              snapshot.data.documents.length
-                                                  .toString(),
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(
-                                      width: 10,
-                                    ),
-                                  ],
-                                ))
-                          ],
+                  if (snapshot.data.documents == null) {
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  } else {
+                    return ListView(
+                      children: <Widget>[
+                        Padding(
+                          padding: EdgeInsets.only(top: 15.0, left: 10.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              IconButton(
+                                icon: Icon(Icons.arrow_back_ios),
+                                color: Colors.white,
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                              Container(
+                                  width: 125.0,
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: <Widget>[
+                                      IconButton(
+                                        icon: Icon(Icons.cached),
+                                        color: Colors.white,
+                                        onPressed: () {
+                                          setState(() {});
+                                          Scaffold.of(context).showSnackBar(
+                                              SnackBar(
+                                                  content: Row(
+                                                    children: [
+                                                      Icon(Icons.check_circle,
+                                                          color: Colors.green),
+                                                      Text("Refreshed"),
+                                                    ],
+                                                  ),
+                                                  duration:
+                                                      Duration(seconds: 1)));
+                                        },
+                                      ),
+                                      Row(
+                                        children: [
+                                          Icon(Icons.people_alt,
+                                              color: Colors.white),
+                                          Text(
+                                            " " +
+                                                snapshot.data.documents.length
+                                                    .toString(),
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(
+                                        width: 10,
+                                      ),
+                                    ],
+                                  ))
+                            ],
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 25.0),
-                      Padding(
-                        padding: EdgeInsets.only(left: 40.0),
-                        child: Row(
-                          children: <Widget>[
-                            Text("Assignment",
-                                style: TextStyle(
-                                    // fontFamily: 'Montserrat',
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 25.0)),
-                            SizedBox(width: 10.0),
-                            Expanded(
-                              child: Text("Submissions",
+                        SizedBox(height: 15.0),
+                        Padding(
+                          padding: EdgeInsets.only(left: 40.0),
+                          child: Row(
+                            children: <Widget>[
+                              Text("Assignment",
                                   style: TextStyle(
-                                      // fontFamily: 'Montserrat',
                                       color: Colors.white,
-                                      fontSize: 24.0)),
-                            )
-                          ],
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 25.0)),
+                              SizedBox(width: 10.0),
+                              Expanded(
+                                child: Text("Submissions",
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 24.0)),
+                              )
+                            ],
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 40.0),
-                      Container(
-                        height: MediaQuery.of(context).size.height - 185.0,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius:
-                              BorderRadius.only(topLeft: Radius.circular(75.0)),
-                        ),
-                        child:
-                            // primary: false,
-                            // padding:
-                            //     EdgeInsets.only(left: 25.0, right: 18.0, top: 15),
-                            Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            SizedBox(
-                              height: 5,
-                            ),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                _previewButton(
-                                    context, value.getCurrentNotice.id),
-                                _extendButton(context, value.getCurrentGroup.id,
-                                    value.getCurrentNotice.id),
-                              ],
-                            ),
-                            SizedBox(
-                              height: 3,
-                            ),
-                            Container(
-                                height: 1, width: 300, color: Colors.grey),
-                            SizedBox(
-                              height: 7,
-                            ),
-                            Expanded(
-                              child: ListView.builder(
-                                itemCount: snapshot.data.documents.length,
-                                itemBuilder: (BuildContext context, int index) {
-                                  // String name = snapshot.data.documents.elementAt(index);
-                                  return Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 1, horizontal: 10),
-                                    child: Slidable(
-                                      actionPane: SlidableDrawerActionPane(),
-                                      actionExtentRatio: 0.30,
-                                      secondaryActions: <Widget>[
-                                        IconSlideAction(
-                                          caption: 'Delete',
-                                          color: Colors.redAccent,
-                                          icon: Icons.delete,
-                                          onTap: () {
-                                            setState(() {
-                                              loading = !loading;
-                                            });
-                                            _deletedialog(
-                                                value.getCurrentGroup.id,
-                                                value.getCurrentNotice.id,
-                                                snapshot.data.documents
-                                                    .elementAt(index)
-                                                    .documentID);
-                                          },
-                                        )
-                                      ],
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(3.0),
-                                        child: Bounce(
-                                          duration: Duration(milliseconds: 110),
-                                          onPressed: () async {
-                                            await Firestore.instance
-                                                .collection("groups")
-                                                .document(
-                                                    value.getCurrentGroup.id)
-                                                .updateData({
-                                              "currentAssignmentSenderid":
+                        SizedBox(height: 20.0),
+                        Container(
+                          height: MediaQuery.of(context).size.height - 155.0,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(75.0)),
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SizedBox(
+                                height: 5,
+                              ),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  _previewButton(
+                                      context, value.getCurrentNotice.id),
+                                  _extendButton(
+                                      context,
+                                      value.getCurrentGroup.id,
+                                      value.getCurrentNotice.id),
+                                ],
+                              ),
+                              SizedBox(
+                                height: 3,
+                              ),
+                              Container(
+                                  height: 1, width: 300, color: Colors.grey),
+                              SizedBox(
+                                height: 7,
+                              ),
+                              Expanded(
+                                child: ListView.builder(
+                                  itemCount: snapshot.data.documents.length,
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    // String name = snapshot.data.documents.elementAt(index);
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 1, horizontal: 10),
+                                      child: Slidable(
+                                        actionPane: SlidableDrawerActionPane(),
+                                        actionExtentRatio: 0.30,
+                                        secondaryActions: <Widget>[
+                                          IconSlideAction(
+                                            caption: 'Delete',
+                                            color: Colors.redAccent,
+                                            icon: Icons.delete,
+                                            onTap: () {
+                                              setState(() {
+                                                loading = !loading;
+                                              });
+                                              _deletedialog(
+                                                  value.getCurrentGroup.id,
+                                                  value.getCurrentNotice.id,
                                                   snapshot.data.documents
                                                       .elementAt(index)
-                                                      .documentID,
-                                            });
-
-                                            Widget retval;
-                                            retval = ChangeNotifierProvider(
-                                              create: (context) =>
-                                                  CurrentGroup(),
-                                              child: OurAssignmentBox(),
-                                            );
-                                            Navigator.of(context)
-                                                .push(MaterialPageRoute(
-                                              builder: (context) => retval,
-                                            ));
-                                          },
-                                          child: Container(
-                                            height: 40,
-                                            decoration: BoxDecoration(
-                                                color: Colors.white,
-                                                borderRadius:
-                                                    BorderRadius.circular(18.0),
-                                                boxShadow: [
-                                                  BoxShadow(
-                                                      color: Colors.grey,
-                                                      blurRadius: 9.0,
-                                                      spreadRadius: 5.0,
-                                                      offset: Offset(
-                                                        4.0,
-                                                        3.5,
-                                                      )),
-                                                ]),
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: Row(
-                                                children: [
-                                                  Text(
+                                                      .documentID);
+                                            },
+                                          )
+                                        ],
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(3.0),
+                                          child: Bounce(
+                                            duration:
+                                                Duration(milliseconds: 110),
+                                            onPressed: () async {
+                                              await Firestore.instance
+                                                  .collection("groups")
+                                                  .document(
+                                                      value.getCurrentGroup.id)
+                                                  .updateData({
+                                                "currentAssignmentSenderid":
                                                     snapshot.data.documents
-                                                                .elementAt(
-                                                                    index)[
-                                                            "userName"] ??
-                                                        "Loading...",
-                                                  ),
-                                                  Spacer(),
-                                                  FutureBuilder(
-                                                      future: _getmarkedlist(),
-                                                      builder: (BuildContext
-                                                              context,
-                                                          AsyncSnapshot<dynamic>
-                                                              snapshot2) {
-                                                        if (snapshot2.data ==
-                                                            null) {
-                                                          return Container();
-                                                        } else {
-                                                          return Visibility(
-                                                            visible: (snapshot2
-                                                                    .data
-                                                                    .contains(snapshot
-                                                                        .data
-                                                                        .documents
-                                                                        .elementAt(
-                                                                            index)
-                                                                        .documentID) ==
-                                                                false),
-                                                            child: FlatButton(
-                                                              minWidth: 5,
-                                                              onPressed:
-                                                                  () async {
-                                                                _attendbutton(
-                                                                    value
-                                                                        .getCurrentNotice
-                                                                        .point,
-                                                                    value
-                                                                        .getCurrentGroup
-                                                                        .id,
-                                                                    snapshot
-                                                                        .data
-                                                                        .documents
-                                                                        .elementAt(
-                                                                            index)
-                                                                        .documentID,
-                                                                    value
-                                                                        .getCurrentNotice
-                                                                        .id);
+                                                        .elementAt(index)
+                                                        .documentID,
+                                              });
 
-                                                                setState(() {});
+                                              Widget retval;
+                                              retval = ChangeNotifierProvider(
+                                                create: (context) =>
+                                                    CurrentGroup(),
+                                                child: OurAssignmentBox(),
+                                              );
+                                              Navigator.of(context)
+                                                  .push(MaterialPageRoute(
+                                                builder: (context) => retval,
+                                              ));
+                                            },
+                                            child: Container(
+                                              height: 40,
+                                              decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          18.0),
+                                                  boxShadow: [
+                                                    BoxShadow(
+                                                        color: Colors.grey,
+                                                        blurRadius: 9.0,
+                                                        spreadRadius: 5.0,
+                                                        offset: Offset(
+                                                          4.0,
+                                                          3.5,
+                                                        )),
+                                                  ]),
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child: Row(
+                                                  children: [
+                                                    Text(
+                                                      snapshot.data.documents
+                                                                  .elementAt(
+                                                                      index)[
+                                                              "userName"] ??
+                                                          "Loading...",
+                                                    ),
+                                                    Spacer(),
+                                                    StreamBuilder(
+                                                        stream: Firestore
+                                                            .instance
+                                                            .collection(
+                                                                "groups")
+                                                            .document(value
+                                                                .getCurrentGroup
+                                                                .id)
+                                                            .collection(
+                                                                "notice")
+                                                            .document(value
+                                                                .getCurrentNotice
+                                                                .id)
+                                                            .snapshots(),
+                                                        builder: (BuildContext
+                                                                context,
+                                                            AsyncSnapshot<
+                                                                    dynamic>
+                                                                snapshot2) {
+                                                          if (snapshot2.data ==
+                                                              null) {
+                                                            return Container();
+                                                          } else {
+                                                            return Visibility(
+                                                              visible: (snapshot2
+                                                                      .data[
+                                                                          "markedId"]
+                                                                      .contains(snapshot
+                                                                          .data
+                                                                          .documents
+                                                                          .elementAt(
+                                                                              index)
+                                                                          .documentID) ==
+                                                                  false),
+                                                              child: FlatButton(
+                                                                minWidth: 5,
+                                                                onPressed:
+                                                                    () async {
+                                                                  // _attendbutton(
+                                                                  //     value
+                                                                  //         .getCurrentNotice
+                                                                  //         .point,
+                                                                  //     value
+                                                                  //         .getCurrentGroup
+                                                                  //         .id,
+                                                                  //     snapshot
+                                                                  //         .data
+                                                                  //         .documents
+                                                                  //         .elementAt(
+                                                                  //             index)
+                                                                  //         .documentID,
+                                                                  //     value
+                                                                  //         .getCurrentNotice
+                                                                  //         .id);
+                                                                  value.adminMarkedAssignment(
+                                                                      value
+                                                                          .getCurrentNotice
+                                                                          .point,
+                                                                      value
+                                                                          .getCurrentGroup
+                                                                          .id,
+                                                                      snapshot
+                                                                          .data
+                                                                          .documents
+                                                                          .elementAt(
+                                                                              index)
+                                                                          .documentID,
+                                                                      value
+                                                                          .getCurrentNotice
+                                                                          .id,
+                                                                      value
+                                                                          .getCurrentNotice
+                                                                          .name);
+                                                                  // setState(() {
+                                                                  //   loading =
+                                                                  //       !loading;
+                                                                  // });
 
-                                                                // int noticepoint =
-                                                                // value
-                                                                //     .getCurrentNotice
-                                                                //     .point;
-                                                                // DocumentSnapshot docref = await Firestore
-                                                                //     .instance
-                                                                //     .collection(
-                                                                //         "groups")
-                                                                //     .document(value
-                                                                //         .getCurrentGroup
-                                                                //         .id)
-                                                                //     .collection(
-                                                                //         "group_member")
-                                                                //     .document(snapshot
-                                                                //         .data
-                                                                //         .documents
-                                                                //         .elementAt(
-                                                                //             index)
-                                                                //         .documentID)
-                                                                //     .get();
-                                                                // var currntpoint =
-                                                                //     docref.data[
-                                                                //         "point"];
-                                                                // int totalpoint =
-                                                                //     currntpoint +
-                                                                //         noticepoint;
-                                                                // print(totalpoint);
-                                                                // await Firestore
-                                                                //     .instance
-                                                                //     .collection(
-                                                                //         "groups")
-                                                                //     .document(value
-                                                                //         .getCurrentGroup
-                                                                //         .id)
-                                                                //     .collection(
-                                                                //         "group_member")
-                                                                //     .document(snapshot
-                                                                //         .data
-                                                                //         .documents
-                                                                //         .elementAt(
-                                                                //             index)
-                                                                //         .documentID)
-                                                                //     .updateData({
-                                                                //   "point":
-                                                                //       totalpoint
-                                                                // });
-                                                                // List uid = List();
-                                                                // uid.add(snapshot
-                                                                //     .data
-                                                                //     .documents
-                                                                //     .elementAt(
-                                                                //         index)
-                                                                //     .documentID);
-                                                                // await Firestore
-                                                                //     .instance
-                                                                //     .collection(
-                                                                //         "groups")
-                                                                //     .document(value
-                                                                //         .getCurrentGroup
-                                                                //         .id)
-                                                                //     .collection(
-                                                                //         "notice")
-                                                                //     .document(value
-                                                                //         .getCurrentNotice
-                                                                //         .id)
-                                                                //     .updateData({
-                                                                //   'markedId':
-                                                                //       FieldValue
-                                                                //           .arrayUnion(
-                                                                //               uid),
-                                                                // });
-                                                                Scaffold.of(
-                                                                        context)
-                                                                    .showSnackBar(new SnackBar(
-                                                                        content:
-                                                                            new Text("Assignment mark Added")));
-                                                              },
-                                                              child: Row(
-                                                                children: [
-                                                                  Icon(
-                                                                    Icons
-                                                                        .check_box_sharp,
-                                                                    color: Colors
-                                                                        .blueAccent,
-                                                                    size: 24,
-                                                                  ),
-                                                                  Text("Check",
-                                                                      style: TextStyle(
-                                                                          fontSize:
-                                                                              20,
-                                                                          color:
-                                                                              Colors.blueAccent)),
-                                                                ],
+                                                                  Scaffold.of(
+                                                                          context)
+                                                                      .showSnackBar(new SnackBar(
+                                                                          content:
+                                                                              new Text("Assignment mark Added")));
+                                                                },
+                                                                child: Row(
+                                                                  children: [
+                                                                    Icon(
+                                                                      Icons
+                                                                          .check_box_sharp,
+                                                                      color: Colors
+                                                                          .blueAccent,
+                                                                      size: 24,
+                                                                    ),
+                                                                    Text(
+                                                                        "Check",
+                                                                        style: TextStyle(
+                                                                            fontSize:
+                                                                                20,
+                                                                            color:
+                                                                                Colors.blueAccent)),
+                                                                  ],
+                                                                ),
                                                               ),
-                                                            ),
-                                                          );
-                                                        }
-                                                      }),
-                                                ],
+                                                            );
+                                                          }
+                                                        }),
+                                                  ],
+                                                ),
                                               ),
                                             ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                  );
-                                },
+                                    );
+                                  },
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      )
-                    ],
-                  );
+                            ],
+                          ),
+                        )
+                      ],
+                    );
+                  }
                 }
-              }
-            }),
-      );
-    });
+              }),
+        );
+      }),
+    );
   }
 }

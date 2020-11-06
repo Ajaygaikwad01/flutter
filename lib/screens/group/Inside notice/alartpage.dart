@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:avatar_glow/avatar_glow.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -209,6 +210,7 @@ class _OurAlertPageState extends State<OurAlertPage> {
 
   Timer _timer;
   var time = DateTime.now();
+
   @override
   void initState() {
     super.initState();
@@ -252,20 +254,14 @@ class _OurAlertPageState extends State<OurAlertPage> {
   }
 
   bool loadingcircle = false;
-  // ProgressDialog progressdialog;
   @override
   Widget build(BuildContext context) {
-    // progressdialog = ProgressDialog(context,
-    //     type: ProgressDialogType.Normal, isDismissible: true);
-    // progressdialog.style(
-    //   message: "Loading....",
-    // );
     CurrentUser _currentuser = Provider.of<CurrentUser>(context, listen: false);
     return Consumer<CurrentGroup>(
         builder: (BuildContext context, value, Widget child) {
       return Scaffold(
         appBar: AppBar(
-          title: Text(value.getCurrentGroup.name ?? " loding....",
+          title: Text(value.getCurrentGroup.name ?? " loading....",
               style: TextStyle(color: Colors.white)),
           iconTheme: IconThemeData(color: Colors.white),
           actions: <Widget>[
@@ -277,7 +273,7 @@ class _OurAlertPageState extends State<OurAlertPage> {
                 Scaffold.of(context).showSnackBar(SnackBar(
                     content: Row(
                       children: [
-                        Icon(Icons.check_circle),
+                        Icon(Icons.check_circle, color: Colors.green),
                         Text("Refreshed"),
                       ],
                     ),
@@ -316,26 +312,7 @@ class _OurAlertPageState extends State<OurAlertPage> {
                     enablePullDown: true,
                     // enablePullUp: true,
                     header: WaterDropHeader(),
-                    // footer: CustomFooter(
-                    //   builder: (BuildContext context, LoadStatus mode) {
-                    //     Widget body;
-                    //     if (mode == LoadStatus.idle) {
-                    //       body = Text("pull up load");
-                    //     } else if (mode == LoadStatus.loading) {
-                    //       body = CupertinoActivityIndicator();
-                    //     } else if (mode == LoadStatus.failed) {
-                    //       body = Text("Load Failed!Click retry!");
-                    //     } else if (mode == LoadStatus.canLoading) {
-                    //       body = Text("release to load more");
-                    //     } else {
-                    //       body = Text("No more Data");
-                    //     }
-                    //     return Container(
-                    //       height: 55.0,
-                    //       child: Center(child: body),
-                    //     );
-                    //   },
-                    // ),
+
                     controller: _refreshController,
                     onRefresh: _onRefresh,
                     onLoading: _onLoading,
@@ -344,6 +321,24 @@ class _OurAlertPageState extends State<OurAlertPage> {
                         itemCount: snapshot.data.documents.length,
                         itemBuilder: (BuildContext context, int index) {
                           // var now = DateTime.now();
+                          var startLivedate;
+                          if (snapshot.data.documents
+                                  .elementAt(index)['noticetype'] ==
+                              "Live") {
+                            startLivedate = snapshot.data.documents
+                                .elementAt(index)["datelivestart"]
+                                .toDate();
+                          }
+                          var startLivediff;
+                          if (snapshot.data.documents
+                                  .elementAt(index)['noticetype'] ==
+                              "Live") {
+                            startLivediff =
+                                startLivedate.difference(time).inMinutes;
+                          } else {
+                            startLivediff = 1;
+                          }
+
                           var date;
                           if (snapshot.data.documents
                                   .elementAt(index)['noticetype'] !=
@@ -364,32 +359,30 @@ class _OurAlertPageState extends State<OurAlertPage> {
                             actionPane: SlidableDrawerActionPane(),
                             actionExtentRatio: 0.25,
                             secondaryActions: <Widget>[
-                              IconSlideAction(
-                                caption: 'Delete',
-                                color: Colors.redAccent,
-                                icon: Icons.delete,
-                                onTap: () {
-                                  if (value.getCurrentGroup.leader ==
-                                      _currentuser.getCurrentUser.uid) {
-                                    _removeNoticedialog(
-                                        context,
-                                        snapshot.data.documents
-                                            .elementAt(index)
-                                            .documentID
-                                            .toString());
-                                    // _removeNotice(
-                                    //     context,
-                                    //     snapshot.data.documents
-                                    //         .elementAt(index)
-                                    //         .documentID
-                                    //         .toString());
-                                  } else {
-                                    Scaffold.of(context).showSnackBar(
-                                        new SnackBar(
-                                            content: new Text(
-                                                "You are not Authorized!")));
-                                  }
-                                },
+                              Visibility(
+                                visible: (value.getCurrentGroup.leader ==
+                                    _currentuser.getCurrentUser.uid),
+                                child: IconSlideAction(
+                                  caption: 'Delete',
+                                  color: Colors.redAccent,
+                                  icon: Icons.delete,
+                                  onTap: () {
+                                    if (value.getCurrentGroup.leader ==
+                                        _currentuser.getCurrentUser.uid) {
+                                      _removeNoticedialog(
+                                          context,
+                                          snapshot.data.documents
+                                              .elementAt(index)
+                                              .documentID
+                                              .toString());
+                                    } else {
+                                      Scaffold.of(context).showSnackBar(
+                                          new SnackBar(
+                                              content: new Text(
+                                                  "You are not Authorized!")));
+                                    }
+                                  },
+                                ),
                               )
                             ],
                             child: Padding(
@@ -610,6 +603,82 @@ class _OurAlertPageState extends State<OurAlertPage> {
                                                         )),
                                                     Spacer(),
                                                     Visibility(
+                                                      visible: (snapshot.data
+                                                                      .documents
+                                                                      .elementAt(
+                                                                          index)[
+                                                                  'noticetype'] ==
+                                                              "Live" &&
+                                                          diff >= 0 &&
+                                                          startLivediff < 0),
+                                                      child: AvatarGlow(
+                                                        glowColor: Colors.blue,
+                                                        endRadius: 15.0,
+                                                        duration: Duration(
+                                                            milliseconds: 2000),
+                                                        repeat: true,
+                                                        showTwoGlows: true,
+                                                        repeatPauseDuration:
+                                                            Duration(
+                                                                milliseconds:
+                                                                    100),
+                                                        child: Material(
+                                                          elevation: 8.0,
+                                                          shape: CircleBorder(),
+                                                          child: CircleAvatar(
+                                                            backgroundColor:
+                                                                Colors
+                                                                    .grey[100],
+                                                            child: Icon(
+                                                              Icons
+                                                                  .radio_button_on_outlined,
+                                                              color: Colors.red,
+                                                              size: 10,
+                                                            ),
+                                                            radius: 9.0,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      // child: Container(
+                                                      //   decoration:
+                                                      //       BoxDecoration(
+                                                      //     color: Colors.green,
+                                                      //     borderRadius:
+                                                      //         BorderRadius
+                                                      //             .circular(
+                                                      //                 20.0),
+                                                      //   ),
+                                                      //   // color: Colors.redAccent,
+                                                      //   child: Row(
+                                                      //     children: [
+                                                      //       (startLivediff < 0)
+                                                      //           ? Icon(
+                                                      //               Icons
+                                                      //                   .alarm_outlined,
+                                                      //               color: Colors
+                                                      //                   .white,
+                                                      //             )
+                                                      //           : Text(""),
+                                                      //       (startLivediff < 0)
+                                                      //           ? Text(
+                                                      //               "Running...",
+                                                      //               style:
+                                                      //                   TextStyle(
+                                                      //                 color: Colors
+                                                      //                     .white,
+                                                      //                 fontSize:
+                                                      //                     17.0,
+                                                      //                 fontWeight:
+                                                      //                     FontWeight
+                                                      //                         .bold,
+                                                      //               ),
+                                                      //             )
+                                                      //           : Text(""),
+                                                      //     ],
+                                                      //   ),
+                                                      // ),
+                                                    ),
+                                                    Visibility(
                                                       visible: (snapshot
                                                                   .data.documents
                                                                   .elementAt(
@@ -700,6 +769,51 @@ class _OurAlertPageState extends State<OurAlertPage> {
                                                 visible: (snapshot
                                                             .data.documents
                                                             .elementAt(index)[
+                                                        'noticetype'] ==
+                                                    "Live"),
+                                                child: Container(
+                                                  child: Row(
+                                                    children: [
+                                                      Text("Start Date:  ",
+                                                          style: TextStyle(
+                                                            color: Colors
+                                                                .amber[900],
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                          )),
+                                                      Text(
+                                                          (snapshot.data.documents
+                                                                          .elementAt(
+                                                                              index)[
+                                                                      "datelivestart"] !=
+                                                                  null)
+                                                              ? DateFormat.yMMMEd("en_US").format(snapshot
+                                                                      .data
+                                                                      .documents
+                                                                      .elementAt(index)[
+                                                                          "datelivestart"]
+                                                                      .toDate()) +
+                                                                  " at- " +
+                                                                  DateFormat("H:mm").format(snapshot
+                                                                      .data
+                                                                      .documents
+                                                                      .elementAt(
+                                                                          index)["datelivestart"]
+                                                                      .toDate())
+                                                              : "loading.....",
+                                                          style: TextStyle(
+                                                            fontSize: 14,
+                                                            //  fontWeight: FontWeight.bold,
+                                                          )),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(height: 5),
+                                              Visibility(
+                                                visible: (snapshot
+                                                            .data.documents
+                                                            .elementAt(index)[
                                                         'noticetype'] !=
                                                     "Notice"),
                                                 child: Container(
@@ -754,62 +868,69 @@ class _OurAlertPageState extends State<OurAlertPage> {
                                                         ? Row(
                                                             children: [
                                                               Spacer(),
-                                                              IconButton(
-                                                                  splashColor:
-                                                                      Colors
-                                                                          .grey,
-                                                                  icon: Icon(
-                                                                    Icons
-                                                                        .check_circle,
-                                                                    color: Colors
-                                                                            .blue[
-                                                                        300],
-                                                                    size: 40,
-                                                                  ),
-                                                                  onPressed:
-                                                                      () {
-                                                                    CurrentUser
-                                                                        _currentuser =
-                                                                        Provider.of<CurrentUser>(
-                                                                            context,
-                                                                            listen:
-                                                                                false);
-                                                                    if (_currentuser
-                                                                            .getCurrentUser
-                                                                            .uniqueId ==
-                                                                        null) {
-                                                                      Scaffold.of(
-                                                                              context)
-                                                                          .showSnackBar(
-                                                                              new SnackBar(content: new Text("Failed Please Add uniqueId in profile")));
-                                                                    } else {
-                                                                      _attendance(
-                                                                          context,
-                                                                          snapshot
-                                                                              .data
-                                                                              .documents
-                                                                              .elementAt(index)
-                                                                              .documentID
-                                                                              .toString());
-                                                                    }
-                                                                  }),
-                                                              SizedBox(
-                                                                width: 35,
+                                                              Bounce(
+                                                                onPressed: () {
+                                                                  // CurrentUser
+                                                                  //     _currentuser =
+                                                                  //     Provider.of<
+                                                                  //             CurrentUser>(
+                                                                  //         context,
+                                                                  //         listen:
+                                                                  //             false);
+                                                                  if (_currentuser
+                                                                          .getCurrentUser
+                                                                          .uniqueId ==
+                                                                      null) {
+                                                                    Scaffold.of(
+                                                                            context)
+                                                                        .showSnackBar(new SnackBar(
+                                                                            content:
+                                                                                new Text("Failed Please Add uniqueId in profile")));
+                                                                  } else {
+                                                                    _attendance(
+                                                                        context,
+                                                                        snapshot
+                                                                            .data
+                                                                            .documents
+                                                                            .elementAt(index)
+                                                                            .documentID
+                                                                            .toString());
+                                                                  }
+                                                                },
+                                                                duration: Duration(
+                                                                    milliseconds:
+                                                                        200),
+                                                                child: Icon(
+                                                                  Icons
+                                                                      .check_circle,
+                                                                  color: Colors
+                                                                          .blue[
+                                                                      300],
+                                                                  size: 45,
+                                                                ),
                                                               ),
-                                                              IconButton(
-                                                                  splashColor:
-                                                                      Colors
-                                                                          .grey,
-                                                                  icon: Icon(
-                                                                    Icons
-                                                                        .highlight_remove,
-                                                                    color: Colors
-                                                                            .red[
-                                                                        300],
-                                                                    size: 40,
-                                                                  ),
-                                                                  onPressed:
-                                                                      () {}),
+                                                              SizedBox(
+                                                                width: 40,
+                                                              ),
+                                                              Bounce(
+                                                                onPressed: () {
+                                                                  Scaffold.of(
+                                                                          context)
+                                                                      .showSnackBar(new SnackBar(
+                                                                          content:
+                                                                              new Text("Your Responce is Saved")));
+                                                                },
+                                                                duration: Duration(
+                                                                    milliseconds:
+                                                                        200),
+                                                                child: Icon(
+                                                                  Icons
+                                                                      .highlight_remove,
+                                                                  color: Colors
+                                                                      .red[300],
+                                                                  size: 45,
+                                                                ),
+                                                              ),
                                                               Spacer(),
                                                             ],
                                                           )
@@ -824,7 +945,7 @@ class _OurAlertPageState extends State<OurAlertPage> {
                                                                   .blue[300]),
                                                         ),
                                                         SizedBox(
-                                                          width: 30,
+                                                          width: 40,
                                                         ),
                                                         Text("Absent",
                                                             style: TextStyle(

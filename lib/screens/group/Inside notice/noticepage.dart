@@ -1,10 +1,16 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dio/dio.dart';
+import 'package:ext_storage/ext_storage.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:worldetor/screens/group/pdfviewer.dart';
 import 'package:worldetor/state/currentgroup.dart';
 import 'package:worldetor/state/currentuser.dart';
 
@@ -17,7 +23,7 @@ class _OurNoticePageState extends State<OurNoticePage> {
   @override
   void initState() {
     super.initState();
-
+    getpermission();
     CurrentUser _currentuser = Provider.of<CurrentUser>(context, listen: false);
     CurrentGroup _currentgroup =
         Provider.of<CurrentGroup>(context, listen: false);
@@ -67,15 +73,21 @@ class _OurNoticePageState extends State<OurNoticePage> {
   TextEditingController _reviewController = TextEditingController();
   bool loading = false;
 
-  // double _progress;
+  void getpermission() async {
+    await PermissionHandler().requestPermissions([PermissionGroup.storage]);
+  }
+
+  String downlodingMessage = " ";
+  bool _isDownloading = false;
   ProgressDialog progressdialog;
+  double _progress;
   @override
   Widget build(BuildContext context) {
     progressdialog = ProgressDialog(context, isDismissible: false);
     return Consumer<CurrentGroup>(
         builder: (BuildContext context, value, Widget child) {
       return Scaffold(
-        backgroundColor: Color(0xFF21BFBD),
+        backgroundColor: Colors.cyan,
         body: StreamBuilder(
             stream: Firestore.instance
                 .collection("groups")
@@ -124,7 +136,8 @@ class _OurNoticePageState extends State<OurNoticePage> {
                                             SnackBar(
                                                 content: Row(
                                                   children: [
-                                                    Icon(Icons.check_circle),
+                                                    Icon(Icons.check_circle,
+                                                        color: Colors.green),
                                                     Text("Refreshed"),
                                                   ],
                                                 ),
@@ -142,7 +155,7 @@ class _OurNoticePageState extends State<OurNoticePage> {
                           ],
                         ),
                       ),
-                      SizedBox(height: 25.0),
+                      SizedBox(height: 10.0),
                       Padding(
                         padding: EdgeInsets.only(left: 40.0),
                         child: Row(
@@ -166,9 +179,9 @@ class _OurNoticePageState extends State<OurNoticePage> {
                           ],
                         ),
                       ),
-                      SizedBox(height: 40.0),
+                      SizedBox(height: 20.0),
                       Container(
-                        height: MediaQuery.of(context).size.height - 185.0,
+                        height: MediaQuery.of(context).size.height - 150.0,
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius:
@@ -179,75 +192,230 @@ class _OurNoticePageState extends State<OurNoticePage> {
                           padding:
                               EdgeInsets.only(left: 25.0, right: 20.0, top: 15),
                           children: <Widget>[
-                            Expanded(
-                              child: Container(
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      "Subject: ",
+                            Container(
+                              child: Row(
+                                children: [
+                                  Text(
+                                    "Subject: ",
+                                    style: TextStyle(
+                                      color: Colors.redAccent,
+                                      fontSize: 17.0,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(" "),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: SelectableText(
+                                      snapshot.data['subject'] ?? "Loading...",
                                       style: TextStyle(
-                                        color: Colors.redAccent,
-                                        fontSize: 17.0,
-                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15.0,
+                                        // fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    Expanded(
-                                      child: Text(
-                                        snapshot.data['subject'] ??
-                                            "Loading...",
-                                        style: TextStyle(
-                                          fontSize: 15.0,
-                                          // fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             ),
                             SizedBox(
-                              height: 5,
+                              height: 10,
                             ),
-                            Expanded(
-                              child: Container(
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      "Description:",
-                                      style: TextStyle(
-                                        color: Colors.redAccent,
-                                        fontSize: 17.0,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                            Container(
+                              child: Row(
+                                children: [
+                                  Text(
+                                    "Description:",
+                                    style: TextStyle(
+                                      color: Colors.redAccent,
+                                      fontSize: 17.0,
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                    Text(
-                                      "-    ",
-                                    ),
-                                  ],
-                                ),
+                                  ),
+                                  Text(
+                                    "-    ",
+                                  ),
+                                ],
                               ),
                             ),
-                            Expanded(
-                              child: Container(
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        snapshot.data['description'] ??
-                                            "Loading...",
-                                        style: TextStyle(
-                                          fontSize: 15.0,
-                                          // fontWeight: FontWeight.bold,
-                                        ),
+                            Container(
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: SelectableLinkify(
+                                      onOpen: (link) async {
+                                        if (await canLaunch(link.url)) {
+                                          await launch(link.url);
+                                        } else {
+                                          throw 'Could not launch $link';
+                                        }
+                                      },
+                                      linkStyle: TextStyle(color: Colors.blue),
+                                      text: snapshot.data['description'] ??
+                                          "Loading...",
+                                      style: TextStyle(
+                                        fontSize: 15.0,
+
+                                        // fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             ),
                             SizedBox(
                               height: 15,
                             ),
+                            (snapshot.data['noticetype'] != "Assignment")
+                                ? Visibility(
+                                    visible: (snapshot.data['noticetype'] ==
+                                        "Notice"),
+                                    child:
+                                        (snapshot.data["filename"].length !=
+                                                null)
+                                            ? Row(
+                                                children: [
+                                                  Flexible(
+                                                    fit: FlexFit.loose,
+                                                    child: ListView.builder(
+                                                      shrinkWrap: true,
+                                                      itemCount: snapshot
+                                                          .data["filename"]
+                                                          .length,
+                                                      itemBuilder:
+                                                          (BuildContext context,
+                                                              int index) {
+                                                        return Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                      .symmetric(
+                                                                  horizontal:
+                                                                      25,
+                                                                  vertical: 1),
+                                                          child: Container(
+                                                            child: Card(
+                                                              color: Colors
+                                                                      .blueGrey[
+                                                                  300],
+                                                              child: Padding(
+                                                                padding: const EdgeInsets
+                                                                        .symmetric(
+                                                                    horizontal:
+                                                                        8,
+                                                                    vertical:
+                                                                        1),
+                                                                child: Row(
+                                                                  children: [
+                                                                    Expanded(
+                                                                      child:
+                                                                          Text(
+                                                                        snapshot.data["filename"][index] ??
+                                                                            "Loading...",
+                                                                        style:
+                                                                            TextStyle(),
+                                                                      ),
+                                                                    ),
+                                                                    IconButton(
+                                                                        splashColor:
+                                                                            Colors
+                                                                                .grey,
+                                                                        icon:
+                                                                            Icon(
+                                                                          Icons
+                                                                              .preview,
+                                                                        ),
+                                                                        onPressed:
+                                                                            () async {
+                                                                          String
+                                                                              url =
+                                                                              snapshot.data["fileurl"][index];
+
+                                                                          Widget
+                                                                              retval;
+                                                                          retval = ChangeNotifierProvider(
+                                                                              create: (context) => CurrentGroup(),
+                                                                              child: Ourpdfviewer());
+                                                                          Navigator.of(context)
+                                                                              .push(
+                                                                            MaterialPageRoute(
+                                                                                builder: (context) => retval,
+                                                                                settings: RouteSettings(arguments: url)),
+                                                                          );
+                                                                        }),
+                                                                    IconButton(
+                                                                        splashColor:
+                                                                            Colors
+                                                                                .grey,
+                                                                        icon:
+                                                                            Icon(
+                                                                          Icons
+                                                                              .download_sharp,
+                                                                        ),
+                                                                        onPressed:
+                                                                            () async {
+                                                                          if (await canLaunch(snapshot.data["fileurl"]
+                                                                              [
+                                                                              index])) {
+                                                                            await launch(snapshot.data["fileurl"][index]);
+                                                                          } else {
+                                                                            throw 'Could not launch ';
+                                                                          }
+                                                                          // setState(
+                                                                          //     () {
+                                                                          //   _isDownloading =
+                                                                          //       !_isDownloading;
+                                                                          // });
+                                                                          // progressdialog
+                                                                          //     .show();
+                                                                          // progressdialog
+                                                                          //     .update(
+                                                                          //   message:
+                                                                          //       "Downloading ....",
+                                                                          // );
+
+                                                                          // var dir =
+                                                                          //     await ExtStorage.getExternalStoragePublicDirectory(ExtStorage.DIRECTORY_DOWNLOADS);
+
+                                                                          // Dio dio =
+                                                                          //     Dio();
+                                                                          // dio.download(
+                                                                          //   snapshot.data["fileurl"][index],
+                                                                          //   "$dir/${snapshot.data["filename"][index]}",
+                                                                          //   onReceiveProgress:
+                                                                          //       (count, total) {
+                                                                          //     var percentage = count / total * 100;
+
+                                                                          //     setState(() {
+                                                                          //       downlodingMessage = percentage.floor().toString();
+                                                                          //     });
+
+                                                                          //     if (downlodingMessage == "100") {
+                                                                          //       progressdialog.hide();
+                                                                          //       Scaffold.of(context).showSnackBar(new SnackBar(content: new Text("File Downloaded")));
+                                                                          //     }
+                                                                          //   },
+                                                                          // );
+                                                                        })
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        );
+                                                      },
+                                                    ),
+                                                  ),
+                                                ],
+                                              )
+                                            : Text(""),
+                                  )
+                                : SizedBox(
+                                    height: 15,
+                                  ),
                             (snapshot.data['noticetype'] == "Assignment")
                                 ? _assignmentButton(
                                     context, value.getDoneWithCurrentAssignment)
@@ -260,49 +428,57 @@ class _OurNoticePageState extends State<OurNoticePage> {
                                     visible:
                                         (value.getDoneWithCurrentAssignment !=
                                             true),
-                                    child: Expanded(
-                                      child: Padding(
-                                        padding: EdgeInsets.symmetric(
-                                            vertical: 5, horizontal: 30),
-                                        child: ListView.builder(
-                                          shrinkWrap: true,
-                                          // scrollDirection: Axis.horizontal,
-                                          itemCount: _filename.length,
-                                          itemBuilder: (BuildContext context,
-                                                  int index) =>
-                                              Card(
-                                            color: Colors.white30,
-                                            child: Center(
-                                                child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Expanded(
-                                                    child: Text("    " +
-                                                        _filename[index])),
-                                                IconButton(
-                                                    icon: Icon(
-                                                      Icons.cancel,
-                                                    ),
-                                                    onPressed: () async {
-                                                      setState(() {
-                                                        loading = !loading;
-                                                      });
-                                                      _filename.removeAt(index);
-                                                      fileurl.removeAt(index);
-                                                      // await FirebaseStorage.instance
-                                                      //     .ref()
-                                                      //     .child(
-                                                      //         _filelocation[index])
-                                                      //     .delete();
-                                                      // _filelocation.removeAt(index);
-                                                      // print();
-                                                    })
-                                              ],
-                                            )),
+                                    child: Row(
+                                      children: [
+                                        Flexible(
+                                          fit: FlexFit.loose,
+                                          child: Padding(
+                                            padding: EdgeInsets.symmetric(
+                                                vertical: 5, horizontal: 30),
+                                            child: ListView.builder(
+                                              shrinkWrap: true,
+                                              // scrollDirection: Axis.horizontal,
+                                              itemCount: _filename.length,
+                                              itemBuilder:
+                                                  (BuildContext context,
+                                                          int index) =>
+                                                      Card(
+                                                color: Colors.white30,
+                                                child: Center(
+                                                    child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    Expanded(
+                                                        child: Text("    " +
+                                                            _filename[index])),
+                                                    IconButton(
+                                                        icon: Icon(
+                                                          Icons.cancel,
+                                                        ),
+                                                        onPressed: () async {
+                                                          setState(() {
+                                                            loading = !loading;
+                                                          });
+                                                          _filename
+                                                              .removeAt(index);
+                                                          fileurl
+                                                              .removeAt(index);
+                                                          // await FirebaseStorage.instance
+                                                          //     .ref()
+                                                          //     .child(
+                                                          //         _filelocation[index])
+                                                          //     .delete();
+                                                          // _filelocation.removeAt(index);
+                                                          // print();
+                                                        })
+                                                  ],
+                                                )),
+                                              ),
+                                            ),
                                           ),
                                         ),
-                                      ),
+                                      ],
                                     ),
                                   )
                                 : Text(""),
@@ -310,75 +486,73 @@ class _OurNoticePageState extends State<OurNoticePage> {
                               visible: (value.getDoneWithCurrentAssignment !=
                                       true &&
                                   snapshot.data['noticetype'] == "Assignment"),
-                              child: Expanded(
-                                child: TextFormField(
-                                  controller: _reviewController,
-                                  decoration: InputDecoration(
-                                      hintText: "Review/Id/Comment"),
-                                  maxLength: 30,
-                                ),
+                              child: TextFormField(
+                                controller: _reviewController,
+                                decoration: InputDecoration(
+                                    hintText: "Review/Id/Comment"),
+                                maxLength: 30,
                               ),
                             ),
                             Visibility(
                               visible: (value.getDoneWithCurrentAssignment !=
                                       true &&
                                   snapshot.data['noticetype'] == "Assignment"),
-                              child: Expanded(
-                                child: RaisedButton(
-                                    child: Padding(
-                                      padding: EdgeInsets.symmetric(
-                                          vertical: 10, horizontal: 30),
-                                      child: Text(
-                                        "Send",
-                                        style: TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 20),
-                                      ),
+                              child: RaisedButton(
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(
+                                        vertical: 10, horizontal: 30),
+                                    child: Text(
+                                      "Send",
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 20),
                                     ),
-                                    onPressed: () async {
-                                      String uid = Provider.of<CurrentUser>(
-                                              context,
-                                              listen: false)
-                                          .getCurrentUser
-                                          .uid;
+                                  ),
+                                  onPressed: () async {
+                                    String uid = Provider.of<CurrentUser>(
+                                            context,
+                                            listen: false)
+                                        .getCurrentUser
+                                        .uid;
 
-                                      String userName =
-                                          Provider.of<CurrentUser>(context,
-                                                  listen: false)
-                                              .getCurrentUser
-                                              .fullName;
+                                    String userName = Provider.of<CurrentUser>(
+                                            context,
+                                            listen: false)
+                                        .getCurrentUser
+                                        .fullName;
+                                    String useruniqueid =
+                                        Provider.of<CurrentUser>(context,
+                                                listen: false)
+                                            .getCurrentUser
+                                            .uniqueId;
+                                    // List<String> selectedfile = List();
+                                    // selectedfile.add(fileLocation);
 
-                                      // List<String> selectedfile = List();
-                                      // selectedfile.add(fileLocation);
+                                    Provider.of<CurrentGroup>(context,
+                                            listen: false)
+                                        .finishedAssignment(
+                                            uid,
+                                            userName,
+                                            useruniqueid,
+                                            _reviewController.text,
+                                            fileurl,
+                                            _filename);
 
-                                      Provider.of<CurrentGroup>(context,
-                                              listen: false)
-                                          .finishedAssignment(
-                                              uid,
-                                              userName,
-                                              _reviewController.text,
-                                              fileurl,
-                                              _filename);
-
-                                      // Navigator.of(context).pop();
-                                    }),
-                              ),
+                                    // Navigator.of(context).pop();
+                                  }),
                             ),
                             Visibility(
                               visible: (value.getDoneWithCurrentAssignment !=
                                       true &&
                                   snapshot.data['noticetype'] == "Assignment"),
-                              child: Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(10.0),
-                                  child:
-                                      Text("Don't Forgot to press SEND button",
-                                          style: TextStyle(
-                                            color: Colors.redAccent,
-                                            fontWeight: FontWeight.bold,
-                                          )),
-                                ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(10.0),
+                                child: Text("Don't Forgot to press SEND button",
+                                    style: TextStyle(
+                                      color: Colors.redAccent,
+                                      fontWeight: FontWeight.bold,
+                                    )),
                               ),
                             ),
                           ],
@@ -398,7 +572,7 @@ class _OurNoticePageState extends State<OurNoticePage> {
 
     if (file != null) {
       progressdialog.show();
-      progressdialog.update(message: "Uploding ....");
+      progressdialog.update(message: "Uploding...");
     }
     String filename = file.path.split("/").last;
 
@@ -424,16 +598,21 @@ class _OurNoticePageState extends State<OurNoticePage> {
           FirebaseStorage().ref().child(imageLocation);
       final StorageUploadTask uploadTask = storageReference.putFile(image);
 
+//       uploadTask.events.listen((event) {
+//         // print(event.snapshot.totalByteCount);
+//         print(event.type);
+//         setState(() {
+//           // _isLoading = true;
+
+//           _progress = event.snapshot.bytesTransferred.toDouble() /
+//               event.snapshot.totalByteCount.toDouble();
+//         });
+//         // }).onError((error) {
+//         //   // _scaffoldKey.currentState.showSnackBar(new SnackBar(content: new Text(error.toString()), backgroundColor: Colors.red,) );
+//       });
+// print(_progress);
+
       await uploadTask.onComplete;
-      // uploadTask.events.listen((event) {
-      //   setState(() {
-      //     _progress = event.snapshot.bytesTransferred.toDouble() /
-      //         event.snapshot.totalByteCount.toDouble();
-      //   });
-      // });
-      // print(_progress);
-      // progressdialog.update(
-      //     message: "Uploading..${(_progress).toStringAsFixed(2)}%");
       _addPathtodatabase(imageLocation, filename);
       // print("object");
 

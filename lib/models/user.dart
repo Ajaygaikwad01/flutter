@@ -9,6 +9,7 @@ class OurUser {
   int attend;
   Timestamp accountCreated;
   String groupid;
+  String notificationTocken;
   List<String> listGroup;
   OurUser({
     this.uid,
@@ -19,6 +20,7 @@ class OurUser {
     this.attend,
     this.accountCreated,
     this.groupid,
+    this.notificationTocken,
     this.listGroup,
   });
 }

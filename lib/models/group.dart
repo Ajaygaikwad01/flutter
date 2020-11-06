@@ -7,6 +7,7 @@ class OurGroup {
   String leaderName;
   String description;
   List<String> members;
+  List<String> tockens;
   Timestamp groupCreated;
   String currentNoticeid;
   String currentAssignmentsenderid;
@@ -19,6 +20,7 @@ class OurGroup {
     this.leaderName,
     this.description,
     this.members,
+    this.tockens,
     this.groupCreated,
     this.currentNoticeid,
     this.currentAssignmentsenderid,

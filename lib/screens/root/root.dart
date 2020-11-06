@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -20,6 +23,28 @@ class OurRoot extends StatefulWidget {
 }
 
 class _OurRootState extends State<OurRoot> {
+  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  @override
+  void initState() {
+    super.initState();
+    if (Platform.isIOS) {
+      _firebaseMessaging
+          .requestNotificationPermissions(IosNotificationSettings());
+
+      _firebaseMessaging.onIosSettingsRegistered.listen((event) {
+        print("ios registerd");
+      });
+    }
+    _firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) async {},
+      // onBackgroundMessage: myBackgroundMessageHandler,
+      onLaunch: (Map<String, dynamic> message) async {},
+      onResume: (Map<String, dynamic> message) async {
+        // print("onResume: $message");
+      },
+    );
+  }
+
   AuthStatus _authStatus = AuthStatus.unknown;
   @override
   void didChangeDependencies() async {

@@ -34,11 +34,11 @@ class CurrentGroup extends ChangeNotifier {
   }
 
   Future<String> adminMarkedAttendance(String groupId, String indexval,
-      String uniqueId, String noticeid, String currentTime) async {
+      String uniqueId, String noticeid, String noticeName) async {
     String retval = "Error";
     try {
       await OurDatabase().markAdminAttandance(
-          groupId, indexval, uniqueId, noticeid, currentTime);
+          groupId, indexval, uniqueId, noticeid, noticeName);
       // _adminAttendanceMrked = true;
       // notifyListeners();
     } catch (e) {
@@ -47,8 +47,27 @@ class CurrentGroup extends ChangeNotifier {
     return retval;
   }
 
-  Future<String> finishedAssignment(String uid, String userName, String review,
-      List urlString, List fileName) async {
+  Future<String> adminMarkedAssignment(
+    int point,
+    String groupId,
+    String indexuserId,
+    String noticeId,
+    String noticeName,
+  ) async {
+    String retval = "Error";
+    try {
+      await OurDatabase().markAdminAssignment(
+          point, groupId, indexuserId, noticeId, noticeName);
+      // _adminAttendanceMrked = true;
+      // notifyListeners();
+    } catch (e) {
+      print(e);
+    }
+    return retval;
+  }
+
+  Future<String> finishedAssignment(String uid, String userName,
+      String useruniqueid, String review, List urlString, List fileName) async {
     String retval = "Error";
     try {
       await OurDatabase().sendAssignment(
@@ -56,6 +75,7 @@ class CurrentGroup extends ChangeNotifier {
           _currentgroup.currentNoticeid,
           uid,
           userName,
+          useruniqueid,
           review,
           urlString,
           fileName);

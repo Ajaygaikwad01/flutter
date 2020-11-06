@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:progress_dialog/progress_dialog.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:worldetor/screens/login/resetpassword.dart';
@@ -62,13 +62,18 @@ class _OurNewLoginPageState extends State<OurNewLoginPage> {
       }
 
       if (_returnString == "Success") {
-        await progressdialog.hide();
+        // await progressdialog.hide();
+        setState(() {
+          loadingcircle = false;
+        });
         Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (context) => HomeNavigator()),
             (route) => false);
       } else {
-        await progressdialog.hide();
+        setState(() {
+          loadingcircle = false;
+        });
         // Scaffold.of(context).showSnackBar(
         //   new SnackBar(
         //     content: Text(_returnString),
@@ -78,7 +83,10 @@ class _OurNewLoginPageState extends State<OurNewLoginPage> {
         _deletedialog();
       }
     } catch (e) {
-      progressdialog.hide();
+      // progressdialog.hide();
+      setState(() {
+        loadingcircle = false;
+      });
       print(e);
     }
   }
@@ -126,207 +134,183 @@ class _OurNewLoginPageState extends State<OurNewLoginPage> {
   }
 
   bool loading = false;
-
+  bool loadingcircle = false;
   // double _progress;
-  ProgressDialog progressdialog;
+  // ProgressDialog progressdialog;
   @override
   Widget build(BuildContext context) {
-    progressdialog = ProgressDialog(context, isDismissible: false);
+    // progressdialog = ProgressDialog(context, isDismissible: false);
     return Scaffold(
-      backgroundColor: Color(0xFF21BFBD),
-      body: ListView(
-        children: <Widget>[
-          // Padding(
-          //   padding: EdgeInsets.only(top: 15.0, left: 10.0),
-          //   child: Row(
-          //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          //     children: <Widget>[
-          //       // IconButton(
-          //       //   icon: Icon(Icons.arrow_back_ios),
-          //       //   color: Colors.white,
-          //       //   onPressed: () {
-          //       //     Navigator.of(context).pop();
-          //       //   },
-          //       // ),
-          //       Container(
-          //           width: 125.0,
-          //           child: Row(
-          //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          //             children: <Widget>[
-          //               // IconButton(
-          //               //   icon: Icon(Icons.cached),
-          //               //   color: Colors.white,
-          //               //   onPressed: () {
-          //               //     setState(() {});
-          //               //   },
-          //               // ),
-          //               // IconButton(
-          //               //   icon: Icon(Icons.menu),
-          //               //   color: Colors.white,
-          //               //   onPressed: () {},
-          //               // )
-          //             ],
-          //           ))
-          //     ],
-          //   ),
-          // ),
-          SizedBox(height: 25.0),
-          Padding(
-            padding: EdgeInsets.only(left: 40.0),
-            child: Row(
-              children: <Widget>[
-                Text("TM'",
-                    style: TextStyle(
-                        // fontFamily: 'Montserrat',
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 25.0)),
-                SizedBox(width: 5.0),
-                Expanded(
-                  child: Text("meet",
+      // backgroundColor: Color(0xFF21BFBD),
+      backgroundColor: Colors.cyan,
+      body: ModalProgressHUD(
+        inAsyncCall: loadingcircle,
+        child: ListView(
+          children: <Widget>[
+            SizedBox(height: 25.0),
+            Padding(
+              padding: EdgeInsets.only(left: 40.0),
+              child: Row(
+                children: <Widget>[
+                  Text("TM'",
                       style: TextStyle(
                           // fontFamily: 'Montserrat',
                           color: Colors.white,
-                          fontSize: 24.0)),
-                )
-              ],
-            ),
-          ),
-          SizedBox(height: 40.0),
-          Container(
-            height: MediaQuery.of(context).size.height - 185.0,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(topLeft: Radius.circular(75.0)),
-            ),
-            child: ListView(
-              // primary: false,
-              padding: EdgeInsets.only(left: 25.0, right: 20.0, top: 15),
-              children: <Widget>[
-                SizedBox(
-                  height: 30.0,
-                ),
-                Center(
-                  child: Padding(
-                    padding:
-                        EdgeInsets.symmetric(vertical: 1.0, horizontal: 4.0),
-                    child: Text(
-                      "Sign In",
-                      style: TextStyle(
-                        color: Theme.of(context).secondaryHeaderColor,
-                        fontSize: 25.0,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  height: 30.0,
-                ),
-                Form(
-                  key: formkey,
-                  child: Column(
-                    children: [
-                      TextFormField(
-                        validator: (val) {
-                          return RegExp(
-                                      r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-                                  .hasMatch(val)
-                              ? null
-                              : "Please provide valid email id";
-                        },
-                        controller: _emailController,
-                        decoration: InputDecoration(
-                            prefixIcon: Icon(Icons.alternate_email),
-                            hintText: "Email"),
-                      ),
-                      SizedBox(
-                        height: 10.0,
-                      ),
-                      TextFormField(
-                        validator: (val) {
-                          return val.isEmpty || val.length < 6
-                              ? "Minimum 6 character required"
-                              : null;
-                        },
-                        controller: _passswordController,
-                        decoration: InputDecoration(
-                            prefixIcon: Icon(Icons.lock_outline),
-                            hintText: "Password"),
-                        obscureText: true,
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  alignment: AlignmentDirectional.bottomEnd,
-                  child: FlatButton(
-                    onPressed: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => OurResetpasssword()));
-                    },
-                    child: Text("Forgot password ?",
-                        style: TextStyle(fontStyle: FontStyle.italic)),
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                ),
-                SizedBox(
-                  height: 15.0,
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: RaisedButton(
-                    child: Padding(
-                      padding:
-                          EdgeInsets.symmetric(vertical: 10, horizontal: 80),
-                      child: Text(
-                        "Sign In",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 23.0,
                           fontWeight: FontWeight.bold,
+                          fontSize: 25.0)),
+                  SizedBox(width: 5.0),
+                  Expanded(
+                    child: Text("meet",
+                        style: TextStyle(
+                            // fontFamily: 'Montserrat',
+                            color: Colors.white,
+                            fontSize: 24.0)),
+                  )
+                ],
+              ),
+            ),
+            SizedBox(height: 20.0),
+            Container(
+              height: MediaQuery.of(context).size.height - 150.0,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(topLeft: Radius.circular(75.0)),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ListView(
+                  // primary: false,
+                  padding: EdgeInsets.only(left: 25.0, right: 20.0, top: 15),
+                  children: <Widget>[
+                    SizedBox(
+                      height: 20.0,
+                    ),
+                    Center(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                            vertical: 1.0, horizontal: 4.0),
+                        child: Text(
+                          "Sign In",
+                          style: TextStyle(
+                            color: Theme.of(context).secondaryHeaderColor,
+                            fontSize: 28.0,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
-                    onPressed: () async {
-                      if (formkey.currentState.validate()) {
-                        await progressdialog.show();
-                        _loginUser(
-                            type: LoginType.email,
-                            email: _emailController.text,
-                            password: _passswordController.text,
-                            context: context);
-                      }
-                    },
-                  ),
+                    SizedBox(
+                      height: 30.0,
+                    ),
+                    Form(
+                      key: formkey,
+                      child: Column(
+                        children: [
+                          TextFormField(
+                            validator: (val) {
+                              return RegExp(
+                                          r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                                      .hasMatch(val)
+                                  ? null
+                                  : "Please provide valid email id";
+                            },
+                            controller: _emailController,
+                            decoration: InputDecoration(
+                                prefixIcon: Icon(Icons.alternate_email),
+                                hintText: "Email"),
+                          ),
+                          SizedBox(
+                            height: 10.0,
+                          ),
+                          TextFormField(
+                            validator: (val) {
+                              return val.isEmpty || val.length < 6
+                                  ? "Minimum 6 character required"
+                                  : null;
+                            },
+                            controller: _passswordController,
+                            decoration: InputDecoration(
+                                prefixIcon: Icon(Icons.lock_outline),
+                                hintText: "Password"),
+                            obscureText: true,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      alignment: AlignmentDirectional.bottomEnd,
+                      child: FlatButton(
+                        onPressed: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => OurResetpasssword()));
+                        },
+                        child: Text("Forgot password ?",
+                            style: TextStyle(fontStyle: FontStyle.italic)),
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 15.0,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: RaisedButton(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 80),
+                          child: Text(
+                            "Sign In",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 23.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        onPressed: () async {
+                          if (formkey.currentState.validate()) {
+                            // await progressdialog.show();
+                            setState(() {
+                              loadingcircle = true;
+                            });
+                            _loginUser(
+                                type: LoginType.email,
+                                email: _emailController.text,
+                                password: _passswordController.text,
+                                context: context);
+                          }
+                        },
+                      ),
+                    ),
+                    SizedBox(
+                      height: 8.0,
+                    ),
+                    Center(child: Text("---or signIn with---")),
+                    SizedBox(
+                      height: 5.0,
+                    ),
+                    _googleButton(),
+                    SizedBox(
+                      height: 20.0,
+                    ),
+                    FlatButton(
+                      onPressed: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => Oursignup()));
+                      },
+                      child: Text("Dont have account? Sign Up Here",
+                          style: TextStyle(fontStyle: FontStyle.italic)),
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    SizedBox(
+                      height: 3.0,
+                    ),
+                  ],
                 ),
-                SizedBox(
-                  height: 8.0,
-                ),
-                Center(child: Text("---or signIn with---")),
-                SizedBox(
-                  height: 5.0,
-                ),
-                _googleButton(),
-                SizedBox(
-                  height: 20.0,
-                ),
-                FlatButton(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                        MaterialPageRoute(builder: (context) => Oursignup()));
-                  },
-                  child: Text("Dont have account? Sign Up Here",
-                      style: TextStyle(fontStyle: FontStyle.italic)),
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                SizedBox(
-                  height: 3.0,
-                ),
-              ],
-            ),
-          )
-        ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

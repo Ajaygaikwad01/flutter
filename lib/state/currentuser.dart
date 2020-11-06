@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -11,6 +12,7 @@ class CurrentUser extends ChangeNotifier {
   OurUser get getCurrentUser => _currentUser;
 
   FirebaseAuth _auth = FirebaseAuth.instance;
+  FirebaseMessaging _fcm = FirebaseMessaging();
 
   Future<String> onStartUp() async {
     String retval = "Error";
@@ -60,6 +62,7 @@ class CurrentUser extends ChangeNotifier {
       _user.email = _authResult.user.email;
       _user.fullName = fullName;
       _user.uniqueId = uniqueId;
+      _user.notificationTocken = await _fcm.getToken();
 
       String _returnString = await OurDatabase().createUser(_user);
       if (_returnString == "Success") {
@@ -112,6 +115,7 @@ class CurrentUser extends ChangeNotifier {
         _user.uid = _authresult.user.uid;
         _user.email = _authresult.user.email;
         _user.fullName = _authresult.user.displayName;
+        _user.notificationTocken = await _fcm.getToken();
         OurDatabase().createUser(_user);
       }
       _currentUser = await OurDatabase().getUserInfo(_authresult.user.uid);

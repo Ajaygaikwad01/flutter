@@ -4,12 +4,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:progress_dialog/progress_dialog.dart';
-
+import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
 import 'package:worldetor/models/notice.dart';
-
 import 'package:worldetor/services/database.dart';
+import 'package:worldetor/state/currentgroup.dart';
 import 'package:worldetor/state/currentuser.dart';
 import 'package:worldetor/utils/ourcontener.dart';
 
@@ -19,20 +18,34 @@ class OurAddAttendance extends StatefulWidget {
 }
 
 class _OurAddAttendanceState extends State<OurAddAttendance> {
+  @override
+  void initState() {
+    super.initState();
+    CurrentUser _currentuser = Provider.of<CurrentUser>(context, listen: false);
+    CurrentGroup _currentgroup =
+        Provider.of<CurrentGroup>(context, listen: false);
+    _currentgroup.updateSteteFromDatabase(
+        _currentuser.getCurrentUser.groupid, _currentuser.getCurrentUser.uid);
+  }
+
   void _addnotice(BuildContext context, OurNotice notice) async {
     CurrentUser _currentuser = Provider.of<CurrentUser>(context, listen: false);
-    String _returnString = await OurDatabase()
-        .addnotice(_currentuser.getCurrentUser.groupid, notice);
+    CurrentGroup _currentgroup =
+        Provider.of<CurrentGroup>(context, listen: false);
+    String _returnString = await OurDatabase().addnotice(
+        _currentuser.getCurrentUser.groupid,
+        notice,
+        _currentgroup.getCurrentGroup.name);
 
     if (_returnString == "Success") {
-      await progressdialog.hide();
+      setState(() {
+        loadingcircle = false;
+      });
       Navigator.pop(context);
-      // Navigator.pushAndRemoveUntil(
-      //     context,
-      //     MaterialPageRoute(
-      //       builder: (context) => OurRoot(),
-      //     ),
-      //     (route) => false);
+    } else {
+      setState(() {
+        loadingcircle = false;
+      });
     }
   }
 
@@ -52,109 +65,104 @@ class _OurAddAttendanceState extends State<OurAddAttendance> {
     }
   }
 
-  ProgressDialog progressdialog;
+  final formkey = GlobalKey<FormState>();
+  bool loadingcircle = false;
   @override
   Widget build(BuildContext context) {
-    progressdialog = ProgressDialog(context,
-        type: ProgressDialogType.Normal, isDismissible: true);
-    progressdialog.style(
-      message: "Loading....",
-    );
-    return Scaffold(
-      appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.white),
-        title: Text("Fill Attendance Imformtion",
-            style: TextStyle(color: Colors.white)),
-      ),
-      body: ListView(
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(5.0),
-            child: Row(
-                // children: [BackButton()],
-                ),
-          ),
-          Spacer(),
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Ourcontener(
-              child: Column(
-                children: <Widget>[
-                  TextFormField(
-                    controller: _noticeTitleController,
-                    decoration: InputDecoration(
-                        prefixIcon: Icon(Icons.title), hintText: "Title"),
-                    maxLength: 20,
-                  ),
-                  SizedBox(
-                    height: 20.0,
-                  ),
-                  TextFormField(
-                    controller: _noticeSubjectController,
-                    decoration: InputDecoration(
-                        prefixIcon: Icon(Icons.subject), hintText: "Subject"),
-                    maxLength: 60,
-                  ),
-                  SizedBox(
-                    height: 20.0,
-                  ),
-                  // TextFormField(
-                  //     controller: _noticeDescriptionController,
-                  //     decoration: InputDecoration(
-                  //         prefixIcon: Icon(Icons.description),
-                  //         hintText: "Description"),
-                  //     minLines: 1,
-                  //     maxLines: 5,
-                  //     maxLengthEnforced: true),
-                  // SizedBox(
-                  //   height: 20.0,
-                  // ),
-                  Text(DateFormat.yMMMMd("en_US").format(_selecedtDate)),
-                  Text(DateFormat("H:mm").format(_selecedtDate)),
-                  FlatButton(
-                      onPressed: () => _selectDate(context),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Icon(Icons.calendar_today, color: Colors.red),
-                          Text("Selcet Due Date",
-                              style: TextStyle(
-                                  color: Colors.red,
-                                  fontWeight: FontWeight.bold)),
-                        ],
-                      )),
-                  SizedBox(height: 10),
-                  RaisedButton(
-                      child: Padding(
-                        padding:
-                            EdgeInsets.symmetric(vertical: 10, horizontal: 80),
-                        child: Text(
-                          "Send",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20),
-                        ),
+    return ModalProgressHUD(
+      inAsyncCall: loadingcircle,
+      child: Scaffold(
+        appBar: AppBar(
+          iconTheme: IconThemeData(color: Colors.white),
+          title: Text("Fill Attendance Information",
+              style: TextStyle(color: Colors.white)),
+        ),
+        body: ListView(
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Ourcontener(
+                child: Form(
+                  key: formkey,
+                  child: Column(
+                    children: <Widget>[
+                      TextFormField(
+                        validator: (val) {
+                          return val.isEmpty
+                              ? "Please provide vaild title"
+                              : null;
+                        },
+                        controller: _noticeTitleController,
+                        decoration: InputDecoration(
+                            prefixIcon: Icon(Icons.title), hintText: "Title"),
+                        maxLength: 20,
                       ),
-                      onPressed: () async {
-                        await progressdialog.show();
-                        OurNotice notice = OurNotice();
-                        notice.noticetype = "Attendance";
+                      SizedBox(
+                        height: 20.0,
+                      ),
+                      TextFormField(
+                        controller: _noticeSubjectController,
+                        decoration: InputDecoration(
+                            prefixIcon: Icon(Icons.subject),
+                            hintText: "Subject"),
+                        maxLength: 60,
+                      ),
+                      SizedBox(
+                        height: 20.0,
+                      ),
+                      Text(DateFormat.yMMMMd("en_US").format(_selecedtDate)),
+                      Text(DateFormat("H:mm").format(_selecedtDate)),
+                      FlatButton(
+                          onPressed: () => _selectDate(context),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Icon(Icons.calendar_today, color: Colors.red),
+                              Text("Select Due Date",
+                                  style: TextStyle(
+                                      color: Colors.red,
+                                      fontWeight: FontWeight.bold)),
+                            ],
+                          )),
+                      SizedBox(height: 10),
+                      RaisedButton(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 80),
+                          child: Text(
+                            "Send",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20),
+                          ),
+                        ),
+                        onPressed: () {
+                          if (formkey.currentState.validate()) {
+                            setState(() {
+                              loadingcircle = true;
+                            });
+                            OurNotice notice = OurNotice();
+                            notice.noticetype = "Attendance";
 
-                        notice.name = _noticeTitleController.text;
-                        notice.subject = _noticeSubjectController.text;
-                        notice.description = _noticeDescriptionController.text;
-                        // notice.datesend = Timestamp.fromDate(_selecedSendDate);
-                        notice.datecompleted =
-                            Timestamp.fromDate(_selecedtDate);
-                        _addnotice(context, notice);
-                      })
-                ],
+                            notice.name = _noticeTitleController.text;
+                            notice.subject = _noticeSubjectController.text;
+                            notice.description =
+                                _noticeDescriptionController.text;
+                            notice.datecompleted =
+                                Timestamp.fromDate(_selecedtDate);
+                            _addnotice(context, notice);
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ),
-          )
-        ],
+            )
+          ],
+        ),
       ),
     );
   }

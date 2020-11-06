@@ -3,14 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bounce/flutter_bounce.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
-import 'package:progress_dialog/progress_dialog.dart';
 import 'package:provider/provider.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:worldetor/screens/root/opengrouproot.dart';
 import 'package:worldetor/screens/home/Constants.dart';
 import 'package:worldetor/screens/home/creategroup.dart';
 import 'package:worldetor/screens/home/drawer.dart';
-import 'package:worldetor/screens/home/joingroup.dart';
 import 'package:worldetor/services/database.dart';
 import 'package:worldetor/state/currentuser.dart';
 import 'package:worldetor/utils/ourNewContainer.dart';
@@ -25,6 +23,162 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     setState(() {});
+  }
+
+  void _alertdialog() {
+    Alert(
+      context: context,
+      type: AlertType.warning,
+      title: "Failed",
+      desc: "Please Add UniqueId in your profile.",
+      buttons: [
+        // DialogButton(
+        //   child: Text(
+        //     "FLAT",
+        //     style: TextStyle(color: Colors.white, fontSize: 20),
+        //   ),
+        //   onPressed: () => Navigator.pop(context),
+        //   color: Color.fromRGBO(0, 179, 134, 1.0),
+        // ),
+        DialogButton(
+          child: Text(
+            "Close",
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+          onPressed: () => Navigator.pop(context),
+          gradient: LinearGradient(colors: [
+            Color.fromRGBO(116, 116, 191, 1.0),
+            Color.fromRGBO(52, 138, 199, 1.0)
+          ]),
+        )
+      ],
+    ).show();
+  }
+
+  void _requestSenddialog() {
+    Alert(
+      context: context,
+      type: AlertType.success,
+      title: "Request Sent",
+      desc: "Contact to Group Admin.",
+      buttons: [
+        DialogButton(
+          child: Text(
+            "Close",
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+          onPressed: () => Navigator.pop(context),
+          gradient: LinearGradient(colors: [
+            Color.fromRGBO(116, 116, 191, 1.0),
+            Color.fromRGBO(52, 138, 199, 1.0)
+          ]),
+        )
+      ],
+    ).show();
+  }
+
+  void _sendJoinRequest(BuildContext context, String groupId, String uniqueId,
+      String notificationTocken) async {
+    CurrentUser _currentuser = Provider.of<CurrentUser>(context, listen: false);
+    DocumentSnapshot _docref =
+        await Firestore.instance.collection("groups").document(groupId).get();
+    if (_docref.exists) {
+      String _returnString = await OurDatabase().joinGroupRequest(
+          groupId,
+          _currentuser.getCurrentUser.uid,
+          _currentuser.getCurrentUser.fullName,
+          _currentuser.getCurrentUser.email,
+          uniqueId,
+          notificationTocken);
+
+      if (_returnString == "Success") {
+        setState(() {
+          loadingcircle = false;
+        });
+        _requestSenddialog();
+      } else {
+        setState(() {
+          loadingcircle = false;
+        });
+        Scaffold.of(context).showSnackBar(SnackBar(
+            content: Text("Failed something went wrong"),
+            duration: Duration(seconds: 1)));
+      }
+    } else {
+      setState(() {
+        loadingcircle = false;
+      });
+      Scaffold.of(context).showSnackBar(SnackBar(
+          content: Text("Failed something went wrong"),
+          duration: Duration(seconds: 1)));
+    }
+  }
+
+  final formkey = GlobalKey<FormState>();
+  TextEditingController _joinIdController = TextEditingController();
+  _joinGroupdialogbox(BuildContext context) {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return Consumer<CurrentUser>(
+            builder: (BuildContext context, value, Widget child) {
+              return StreamBuilder(
+                  stream: Firestore.instance
+                      .collection("users")
+                      .document(value.getCurrentUser.uid)
+                      .snapshots(),
+                  builder: (BuildContext context,
+                      AsyncSnapshot<DocumentSnapshot> snapshot) {
+                    return AlertDialog(
+                      title: Text("Send Join Request"),
+                      content: Form(
+                        key: formkey,
+                        child: TextFormField(
+                          validator: (val) {
+                            return val.isEmpty
+                                ? "Please provide vaild GroupId"
+                                : null;
+                          },
+                          controller: _joinIdController,
+                          decoration: InputDecoration(
+                              prefixIcon: Icon(Icons.group),
+                              hintText: "GroupId"),
+                        ),
+                      ),
+                      actions: <Widget>[
+                        FlatButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: Text("Cancel")),
+                        FlatButton(
+                            onPressed: () {
+                              if (formkey.currentState.validate()) {
+                                if (snapshot.data["uniqueId"] != null) {
+                                  Navigator.of(context).pop();
+                                  setState(() {
+                                    loadingcircle = true;
+                                  });
+
+                                  _sendJoinRequest(
+                                      context,
+                                      _joinIdController.text,
+                                      snapshot.data["uniqueId"],
+                                      snapshot.data["notificationTocken"]);
+
+                                  _joinIdController.clear();
+                                } else {
+                                  _alertdialog();
+                                }
+                              }
+                            },
+                            child: Text("Send")),
+                      ],
+                    );
+                  });
+            },
+          );
+        });
   }
 
   void _deletedialog(userId, groupId) {
@@ -70,23 +224,15 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         loadingcircle = false;
       });
-      // await progressdialog.hide();
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => OurGroupRoot(),
         ),
       );
-      // Navigator.pushAndRemoveUntil(
-      //     context,
-      //     MaterialPageRoute(
-      //       builder: (context) => OurRoot(),
-      //     ),
-      //     (route) => false);
     } else {
       setState(() {
         loadingcircle = false;
       });
-      // await progressdialog.hide();
       Scaffold.of(context).showSnackBar(SnackBar(
           content: Text("Failed something went wrong"),
           duration: Duration(seconds: 1)));
@@ -106,15 +252,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   bool loading = false;
   bool loadingcircle = false;
-  // ProgressDialog progressdialog;
   @override
   Widget build(BuildContext context) {
-    // progressdialog = ProgressDialog(context,
-    //     type: ProgressDialogType.Normal, isDismissible: false);
-    // progressdialog.style(message: "Loading...");
     return Scaffold(
       appBar: AppBar(
-        // backgroundColor: Colors.greenAccent[100],
         title: Text(
           "Home",
           style: TextStyle(color: Colors.white),
@@ -131,12 +272,11 @@ class _HomeScreenState extends State<HomeScreen> {
               Scaffold.of(context).showSnackBar(SnackBar(
                   content: Row(
                     children: [
-                      Icon(Icons.check_circle),
+                      Icon(Icons.check_circle, color: Colors.green),
                       Text("Refreshed"),
                     ],
                   ),
                   duration: Duration(seconds: 1)));
-              // print("Refreshing");
             },
           ),
           PopupMenuButton<String>(
@@ -151,11 +291,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 );
               } else if (choice == Constant.JoinGroup) {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => OurJoinGroup(),
-                  ),
-                );
+                _joinGroupdialogbox(context);
               }
             },
             itemBuilder: (BuildContext context) {
@@ -187,7 +323,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   if (snapshot.data == null) {
                     return Container(
                       child: Center(
-                        child: Text("Loading...."),
+                        child: CircularProgressIndicator(),
                       ),
                     );
                   } else {
@@ -202,7 +338,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             builder: (BuildContext context,
                                 AsyncSnapshot<DocumentSnapshot> snapshot2) {
                               if (snapshot2.data == null) {
-                                return Text("Loading....");
+                                return Container(
+                                    child: Center(
+                                        child: CircularProgressIndicator()));
                               } else {
                                 return Padding(
                                   padding: const EdgeInsets.all(8.0),
@@ -231,8 +369,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                         setState(() {
                                           loadingcircle = true;
                                         });
-
-                                        // await progressdialog.show();
                                         _openGroup(
                                             context, snapshot2.data.documentID);
                                       },
@@ -242,10 +378,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                               borderRadius:
                                                   BorderRadius.circular(15)),
                                           color: Colors.white,
-                                          // color: Colors.cyanAccent[100],
-                                          // child: InkWell(
-                                          //   splashColor: Colors.grey,
-                                          //   onTap: () {},
                                           child: Padding(
                                             padding: const EdgeInsets.all(10.0),
                                             child: Container(
@@ -288,7 +420,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                               ),
                                             ),
                                           ),
-                                          // ),
                                         ),
                                       ),
                                     ),

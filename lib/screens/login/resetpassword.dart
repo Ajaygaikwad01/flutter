@@ -41,6 +41,7 @@ class _OurResetpassswordState extends State<OurResetpasssword> {
     ).show();
   }
 
+  final formkey = GlobalKey<FormState>();
   TextEditingController _emailController = TextEditingController();
   @override
   Widget build(BuildContext context) {
@@ -64,12 +65,22 @@ class _OurResetpassswordState extends State<OurResetpasssword> {
                 child: Ourcontener(
                   child: Column(
                     children: <Widget>[
-                      TextFormField(
-                        controller: _emailController,
-                        decoration: InputDecoration(
-                            prefixIcon: Icon(Icons.alternate_email),
-                            hintText: "Email"),
-                        maxLength: 25,
+                      Form(
+                        key: formkey,
+                        child: TextFormField(
+                          validator: (val) {
+                            return RegExp(
+                                        r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                                    .hasMatch(val)
+                                ? null
+                                : "Please provide valid email id";
+                          },
+                          controller: _emailController,
+                          decoration: InputDecoration(
+                              prefixIcon: Icon(Icons.alternate_email),
+                              hintText: "Email"),
+                          maxLength: 25,
+                        ),
                       ),
                       RaisedButton(
                           child: Padding(
@@ -84,8 +95,10 @@ class _OurResetpassswordState extends State<OurResetpasssword> {
                             ),
                           ),
                           onPressed: () {
-                            value.onresetPassowrd(_emailController.text);
-                            _alertdialog();
+                            if (formkey.currentState.validate()) {
+                              value.onresetPassowrd(_emailController.text);
+                              _alertdialog();
+                            }
                           })
                     ],
                   ),

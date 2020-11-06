@@ -57,7 +57,7 @@ class _OurDrawerState extends State<OurDrawer> {
           Container(
             width: double.infinity,
             padding: EdgeInsets.all(20),
-            color: Color(0xFF21BFBD),
+            color: Colors.cyan,
             child: Center(
               child: Consumer<CurrentUser>(
                 builder: (BuildContext context, value, Widget child) {
@@ -91,14 +91,17 @@ class _OurDrawerState extends State<OurDrawer> {
                               Row(
                                 children: [
                                   Text(
-                                    "   Unique ID :",
+                                    "  Unique ID: ",
                                     style: TextStyle(
                                         fontSize: 18, color: Colors.white),
                                   ),
-                                  Text(
-                                    snapshot.data["uniqueId"] ?? "Add UniqueId",
-                                    style: TextStyle(
-                                        fontSize: 17, color: Colors.white),
+                                  Expanded(
+                                    child: Text(
+                                      snapshot.data["uniqueId"] ??
+                                          "Add UniqueId",
+                                      style: TextStyle(
+                                          fontSize: 17, color: Colors.white),
+                                    ),
                                   ),
                                   IconButton(
                                       icon: Icon(Icons.edit, color: Colors.red),
@@ -126,24 +129,24 @@ class _OurDrawerState extends State<OurDrawer> {
               ),
             ),
           ),
-          ListTile(
-            leading: Icon(Icons.logout),
-            title: Expanded(
-              child: Text("signOut",
+          Expanded(
+            child: ListTile(
+              leading: Icon(Icons.logout),
+              title: Text("signOut",
                   style: TextStyle(fontSize: 18, color: Colors.black)),
-            ),
-            onTap: () async {
-              CurrentUser _currentuser =
-                  Provider.of<CurrentUser>(context, listen: false);
+              onTap: () async {
+                CurrentUser _currentuser =
+                    Provider.of<CurrentUser>(context, listen: false);
 
-              String _returnstring = await _currentuser.signOut();
-              if (_returnstring == "Success") {
-                Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (context) => OurRoot()),
-                    (route) => false);
-              }
-            },
+                String _returnstring = await _currentuser.signOut();
+                if (_returnstring == "Success") {
+                  Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (context) => OurRoot()),
+                      (route) => false);
+                }
+              },
+            ),
           ),
         ],
       ),

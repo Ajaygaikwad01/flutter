@@ -3,7 +3,13 @@ import 'dart:async';
 import 'package:agora_rtc_engine/rtc_engine.dart';
 import 'package:agora_rtc_engine/rtc_local_view.dart' as RtcLocalView;
 import 'package:agora_rtc_engine/rtc_remote_view.dart' as RtcRemoteView;
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:worldetor/screens/group/Inside%20notice/live_pages/livechat.dart';
+import 'package:worldetor/screens/group/Inside%20notice/live_pages/livedrawer.dart';
+import 'package:worldetor/state/currentgroup.dart';
+import 'package:worldetor/state/currentuser.dart';
 
 import './settings.dart';
 
@@ -30,12 +36,41 @@ class _CallPageState extends State<CallPage> {
   TextEditingController _chatController = TextEditingController();
   @override
   void dispose() {
+    // CurrentUser _currentuser = Provider.of<CurrentUser>(context, listen: false);
+    // CurrentGroup _currentgroup =
+    //     Provider.of<CurrentGroup>(context, listen: false);
+    // await Firestore.instance
+    //     .collection("groups")
+    //     .document(_currentgroup.getCurrentGroup.id)
+    //     .collection("notice")
+    //     .document(_currentgroup.getCurrentNotice.id)
+    //     .collection("joinmembers")
+    //     .document(_currentuser.getCurrentUser.uid)
+    //     .delete();
     // clear users
     _users.clear();
+
     // destroy sdk
     _engine.leaveChannel();
     _engine.destroy();
+
     super.dispose();
+    print("leave");
+
+    // try {
+    // await Firestore.instance
+    //     .collection("groups")
+    //     .document(_currentgroup.getCurrentGroup.id)
+    //     .collection("notice")
+    //     .document(_currentgroup.getCurrentNotice.id)
+    //     .collection("joinmembers")
+    //     .document(_currentuser.getCurrentUser.uid)
+    //     .delete();
+    // print("ajay gaikwad");
+    // } catch (e) {
+    // print("erros " + e);
+    // }
+    // _memberleft();
   }
 
   @override
@@ -43,7 +78,31 @@ class _CallPageState extends State<CallPage> {
     super.initState();
     // initialize agora sdk
     initialize();
+    CurrentUser _currentuser = Provider.of<CurrentUser>(context, listen: false);
+    CurrentGroup _currentgroup =
+        Provider.of<CurrentGroup>(context, listen: false);
+    _currentgroup.updateSteteFromDatabase(
+        _currentuser.getCurrentUser.groupid, _currentuser.getCurrentUser.uid);
   }
+
+  // void _memberleft() async {
+  //   CurrentUser _currentuser = Provider.of<CurrentUser>(context, listen: false);
+  //   CurrentGroup _currentgroup =
+  //       Provider.of<CurrentGroup>(context, listen: false);
+  //   try {
+  //     await Firestore.instance
+  //         .collection("groups")
+  //         .document(_currentgroup.getCurrentGroup.id)
+  //         .collection("notice")
+  //         .document(_currentgroup.getCurrentNotice.id)
+  //         .collection("joinmembers")
+  //         .document(_currentuser.getCurrentUser.uid)
+  //         .delete();
+  //     print("ajay gaikwad");
+  //   } catch (e) {
+  //     print("erros " + e);
+  //   }
+  // }
 
   Future<void> initialize() async {
     if (APP_ID.isEmpty) {
@@ -174,10 +233,64 @@ class _CallPageState extends State<CallPage> {
     return Container();
   }
 
+  void _sendmessage(message) async {
+    try {
+      CurrentUser _currentuser =
+          Provider.of<CurrentUser>(context, listen: false);
+      CurrentGroup _currentgroup =
+          Provider.of<CurrentGroup>(context, listen: false);
+      await Firestore.instance
+          .collection("groups")
+          .document(_currentgroup.getCurrentGroup.id)
+          .collection("notice")
+          .document(_currentgroup.getCurrentNotice.id)
+          .collection("chats")
+          .add({
+        'senderId': _currentuser.getCurrentUser.uid,
+        'sendername': _currentuser.getCurrentUser.fullName,
+        'message': message,
+        'senddate': Timestamp.now(),
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
   /// Toolbar layout
   Widget get _toolbar {
-    if (widget.role == ClientRole.Audience) return Container();
-    final views = _getRenderViews();
+    if (widget.role == ClientRole.Audience) {
+      return Container(
+        alignment: Alignment.bottomCenter,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Row(
+              children: [
+                Flexible(
+                    child: TextFormField(
+                  style: TextStyle(color: Colors.white),
+                  controller: _chatController,
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(Icons.chat),
+                    hintText: "Chat",
+                    fillColor: Colors.white,
+                    focusColor: Colors.white,
+                  ),
+                )),
+                IconButton(
+                    icon: Icon(Icons.send, color: Colors.blueAccent, size: 35),
+                    onPressed: () {
+                      _sendmessage(_chatController.text);
+                      _chatController.clear();
+                      // print("send");
+                    })
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+    // final views = _getRenderViews();
     return Container(
       alignment: Alignment.bottomRight,
       padding: const EdgeInsets.symmetric(vertical: 10),
@@ -186,24 +299,10 @@ class _CallPageState extends State<CallPage> {
           Row(
             children: [
               Icon(Icons.remove_red_eye),
-              Text("viewers [${views.length.toString()}]",
+              Text("viewers [${_users.length.toString()}]",
                   style: TextStyle(fontWeight: FontWeight.bold)),
             ],
           ),
-          // Container(
-          //   child: RawMaterialButton(
-          //     onPressed: _onToggleMute,
-          //     child: Icon(
-          //       muted ? Icons.mic_off : Icons.mic,
-          //       color: muted ? Colors.white : Colors.blueAccent,
-          //       size: 20.0,
-          //     ),
-          //     shape: CircleBorder(),
-          //     elevation: 2.0,
-          //     fillColor: muted ? Colors.blueAccent : Colors.white,
-          //     padding: const EdgeInsets.all(12.0),
-          //   ),
-          // ),
           Spacer(),
           Container(
             child: Row(
@@ -260,24 +359,31 @@ class _CallPageState extends State<CallPage> {
               ],
             ),
           ),
-          // Padding(
-          //   padding: const EdgeInsets.all(8.0),
-          //   child: Row(
-          //     children: [
-          //       Flexible(
-          //           child: TextFormField(
-          //         controller: _chatController,
-          //         decoration: InputDecoration(
-          //             prefixIcon: Icon(Icons.chat), hintText: "Chat"),
-          //       )),
-          //       IconButton(
-          //           icon: Icon(Icons.send, color: Colors.blueAccent, size: 35),
-          //           onPressed: () {
-          //             print("send");
-          //           })
-          //     ],
-          //   ),
-          // ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Flexible(
+                    child: TextFormField(
+                  style: TextStyle(color: Colors.white),
+                  controller: _chatController,
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(Icons.chat),
+                    hintText: "Chat",
+                    fillColor: Colors.white,
+                    focusColor: Colors.white,
+                  ),
+                )),
+                IconButton(
+                    icon: Icon(Icons.send, color: Colors.blueAccent, size: 35),
+                    onPressed: () {
+                      _sendmessage(_chatController.text);
+                      _chatController.clear();
+                      // print("send");
+                    })
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -287,48 +393,84 @@ class _CallPageState extends State<CallPage> {
   Widget _panel() {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 30),
-      alignment: Alignment.bottomLeft,
+      alignment: Alignment.centerLeft,
       child: FractionallySizedBox(
-        heightFactor: 0.5,
+        heightFactor: 0.8,
         child: Container(
           // alignment: Alignment.center,
           padding: const EdgeInsets.symmetric(vertical: 50),
-          child: ListView.builder(
-            reverse: true,
-            itemCount: _infoStrings.length,
-            itemBuilder: (BuildContext context, int index) {
-              if (_infoStrings.isEmpty) {
-                return null;
-              }
-              return Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 3,
-                  horizontal: 10,
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Flexible(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 2,
-                          horizontal: 5,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.yellowAccent,
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        child: Text(
-                          _infoStrings[index],
-                          style: TextStyle(color: Colors.blueGrey),
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              );
-            },
-          ),
+          child: Consumer<CurrentGroup>(
+              builder: (BuildContext context, value, Widget child) {
+            return StreamBuilder(
+                stream: Firestore.instance
+                    .collection("groups")
+                    .document(value.getCurrentGroup.id)
+                    .collection("notice")
+                    .document(value.getCurrentNotice.id)
+                    .collection("chats")
+                    .orderBy("senddate", descending: true)
+                    .snapshots(),
+                builder: (BuildContext context,
+                    AsyncSnapshot<QuerySnapshot> snapshot) {
+                  if (snapshot.data == null) {
+                    return Center(
+                      child: Text("empty"),
+                    );
+                  } else {
+                    return ListView.builder(
+                      reverse: true,
+                      itemCount: snapshot.data.documents.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 3,
+                            horizontal: 10,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Flexible(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 2,
+                                    horizontal: 5,
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(
+                                            snapshot.data.documents.elementAt(
+                                                    index)["sendername"] ??
+                                                "Loading..",
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 11)),
+                                      ),
+                                      Container(
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(
+                                          snapshot.data.documents.elementAt(
+                                                  index)["message"] ??
+                                              "Loading..",
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 12),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  }
+                });
+          }),
         ),
       ),
     );
@@ -353,7 +495,14 @@ class _CallPageState extends State<CallPage> {
     setState(() {
       hidecam = !hidecam;
     });
-    _engine.muteLocalVideoStream(muted);
+    // print(hidecam);
+    // _engine.muteLocalVideoStream(hidecam);
+    // _engine.muteAllRemoteVideoStreams(muted);
+    if (hidecam == true) {
+      _engine.disableVideo();
+    } else if (hidecam == false) {
+      _engine.enableVideo();
+    }
   }
 
   @override
@@ -362,8 +511,23 @@ class _CallPageState extends State<CallPage> {
       appBar: AppBar(
         iconTheme: IconThemeData(color: Colors.white),
         title: Text('Live Stream', style: TextStyle(color: Colors.white)),
+        actions: [
+          IconButton(
+              icon: Icon(Icons.chat_rounded),
+              onPressed: () {
+                Widget retval;
+                retval = ChangeNotifierProvider(
+                  create: (context) => CurrentGroup(),
+                  child: OurLiveChat(),
+                );
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => retval),
+                );
+              })
+        ],
       ),
       backgroundColor: Colors.black,
+      drawer: OurLiveDrawer(),
       body: Center(
         child: Stack(
           children: <Widget>[

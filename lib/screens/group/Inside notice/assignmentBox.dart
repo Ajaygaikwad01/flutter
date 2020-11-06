@@ -129,10 +129,12 @@ class _OurAssignmentBoxState extends State<OurAssignmentBox> {
                                                 count / total * 100;
                                             // _percentage = percentage;
                                             setState(() {
-                                              // print(percentage);
+                                              // _percentage = percentage;
+                                              print(percentage);
                                               downlodingMessage =
                                                   percentage.floor().toString();
                                             });
+
                                             if (downlodingMessage == "100") {
                                               progressdialog.hide();
                                               Scaffold.of(context).showSnackBar(

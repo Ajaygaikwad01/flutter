@@ -10,7 +10,7 @@ class _HomeVideoRoomState extends State<HomeVideoRoom> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("LIVE"),
+        title: Text("Coming Soon"),
       ),
     );
   }
